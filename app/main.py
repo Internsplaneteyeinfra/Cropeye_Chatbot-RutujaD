@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-
 from app.graph.graph import build_graph
 
 app = FastAPI(title="CropEye Chatbot API")
