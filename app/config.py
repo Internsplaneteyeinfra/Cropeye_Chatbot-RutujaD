@@ -1,7 +1,11 @@
+from langchain_ollama import ChatOllama
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+llm = ChatOllama(
+    model=os.getenv("OLLAMA_MODEL", "mistral"),
+    base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+    temperature=float(os.getenv("OLLAMA_TEMPERATURE", 0))
+)
