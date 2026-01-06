@@ -1,7 +1,8 @@
 langgraph
 langchain
 langchain-google-genai
-langchain-community
+langchain-ollama
+
 fastapi
 uvicorn
 python-dotenv
