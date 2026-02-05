@@ -1,0 +1,11 @@
+langgraph
+langchain
+langchain-google-genai
+langchain-ollama
+
+fastapi
+uvicorn
+python-dotenv
+httpx
+cachetools
+pydantic
