@@ -1,38 +1,36 @@
 # app/graph/router.py
 
+SOIL_ANALYSIS_INTENTS = {
+    "soil_analysis",
+    "fertilizer_advice"
+}
+SOIL_MOISTURE_INTENTS = {
+     "soil_moisture", 
+}
+
+WEATHER_INTENTS = {
+    "weather_forecast",
+}
+
+
 def router(state: dict) -> str:
     """
-    Decide which agent to call next based on intent.
-    Returns the NEXT NODE NAME.
+    Decide next agent based on intent only.
+    Chatbot-first routing (no forced context).
     """
 
-    intent = state.get("intent")
+    intent = state.get("intent", "")
 
-    # Route to farm context first (if not already set)
-    if "context" not in state or not state.get("context") or not state["context"].get("plot_id"):
-        return "farm_context_agent"
-
-    # Route based on intent
-    if intent == "weather_forecast":
-        return "weather_agent"
-
-    if intent == "soil_status" or intent == "soil_analysis":
+    if intent in SOIL_ANALYSIS_INTENTS:
         return "soil_analysis_agent"
 
-    if intent == "irrigation_advice":
-        return "irrigation_agent"
+    if intent in SOIL_MOISTURE_INTENTS:
+        return "soil_moisture_agent"
 
-    if intent == "pest_risk":
-        return "pest_agent"
+    if intent in WEATHER_INTENTS:
+        return "weather_agent"
 
-    if intent == "yield_forecast":
-        return "yield_agent"
-
-    if intent == "fertilizer_advice":
-        return "soil_analysis_agent"  # Uses same agent as soil analysis
-
-    if intent == "crop_health_summary":
-        return "crop_health_agent"
-
-    # Default to response generator
     return "response_generator"
+
+
+# Just reminder: later i'll create a combined soil_agent for soil moisture, soil analysis 

@@ -6,8 +6,8 @@ class GraphState(TypedDict):
     user_language: Optional[str]
     intent: Optional[str]
     entities: Dict[str, Any]
-    context: Optional[Dict[str, Any]]  # Farm context (plot, crop, etc.)
+    context: Optional[Dict[str, Any]]  
     analysis: Optional[Dict[str, Any]]  # Agent analysis results
-    user_id: Optional[int]  # User ID from auth
-    auth_token: Optional[str]  # Auth token for API calls
+    user_id: Optional[int]  
+    auth_token: Optional[str]  
     final_response: Optional[str]

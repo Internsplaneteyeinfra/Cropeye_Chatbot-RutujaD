@@ -1,13 +1,7 @@
-"""
-Soil Analysis Agent
-Handles all soil-related queries (N, P, K, pH, CEC, OC, BD, Fe, SOC)
-"""
-
-from typing import Dict, Any, Optional
+from typing import Any, Optional
 from app.services.api_service import get_api_service
 
-
-# Optimal ranges for soil parameters (from frontend logic)
+# Optimal ranges (same as dashboard logic)
 SOIL_OPTIMAL_RANGES = {
     "nitrogen": {"min": 50, "max": 150, "unit": "Kg/acre"},
     "phosphorus": {"min": 25, "max": 75, "unit": "Kg/acre"},
@@ -20,226 +14,116 @@ SOIL_OPTIMAL_RANGES = {
     "soc": {"min": 1.5, "max": 3.5, "unit": "%"}
 }
 
-# Parameter name mappings
-PARAMETER_MAPPING = {
-    "n": "nitrogen",
-    "nitrogen": "nitrogen",
-    "p": "phosphorus",
-    "phosphorus": "phosphorus",
-    "k": "potassium",
-    "potassium": "potassium",
-    "ph": "pH",
-    "pH": "pH",
-    "cec": "cec",
-    "cation exchange capacity": "cec",
-    "oc": "organic_carbon",
-    "organic carbon": "organic_carbon",
-    "bd": "bulk_density",
-    "bulk density": "bulk_density",
-    "fe": "fe",
-    "iron": "fe",
-    "soc": "soc",
-    "soil organic carbon": "soc"
-}
-
-
-def get_parameter_status(value: float, param_name: str) -> str:
-    """
-    Determine status: Very Low, Low, Medium, Optimal, Very High
-    """
-    if param_name not in SOIL_OPTIMAL_RANGES:
+def get_parameter_status(value: float, param: str) -> str:
+    if value is None or param not in SOIL_OPTIMAL_RANGES:
         return "Unknown"
-    
-    optimal = SOIL_OPTIMAL_RANGES[param_name]
-    min_val = optimal["min"]
-    max_val = optimal["max"]
-    range_size = max_val - min_val
-    
-    if value < min_val - (range_size * 0.5):
-        return "Very Low"
-    elif value < min_val:
+    r = SOIL_OPTIMAL_RANGES[param]
+    if value < r["min"]:
         return "Low"
-    elif value <= max_val:
-        return "Optimal"
-    elif value <= max_val + (range_size * 0.5):
-        return "High"
-    else:
+    elif value > r["max"]:
         return "Very High"
-
-
-def format_parameter_value(value: Any, param_name: str) -> Optional[float]:
-    """
-    Format and extract parameter value from API response
-    """
-    if value is None:
-        return None
-    
-    try:
-        return float(value)
-    except (ValueError, TypeError):
-        return None
-
+    else:
+        return "Optimal"
 
 async def soil_analysis_agent(state: dict) -> dict:
     """
-    Soil Analysis Agent
-    Handles soil-related queries
+    Handles:
+    - Single parameter soil query
+    - Full soil analysis report
     """
-    # Get context
-    context = state.get("context", {})
-    plot_id = context.get("plot_id")
-    
-    if not plot_id:
-        state["analysis"] = {
-            "error": "Plot ID not found. Please specify a plot.",
-            "agent": "soil_analysis"
-        }
-        return state
-    
-    # Get entities
-    entities = state.get("entities", {})
-    parameter = entities.get("parameter")
+
+    context = state.get("context") or {}
+    entities = state.get("entities") or {}
+
+    plot_id = context.get("plot_id") or entities.get("plot_id") or "369_12"
     date = entities.get("date")
-    
-    # Get API service
+
     auth_token = state.get("auth_token")
     api_service = get_api_service(auth_token)
-    
-    # Fetch soil analysis
-    soil_data = await api_service.get_soil_analysis(
+
+    # ---- CALL APIs ----
+    analyze_data = await api_service.get_soil_analysis(
         plot_name=plot_id,
         date=date
     )
-    
-    if "error" in soil_data:
-        state["analysis"] = {
-            "error": soil_data["error"],
-            "agent": "soil_analysis"
-        }
+
+    required_n_data = await api_service.get_npk_requirements(
+        plot_name=plot_id,
+        end_date=date
+    )
+
+    # ---- LOG FOR CROSS CHECK ----
+    print("\n=== SOIL ANALYSIS DEBUG ===")
+    print("Plot:", plot_id)
+    print("Analyze API:", analyze_data)
+    print("Required-N API:", required_n_data)
+    print("==========================\n")
+
+    if "error" in analyze_data:
+        state["analysis"] = analyze_data
         return state
-    
-    # Extract statistics from response
-    # Response format: {features: [{properties: {statistics: {...}}}]}
-    statistics = {}
-    
-    if "features" in soil_data and len(soil_data["features"]) > 0:
-        statistics = soil_data["features"][0].get("properties", {}).get("statistics", {})
-    elif "statistics" in soil_data:
-        statistics = soil_data["statistics"]
-    elif isinstance(soil_data, dict):
-        statistics = soil_data
-    
-    # If parameter is specified, return only that parameter
-    if parameter:
-        param_lower = parameter.lower()
-        param_key = PARAMETER_MAPPING.get(param_lower)
-        
-        if not param_key:
-            state["analysis"] = {
-                "error": f"Unknown parameter: {parameter}",
-                "agent": "soil_analysis"
-            }
-            return state
-        
-        # Get value from statistics
-        value = None
-        
-        # Try different possible keys
-        possible_keys = [
-            param_key,
-            param_key.replace("_", ""),
-            param_key.upper(),
-            param_key.lower()
-        ]
-        
-        for key in possible_keys:
-            if key in statistics:
-                value = statistics[key]
-                break
-        
-        # Special handling for some parameters
-        if param_key == "nitrogen" and value is None:
-            value = statistics.get("total_nitrogen")
-        if param_key == "organic_carbon" and value is None:
-            value = statistics.get("organic_carbon_stock")
-        if param_key == "fe" and value is None:
-            value = statistics.get("fe_ppm_estimated")
-        
-        if value is None:
-            state["analysis"] = {
-                "error": f"Parameter {parameter} not found in soil data",
-                "agent": "soil_analysis"
-            }
-            return state
-        
-        formatted_value = format_parameter_value(value, param_key)
-        if formatted_value is None:
-            state["analysis"] = {
-                "error": f"Invalid value for parameter {parameter}",
-                "agent": "soil_analysis"
-            }
-            return state
-        
-        optimal = SOIL_OPTIMAL_RANGES.get(param_key, {})
-        status = get_parameter_status(formatted_value, param_key)
-        
-        state["analysis"] = {
-            "agent": "soil_analysis",
-            "parameter": param_key,
-            "value": formatted_value,
-            "unit": optimal.get("unit", ""),
-            "optimal_range": {
-                "min": optimal.get("min"),
-                "max": optimal.get("max")
-            },
-            "status": status,
-            "plot_id": plot_id
+
+    # ---- EXTRACT STATISTICS ----
+    stats = (
+        analyze_data.get("features", [{}])[0]
+        .get("properties", {})
+        .get("statistics", {})
+    )
+
+    # ---- FINAL VALUES (DASHBOARD LOGIC) ----
+    soil_report = {
+        "nitrogen": {
+            "value": required_n_data.get("soilN"),
+            "unit": "Kg/acre",
+            "status": get_parameter_status(required_n_data.get("soilN"), "nitrogen")
+        },
+        "phosphorus": {
+            "value": required_n_data.get("soilP"),
+            "unit": "Kg/acre",
+            "status": get_parameter_status(required_n_data.get("soilP"), "phosphorus")
+        },
+        "potassium": {
+            "value": required_n_data.get("soilK"),
+            "unit": "Kg/acre",
+            "status": get_parameter_status(required_n_data.get("soilK"), "potassium")
+        },
+        "pH": {
+            "value": stats.get("phh2o"),
+            "unit": "",
+            "status": get_parameter_status(stats.get("phh2o"), "pH")
+        },
+        "cec": {
+            "value": stats.get("cation_exchange_capacity"),
+            "unit": "C mol/Kg",
+            "status": get_parameter_status(stats.get("cation_exchange_capacity"), "cec")
+        },
+        "organic_carbon": {
+            "value": stats.get("organic_carbon_stock"),
+            "unit": "T/acre",
+            "status": get_parameter_status(stats.get("organic_carbon_stock"), "organic_carbon")
+        },
+        "bulk_density": {
+            "value": stats.get("bulk_density"),
+            "unit": "Kg/m³",
+            "status": get_parameter_status(stats.get("bulk_density"), "bulk_density")
+        },
+        "fe": {
+            "value": stats.get("fe_ppm_estimated"),
+            "unit": "ppm",
+            "status": get_parameter_status(stats.get("fe_ppm_estimated"), "fe")
+        },
+        "soc": {
+            "value": stats.get("soil_organic_carbon"),
+            "unit": "%",
+            "status": get_parameter_status(stats.get("soil_organic_carbon"), "soc")
         }
-    else:
-        # Return all parameters
-        all_params = {}
-        
-        for param_key, optimal in SOIL_OPTIMAL_RANGES.items():
-            value = None
-            
-            # Try different possible keys
-            possible_keys = [
-                param_key,
-                param_key.replace("_", ""),
-                param_key.upper(),
-                param_key.lower()
-            ]
-            
-            for key in possible_keys:
-                if key in statistics:
-                    value = statistics[key]
-                    break
-            
-            # Special handling
-            if param_key == "nitrogen" and value is None:
-                value = statistics.get("total_nitrogen")
-            if param_key == "organic_carbon" and value is None:
-                value = statistics.get("organic_carbon_stock")
-            if param_key == "fe" and value is None:
-                value = statistics.get("fe_ppm_estimated")
-            
-            if value is not None:
-                formatted_value = format_parameter_value(value, param_key)
-                if formatted_value is not None:
-                    all_params[param_key] = {
-                        "value": formatted_value,
-                        "unit": optimal.get("unit", ""),
-                        "optimal_range": {
-                            "min": optimal.get("min"),
-                            "max": optimal.get("max")
-                        },
-                        "status": get_parameter_status(formatted_value, param_key)
-                    }
-        
-        state["analysis"] = {
-            "agent": "soil_analysis",
-            "parameters": all_params,
-            "plot_id": plot_id
-        }
-    
+    }
+
+    state["analysis"] = {
+        "agent": "soil_analysis",
+        "plot_id": plot_id,
+        "report_type": "full_soil_analysis",
+        "parameters": soil_report
+    }
+
     return state

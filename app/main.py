@@ -7,11 +7,13 @@ app = FastAPI(title="CropEye Chatbot API")
 
 graph = build_graph()
 
+DEFAULT_PLOT_ID = "369_12"
+
 
 class ChatRequest(BaseModel):
     message: str
-    user_id: Optional[int] = None
-    plot_id: Optional[str] = None
+    user_id: Optional[int] = None  
+    plot_id: Optional[str] = None 
 
 
 @app.get("/")
@@ -27,30 +29,36 @@ async def chat(
     request: ChatRequest,
     authorization: Optional[str] = Header(None)
 ):
-    # Extract auth token from header
+    """
+    Chat endpoint - processes user messages through the chatbot graph
+    
+    NOTE: For development without authentication:
+    - authorization header is optional
+    - user_id is optional
+    - plot_id can be provided
+    - Chatbot will work with plot-based APIs that don't require authentication
+    """
+    # Extract auth token from header (optional during development)
     auth_token = None
     if authorization and authorization.startswith("Bearer "):
         auth_token = authorization.replace("Bearer ", "")
     
-    # Initialize state
+    
+    # ---------- INITIAL GRAPH STATE ----------
     state = {
         "user_message": request.message,
         "user_language": None,
         "intent": None,
         "entities": {},
-        "context": None,
+        "context": {
+            "plot_id": request.plot_id or DEFAULT_PLOT_ID,
+            "user_id": request.user_id,
+            "auth_token": auth_token
+        },
         "analysis": None,
-        "user_id": request.user_id,
-        "auth_token": auth_token,
         "final_response": None
     }
-    
-    # If plot_id provided, add to entities
-    if request.plot_id:
-        if "entities" not in state:
-            state["entities"] = {}
-        state["entities"]["plot_id"] = request.plot_id
-
+   
     # Run graph (async)
     result = await graph.ainvoke(state)
     print("FINAL GRAPH STATE", result)
@@ -71,3 +79,7 @@ def health_check():
         "status": "ok",
         "message": "Service is running"
     }
+
+
+# if __name__ == "__main__":
+#     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=False)

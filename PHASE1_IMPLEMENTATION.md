@@ -12,7 +12,7 @@
 **File:** `app/prompts/intent_prompt.py`
 - Added comprehensive intent categories:
   - `soil_analysis` - Specific soil parameters (N, P, K, pH, etc.)
-  - `soil_status` - General soil condition
+  - `soil_moisture` - General soil condition
   - `irrigation_advice` - Water requirements
   - `pest_risk` - Pest/disease assessment
   - `yield_forecast` - Yield and biomass

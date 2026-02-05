@@ -1,13 +1,31 @@
-from app.prompts.response_prompt import RESPONSE_PROMPT
+# response_generator.py
 from app.config import llm
 import json
+from app.prompts.base_system_prompt import BASE_SYSTEM_PROMPT   #globle
+from app.prompts.response_prompt import RESPONSE_PROMPT         #globle
 
+from app.prompts.weather_prompt import WEATHER_AGENT_PROMPT
+from app.prompts.soil_moisture_prompt import SOIL_MOISTURE_AGENT_PROMPT
+
+def _select_domain_prompt(intent: str) -> str:
+    """
+    Select domain-specific interpretation prompt based on intent.
+    This controls WHAT the model should interpret.
+    """
+
+    if intent in {"weather_forecast"}:
+        return WEATHER_AGENT_PROMPT
+
+    if intent in {"soil_status", "soil_moisture"}:
+        return SOIL_MOISTURE_AGENT_PROMPT
+
+    # if intent in {"soil_analysis", "fertilizer_advice"}:
+    #     return SOIL_ANALYSIS_AGENT_PROMPT
+
+    # No domain reasoning needed
+    return ""
 
 def response_generator(state: dict) -> dict:
-    """
-    Response Generator Agent
-    Formats and translates responses to user's language
-    """
     
     intent = state.get("intent", "")
     language = state.get("user_language", "en")
@@ -15,11 +33,10 @@ def response_generator(state: dict) -> dict:
     analysis = state.get("analysis", {})
     context = state.get("context", {})
     
-    # Format analysis data for prompt
+    
     analysis_str = "No analysis data available"
     if analysis:
         try:
-            # Convert analysis to readable string
             if isinstance(analysis, dict):
                 analysis_str = json.dumps(analysis, indent=2, ensure_ascii=False)
             else:
@@ -27,7 +44,7 @@ def response_generator(state: dict) -> dict:
         except Exception:
             analysis_str = str(analysis)
     
-    # Format context for prompt
+
     context_str = "No context available"
     if context:
         try:
@@ -35,7 +52,9 @@ def response_generator(state: dict) -> dict:
         except Exception:
             context_str = str(context)
     
-    prompt = RESPONSE_PROMPT.format(
+    domain_prompt = _select_domain_prompt(intent)
+
+    prompt = (BASE_SYSTEM_PROMPT + domain_prompt + RESPONSE_PROMPT).format(
         intent=intent,
         language=language,
         analysis=analysis_str,
