@@ -6,6 +6,9 @@ from app.prompts.response_prompt import RESPONSE_PROMPT         #globle
 
 from app.prompts.weather_prompt import WEATHER_AGENT_PROMPT
 from app.prompts.soil_moisture_prompt import SOIL_MOISTURE_AGENT_PROMPT
+from app.prompts.irrigation_prompt import IRRIGATION_AGENT_PROMPT
+from app.prompts.map_prompt import MAP_AGENT_PROMPT
+
 
 def _select_domain_prompt(intent: str) -> str:
     """
@@ -16,13 +19,19 @@ def _select_domain_prompt(intent: str) -> str:
     if intent in {"weather_forecast"}:
         return WEATHER_AGENT_PROMPT
 
-    if intent in {"soil_status", "soil_moisture"}:
+    if intent in {"soil_status", "soil_moisture_current", "soil_moisture_trend"}:
         return SOIL_MOISTURE_AGENT_PROMPT
+
+    if intent in {"map_view"}:
+        return MAP_AGENT_PROMPT
+
+    if intent in {"irrigation_schedule", "irrigation_advice"}:
+        return IRRIGATION_AGENT_PROMPT
 
     # if intent in {"soil_analysis", "fertilizer_advice"}:
     #     return SOIL_ANALYSIS_AGENT_PROMPT
 
-    # No domain reasoning needed
+ 
     return ""
 
 def response_generator(state: dict) -> dict:

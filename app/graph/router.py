@@ -12,6 +12,14 @@ WEATHER_INTENTS = {
     "weather_forecast",
 }
 
+IRRIGATION_INTENTS = {
+    "irrigation_advice",
+    "irrigation_schedule",
+}
+
+MAP_INTENTS = {
+     "map_view",
+}
 
 def router(state: dict) -> str:
     """
@@ -21,6 +29,9 @@ def router(state: dict) -> str:
 
     intent = state.get("intent", "")
 
+    if intent in MAP_INTENTS:
+        return "map_agent"
+        
     if intent in SOIL_ANALYSIS_INTENTS:
         return "soil_analysis_agent"
 
@@ -30,7 +41,11 @@ def router(state: dict) -> str:
     if intent in WEATHER_INTENTS:
         return "weather_agent"
 
+    if intent in IRRIGATION_INTENTS:
+        return "irrigation_agent"
+    
+
     return "response_generator"
 
 
-# Just reminder: later i'll create a combined soil_agent for soil moisture, soil analysis 
+# Just reminder: later i'll create a combined soil_agent for soil moisture AND soil analysis 
