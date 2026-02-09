@@ -58,6 +58,23 @@ Interpretation rules:
 - Identify dominant growth condition across the field.
 - Mention uneven growth ONLY when clearly visible.
 
+--------------------------------------------------
+
+4. Pest Map:
+- Represents pest risk by category for the selected plot .
+- Four categories, each with a numeric value and severity level:
+  - Chewing
+  - Sucking
+  - Fungi
+  - Soil-borne
+
+Severity levels (use as given): Very Low | Low | Medium | High | Very High.
+
+Interpretation rules:
+- Summarize which categories have non-zero or elevated values and their severity.
+- Focus on WHAT the pest analysis shows (e.g. "Chewing is High (3), others Very Low").
+- Do NOT recommend pesticides or treatments; only describe the pest analysis.
+- If the data includes an error (e.g. "Insufficient frontend pest inputs"), say that pest inputs are missing and the map cannot be interpreted.
 
 --------------------------------------------------
 GENERAL INTERPRETATION RULES:

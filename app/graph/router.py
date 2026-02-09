@@ -21,6 +21,10 @@ MAP_INTENTS = {
      "map_view",
 }
 
+PEST_INTENTS = {
+    "pest_risk",
+}
+
 def router(state: dict) -> str:
     """
     Decide next agent based on intent only.
@@ -43,7 +47,9 @@ def router(state: dict) -> str:
 
     if intent in IRRIGATION_INTENTS:
         return "irrigation_agent"
-    
+
+    if intent in PEST_INTENTS:
+        return "pest_agent"
 
     return "response_generator"
 

@@ -8,6 +8,7 @@ from app.prompts.weather_prompt import WEATHER_AGENT_PROMPT
 from app.prompts.soil_moisture_prompt import SOIL_MOISTURE_AGENT_PROMPT
 from app.prompts.irrigation_prompt import IRRIGATION_AGENT_PROMPT
 from app.prompts.map_prompt import MAP_AGENT_PROMPT
+from app.prompts.pest_risk_prompt import PEST_RISK_AGENT_PROMPT
 
 
 def _select_domain_prompt(intent: str) -> str:
@@ -24,6 +25,9 @@ def _select_domain_prompt(intent: str) -> str:
 
     if intent in {"map_view"}:
         return MAP_AGENT_PROMPT
+
+    if intent in {"pest_risk"}:
+        return PEST_RISK_AGENT_PROMPT
 
     if intent in {"irrigation_schedule", "irrigation_advice"}:
         return IRRIGATION_AGENT_PROMPT

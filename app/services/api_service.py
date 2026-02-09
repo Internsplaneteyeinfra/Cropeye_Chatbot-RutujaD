@@ -323,6 +323,44 @@ class APIService:
             return {"error": f"Growth map fetch failed: {str(e)}"}
 
     # ----------------------------------------------------------------
+    
+    async def get_pest_detection(self, plot_id: str, end_date: Optional[str] = None, days_back: int = 7) -> dict:
+        """
+        Get pest detection data from API
+        API: POST /pest-detection?plot_name={plot_id}&end_date={end_date}&days_back={days_back}
+        """
+        if end_date is None:
+            end_date = datetime.now().strftime("%Y-%m-%d")
+        
+        cache_key = f"pest_detection_{plot_id}_{end_date}_{days_back}"
+        
+        if cache_key in pest_cache:
+            return pest_cache[cache_key]
+        
+        try:
+            # Use PLOT_API_URL for pest detection (same as other map endpoints)
+            url = f"{PLOT_API_URL}/pest-detection"
+            params = {
+                "plot_name": plot_id,
+                "end_date": end_date,
+                "days_back": days_back
+            }
+            
+            response = await self.client.post(
+                url,
+                params=params,
+                headers=self._get_headers()
+            )
+            response.raise_for_status()
+            data = response.json()
+            
+            pest_cache[cache_key] = data
+            return data
+            
+        except httpx.HTTPError as e:
+            return {"error": f"Pest detection fetch failed: {str(e)}"}
+
+    # ----------------------------------------------------------------
 
     async def get_soil_moisture_timeseries(self, plot_name: str) -> dict:
         """
