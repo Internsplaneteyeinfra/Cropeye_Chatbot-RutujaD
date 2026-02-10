@@ -12,7 +12,7 @@ from gtts import gTTS
 from typing import Optional, Tuple
 from faster_whisper import WhisperModel
 
-# Language code mapping: chatbot user_language -> gTTS lang code
+# Language code mapping: chatbot user_language -> gTTS lang code ..
 USER_LANG_TO_GTTS = {
     "en": "en",
     "english": "en",
