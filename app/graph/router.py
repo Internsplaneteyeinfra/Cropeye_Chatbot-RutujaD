@@ -1,28 +1,26 @@
 # app/graph/router.py
 
 SOIL_ANALYSIS_INTENTS = {
-    "soil_analysis",
-    "fertilizer_advice"
+    "soil_analysis"
 }
 SOIL_MOISTURE_INTENTS = {
      "soil_moisture", 
 }
-
 WEATHER_INTENTS = {
     "weather_forecast",
 }
-
 IRRIGATION_INTENTS = {
     "irrigation_advice",
     "irrigation_schedule",
 }
-
 MAP_INTENTS = {
      "map_view",
 }
-
 PEST_INTENTS = {
     "pest_risk",
+}
+FERTILIZER_INTENTS = {
+    "fertilizer_advice",
 }
 
 def router(state: dict) -> str:
@@ -32,6 +30,7 @@ def router(state: dict) -> str:
     """
 
     intent = state.get("intent", "")
+    print("🧭 ROUTER intent =", intent)
 
     if intent in MAP_INTENTS:
         return "map_agent"
@@ -50,6 +49,10 @@ def router(state: dict) -> str:
 
     if intent in PEST_INTENTS:
         return "pest_agent"
+
+    if intent in FERTILIZER_INTENTS:
+        print("🧭 ROUTER → fertilizer_agent")
+        return "fertilizer_agent"
 
     return "response_generator"
 

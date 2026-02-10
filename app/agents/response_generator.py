@@ -8,7 +8,7 @@ from app.prompts.weather_prompt import WEATHER_AGENT_PROMPT
 from app.prompts.soil_moisture_prompt import SOIL_MOISTURE_AGENT_PROMPT
 from app.prompts.irrigation_prompt import IRRIGATION_AGENT_PROMPT
 from app.prompts.map_prompt import MAP_AGENT_PROMPT
-from app.prompts.pest_risk_prompt import PEST_RISK_AGENT_PROMPT
+from app.prompts.pest_prompt import PEST_AGENT_PROMPT
 
 
 def _select_domain_prompt(intent: str) -> str:
@@ -27,7 +27,7 @@ def _select_domain_prompt(intent: str) -> str:
         return MAP_AGENT_PROMPT
 
     if intent in {"pest_risk"}:
-        return PEST_RISK_AGENT_PROMPT
+        return PEST_AGENT_PROMPT
 
     if intent in {"irrigation_schedule", "irrigation_advice"}:
         return IRRIGATION_AGENT_PROMPT
@@ -46,7 +46,13 @@ def response_generator(state: dict) -> dict:
     analysis = state.get("analysis", {})
     context = state.get("context", {})
     
-    
+    short_memory = state.get("short_memory", []) or []
+    memory_text = "\n".join(
+        f"{m.get('role', '')}: {m.get('message', '')}"
+        for m in short_memory
+    ) 
+    print("MEMORY TEXT", memory_text)
+
     analysis_str = "No analysis data available"
     if analysis:
         try:

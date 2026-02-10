@@ -81,7 +81,11 @@ INTENT DECISION RULES (VERY IMPORTANT):
    - soil condition (general)
    - soil report or soil test
    - nutrients or chemical properties of soil
+   - soil NPK
+   - soil nitrogen / phosphorus / potassium
+   - soil health / status / low / high
    The user does NOT need to mention parameters explicitly.
+
    Examples:
    - How is my soil?
    - Tell me about my soil
@@ -108,6 +112,14 @@ INTENT DECISION RULES (VERY IMPORTANT):
    Examples:
    - Do I need fertilizer?
    - मला खत लागेल का?
+   - fertilizer
+   - fertilizer npk
+   - fertilizer required
+   - npk fertilizer requirements
+   - fertilizer schedule
+   - urea / DAP / potash
+   - next 7 days
+   - how much to apply
    - What NPK should I apply?
 
 --------------------------------------------------

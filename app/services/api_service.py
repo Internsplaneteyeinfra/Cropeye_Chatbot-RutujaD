@@ -30,14 +30,14 @@ print(f"[API SERVICE INIT] BASE_URL: {BASE_URL}")
 
 
 # Cache configuration
-map_cache = TTLCache(maxsize=300, ttl=1800) 
-soil_cache = TTLCache(maxsize=1000, ttl=900)  # 15 minutes
-weather_cache = TTLCache(maxsize=500, ttl=600)  # 10 minutes
-irrigation_cache = TTLCache(maxsize=500, ttl=300)  # 5 minutes
-farm_context_cache = TTLCache(maxsize=100, ttl=3600)  # 1 hour
+map_cache = TTLCache(maxsize=300, ttl=43200)  # 12 hours
+soil_cache = TTLCache(maxsize=1000, ttl=43200)  # 12 hours
+weather_cache = TTLCache(maxsize=500, ttl=7200)  # 2 hours
+irrigation_cache = TTLCache(maxsize=500, ttl=43200)  # 12 hour
+farm_context_cache = TTLCache(maxsize=100, ttl=3600)  # 12 hour
+pest_cache = TTLCache(maxsize=500, ttl=43200)  # 12 hours
 
-pest_cache = TTLCache(maxsize=500, ttl=600)  # 10 minutes
-yield_cache = TTLCache(maxsize=500, ttl=1800)  # 30 minutes
+# yield_cache = TTLCache(maxsize=500, ttl=1800)  # 30 minutes
 
 
 class APIService:
@@ -168,23 +168,19 @@ class APIService:
         cache_key = f"npk_requirements_{plot_name}_{end_date}"
         
         if cache_key in soil_cache:
-            cached_data = soil_cache[cache_key].copy()
-            print(f"[API SERVICE] Returning cached NPK requirements for {plot_name} (cache_key: {cache_key})")
+            cached_data = soil_cache[cache_key].copy()            
             return cached_data
         
         try:
             url = f"{SOIL_API_URL}/required-n/{plot_name}"
             params = {"end_date": end_date}
-            print(f"[API SERVICE] Making API call to {url} with params: {params}")
             response = await self.client.post(url, params=params, headers=self._get_headers())
             response.raise_for_status()
             data = response.json()
             
             soil_cache[cache_key] = data
-            print(f"[API SERVICE] API call successful for NPK requirements {plot_name}, data cached (cache_key: {cache_key})")
             return data
         except httpx.HTTPStatusError as e:
-            print(f"[API SERVICE] HTTP error for NPK requirements {plot_name}: {e.response.status_code} - {e.response.text}")
             return {"error": f"HTTP {e.response.status_code}: Failed to fetch NPK requirements"}
         except httpx.RequestError as e:
             print(f"[API SERVICE] Request error for NPK requirements {plot_name}: {str(e)}")
@@ -244,10 +240,10 @@ class APIService:
         if end_date is None:
             end_date = datetime.now().strftime("%Y-%m-%d")
 
-        # cache_key = f"soil_moisture_map_{plot_name}_{end_date}"
+        cache_key = f"soil_moisture_map_{plot_name}_{end_date}"
 
-        # if cache_key in map_cache:
-        #     return map_cache[cache_key]
+        if cache_key in map_cache:
+            return map_cache[cache_key]
 
         print(f"[SOIL MAP] plot_name={plot_name}, end_date={end_date}")
 
@@ -262,7 +258,7 @@ class APIService:
             response.raise_for_status()
             data = response.json()
 
-            # map_cache[cache_key] = data
+            map_cache[cache_key] = data
             return data
 
         except httpx.HTTPError as e:
@@ -276,10 +272,10 @@ class APIService:
         API: POST /wateruptake
         """
         end_date = end_date or datetime.now().strftime("%Y-%m-%d")
-        # cache_key = f"water_uptake_map_{plot_id}_{end_date}"
+        cache_key = f"water_uptake_map_{plot_id}_{end_date}"
 
-        # if cache_key in map_cache:
-        #     return map_cache[cache_key]
+        if cache_key in map_cache:
+            return map_cache[cache_key]
 
         try:
             response = await self.client.post(
@@ -289,7 +285,7 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-            # map_cache[cache_key] = data
+            map_cache[cache_key] = data
             return data
 
         except httpx.HTTPError as e:
@@ -367,25 +363,24 @@ class APIService:
         Get soil moisture timeseries from field service
         API: GET /soil-moisture/{plot_name}
         """
-        # cache_key = f"field_soil_moisture_{plot_name}"
+        today = datetime.now().strftime("%Y-%m-%d")
+        cache_key = f"field_soil_moisture_{plot_name}"
 
-        # if cache_key in irrigation_cache:
-            # print("[FIELD API] returning cached data")
-            # return irrigation_cache[cache_key]
+        if cache_key in irrigation_cache:
+            print("[FIELD API] returning cached data")
+            return irrigation_cache[cache_key]
 
         url = f"{FIELD_API_URL}/soil-moisture/{plot_name}"  
         headers = self._get_headers()
 
         try:          
             response = await self.client.post(url, headers=self._get_headers())
-
-
             response.raise_for_status()
             data = response.json()
 
-             # ✅ cache ONLY success
-            # if isinstance(data, list):
-            #     irrigation_cache[cache_key] = data
+            #  ✅ cache ONLY success
+            if isinstance(data, list):
+                irrigation_cache[cache_key] = data
 
             return data
 
@@ -399,6 +394,7 @@ class APIService:
         Evapotranspiration (ET) for irrigation logic
         API: GET /plots/{plot_id}/compute-et/
         """
+        today = datetime.now().strftime("%Y-%m-%d")
         cache_key = f"et_{plot_id}"
 
         if cache_key in irrigation_cache:
