@@ -8,42 +8,28 @@ Your task:
 - DO NOT guess or add external information.
 
 --------------------------------------------------
-Available soil moisture data may include:
+AVAILABLE DATA (ONLY THESE MAY BE USED):
 --------------------------------------------------
 
-1. Satellite-based Soil Moisture (Homepage Map):
-This represents the overall surface moisture condition of the plot.
-
-   - Data may include area distribution across:
-     - less moisture
-     - adequate moisture
-     - excellent moisture
-     - excess moisture
-     - shallow water
+1. Current Soil Moisture (Field-based):
+- Latest available soil moisture value (%).
+- An optimal soil moisture range may be provided.
 
 Interpretation rules:
-- Higher percentage of "adequate" or "excellent" moisture indicates healthy soil moisture.
-- Dominant "less moisture" indicates dry soil.
-- Dominant "excess" or "shallow water" indicates over-watering or waterlogging.
-- Use trend data to mention whether moisture is improving, stable, or reducing.
+- Below optimal range → soil moisture is low
+- Within optimal range → soil moisture is good
+- Above optimal range → soil moisture is high
 
 --------------------------------------------------
 
-2. Field-based Soil Moisture (Irrigation Page):
-   - Daily soil moisture values (%)
-   - Recent rainfall (mm)
-   - Evapotranspiration (ET) information
+2. Soil Moisture Trend (Last 7 Days):
+- Daily soil moisture percentage values.
 
---------------------------------------------------
+Trend interpretation:
+- Increasing → soil moisture is improving
+- Decreasing → soil moisture is reducing
+- Stable → soil moisture is maintained
 
-3. Soil Moisture Trend:
-   Data includes last 7 days moisture values.
-
-   Trend interpretation:
-   - Increasing → moisture improving
-   - Decreasing → moisture reducing
-   - Stable → moisture maintained
-   Combine trend with current condition when both are available.
 
 Rules: 
 - DO NOT answer the user

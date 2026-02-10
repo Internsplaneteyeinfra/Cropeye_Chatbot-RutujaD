@@ -16,22 +16,28 @@ load_dotenv()
 
 # Base URLs
 BASE_URL = os.getenv("BASE_URL", "https://cropeye-server-1.onrender.com/api")
-SOIL_API_URL = os.getenv("SOIL_API_URL", "https://dev-soil.cropeye.ai")
-PLOT_API_URL = os.getenv("PLOT_API_URL", "https://dev-plot.cropeye.ai")
+SOIL_API_URL = os.getenv("SOIL_API_URL", "https://main-cropeye.up.railway.app")
+PLOT_API_URL = os.getenv("PLOT_API_URL", "https://admin-cropeye.up.railway.app")
 EVENTS_API_URL = os.getenv("EVENTS_API_URL", "https://dev-events.cropeye.ai")
 FIELD_API_URL = os.getenv("FIELD_API_URL", "https://sef-cropeye.up.railway.app")
-WEATHER_API_URL = os.getenv("WEATHER_API_URL", "https://dev-weather.cropeye.ai")
+WEATHER_API_URL = os.getenv("WEATHER_API_URL", "https://weather-cropeye.up.railway.app")
+
+# Debug: Print which URLs are being used
+print(f"[API SERVICE INIT] SOIL_API_URL: {SOIL_API_URL}")
+print(f"[API SERVICE INIT] PLOT_API_URL: {PLOT_API_URL}")
+print(f"[API SERVICE INIT] BASE_URL: {BASE_URL}")
 
 
 
 # Cache configuration
-soil_cache = TTLCache(maxsize=1000, ttl=900)  # 15 minutes
-irrigation_cache = TTLCache(maxsize=500, ttl=300)  # 5 minutes
-pest_cache = TTLCache(maxsize=500, ttl=600)  # 10 minutes
-yield_cache = TTLCache(maxsize=500, ttl=1800)  # 30 minutes
-farm_context_cache = TTLCache(maxsize=100, ttl=3600)  # 1 hour
-weather_cache = TTLCache(maxsize=500, ttl=600)  # 10 minutes
+map_cache = TTLCache(maxsize=300, ttl=43200)  # 12 hours
+soil_cache = TTLCache(maxsize=1000, ttl=43200)  # 12 hours
+weather_cache = TTLCache(maxsize=500, ttl=7200)  # 2 hours
+irrigation_cache = TTLCache(maxsize=500, ttl=43200)  # 12 hour
+farm_context_cache = TTLCache(maxsize=100, ttl=3600)  # 12 hour
+pest_cache = TTLCache(maxsize=500, ttl=43200)  # 12 hours
 
+# yield_cache = TTLCache(maxsize=500, ttl=1800)  # 30 minutes
 
 
 class APIService:
@@ -50,6 +56,8 @@ class APIService:
             headers["Authorization"] = f"Bearer {self.auth_token}"
         return headers
     
+    # ----------------------------------------------------------------
+
     async def get_farmer_profile(self, user_id: Optional[int] = None) -> Dict[str, Any]:
         """
         Get farmer profile with plots information
@@ -71,12 +79,9 @@ class APIService:
         except httpx.HTTPError as e:
             return {"error": f"Failed to fetch farmer profile: {str(e)}"}
     
-    async def get_soil_analysis(
-        self, 
-        plot_name: str, 
-        date: Optional[str] = None,
-        fe_days_back: int = 30
-    ) -> Dict[str, Any]:
+    # ----------------------------------------------------------------
+
+    async def get_soil_analysis(self, plot_name: str, date: Optional[str] = None, fe_days_back: int = 30 ) -> Dict[str, Any]:
         """
         Get complete soil analysis for a plot
         API: POST /analyze?plot_name={id}&date={date}&fe_days_back=30
@@ -119,15 +124,35 @@ class APIService:
             
             print(f"[API SERVICE] API call successful for {plot_name}, data cached (cache_key: {cache_key})")
             return data
-        except httpx.HTTPError as e:
-            print(f"[API SERVICE] API call failed for {plot_name}: {str(e)}")
+        except httpx.HTTPStatusError as e:
+            print(f"[API SERVICE] HTTP error for {plot_name}: {e.response.status_code} - {e.response.text}")
             return {
-                "error": f"Failed to fetch soil analysis: {str(e)}",
+                "error": f"HTTP {e.response.status_code}: Failed to fetch soil analysis",
                 "_from_cache": False,
                 "_api_called": True,
                 "_cache_key": cache_key
             }
-    
+        except httpx.RequestError as e:
+            print(f"[API SERVICE] Request error for {plot_name}: {str(e)}")
+            return {
+                "error": f"Request failed: {str(e)}",
+                "_from_cache": False,
+                "_api_called": True,
+                "_cache_key": cache_key
+            }
+        except Exception as e:
+            print(f"[API SERVICE] Unexpected error for {plot_name}: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return {
+                "error": f"Unexpected error: {str(e)}",
+                "_from_cache": False,
+                "_api_called": True,
+                "_cache_key": cache_key
+            }
+
+    # ----------------------------------------------------------------
+
     async def get_npk_requirements(
         self,
         plot_name: str,
@@ -143,7 +168,8 @@ class APIService:
         cache_key = f"npk_requirements_{plot_name}_{end_date}"
         
         if cache_key in soil_cache:
-            return soil_cache[cache_key]
+            cached_data = soil_cache[cache_key].copy()            
+            return cached_data
         
         try:
             url = f"{SOIL_API_URL}/required-n/{plot_name}"
@@ -154,9 +180,19 @@ class APIService:
             
             soil_cache[cache_key] = data
             return data
-        except httpx.HTTPError as e:
-            return {"error": f"Failed to fetch NPK requirements: {str(e)}"}
+        except httpx.HTTPStatusError as e:
+            return {"error": f"HTTP {e.response.status_code}: Failed to fetch NPK requirements"}
+        except httpx.RequestError as e:
+            print(f"[API SERVICE] Request error for NPK requirements {plot_name}: {str(e)}")
+            return {"error": f"Request failed: {str(e)}"}
+        except Exception as e:
+            print(f"[API SERVICE] Unexpected error for NPK requirements {plot_name}: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return {"error": f"Unexpected error: {str(e)}"}
     
+    # ----------------------------------------------------------------
+
     async def get_npk_analysis(
         self,
         plot_name: str,
@@ -191,6 +227,10 @@ class APIService:
             return {"error": f"Failed to fetch NPK analysis: {str(e)}"}
     
 
+    # ==================================================
+    # MAP APIs (Spatial Intelligence)
+    # ==================================================
+
     async def get_soil_moisture_map(self, plot_name: str, end_date: str = None) -> dict:
         """
         Get satellite soil moisture map (GeoJSON / raster)
@@ -202,8 +242,10 @@ class APIService:
 
         cache_key = f"soil_moisture_map_{plot_name}_{end_date}"
 
-        if cache_key in soil_cache:
-            return soil_cache[cache_key]
+        if cache_key in map_cache:
+            return map_cache[cache_key]
+
+        print(f"[SOIL MAP] plot_name={plot_name}, end_date={end_date}")
 
         try:
             url = f"{PLOT_API_URL}/SoilMoisture"
@@ -216,18 +258,112 @@ class APIService:
             response.raise_for_status()
             data = response.json()
 
-            soil_cache[cache_key] = data
+            map_cache[cache_key] = data
             return data
 
         except httpx.HTTPError as e:
             return {"error": f"Failed to fetch soil moisture map: {str(e)}"}
 
+    # ----------------------------------------------------------------
+    
+    async def get_water_uptake_map(self, plot_id: str, end_date: Optional[str] = None) -> dict:
+        """
+        Satellite water uptake map
+        API: POST /wateruptake
+        """
+        end_date = end_date or datetime.now().strftime("%Y-%m-%d")
+        cache_key = f"water_uptake_map_{plot_id}_{end_date}"
+
+        if cache_key in map_cache:
+            return map_cache[cache_key]
+
+        try:
+            response = await self.client.post(
+                f"{PLOT_API_URL}/wateruptake",
+                params={"plot_name": plot_id, "end_date": end_date},
+                headers=self._get_headers()
+            )
+            response.raise_for_status()
+            data = response.json()
+            map_cache[cache_key] = data
+            return data
+
+        except httpx.HTTPError as e:
+            return {"error": f"Water uptake map fetch failed: {str(e)}"}
+   
+    # ----------------------------------------------------------------
+    
+    async def get_growth_map(self, plot_id: str, end_date: Optional[str] = None) -> dict:
+        """
+        Satellite crop growth map
+        API: POST /analyze_Growth
+        """
+        end_date = end_date or datetime.now().strftime("%Y-%m-%d")
+
+        try:
+            response = await self.client.post(
+                f"{PLOT_API_URL}/analyze_Growth",
+                params={
+                    "plot_name": plot_id,
+                    "end_date": end_date
+                },
+                headers=self._get_headers()
+            )
+            response.raise_for_status()
+            data = response.json()
+            print("RAW data ", data)
+            
+            return data
+
+        except httpx.HTTPError as e:
+            return {"error": f"Growth map fetch failed: {str(e)}"}
+
+    # ----------------------------------------------------------------
+    
+    async def get_pest_detection(self, plot_id: str, end_date: Optional[str] = None, days_back: int = 7) -> dict:
+        """
+        Get pest detection data from API
+        API: POST /pest-detection?plot_name={plot_id}&end_date={end_date}&days_back={days_back}
+        """
+        if end_date is None:
+            end_date = datetime.now().strftime("%Y-%m-%d")
+        
+        cache_key = f"pest_detection_{plot_id}_{end_date}_{days_back}"
+        
+        if cache_key in pest_cache:
+            return pest_cache[cache_key]
+        
+        try:
+            # Use PLOT_API_URL for pest detection (same as other map endpoints)
+            url = f"{PLOT_API_URL}/pest-detection"
+            params = {
+                "plot_name": plot_id,
+                "end_date": end_date,
+                "days_back": days_back
+            }
+            
+            response = await self.client.post(
+                url,
+                params=params,
+                headers=self._get_headers()
+            )
+            response.raise_for_status()
+            data = response.json()
+            
+            pest_cache[cache_key] = data
+            return data
+            
+        except httpx.HTTPError as e:
+            return {"error": f"Pest detection fetch failed: {str(e)}"}
+
+    # ----------------------------------------------------------------
 
     async def get_soil_moisture_timeseries(self, plot_name: str) -> dict:
         """
         Get soil moisture timeseries from field service
         API: GET /soil-moisture/{plot_name}
         """
+        today = datetime.now().strftime("%Y-%m-%d")
         cache_key = f"field_soil_moisture_{plot_name}"
 
         if cache_key in irrigation_cache:
@@ -239,14 +375,10 @@ class APIService:
 
         try:          
             response = await self.client.post(url, headers=self._get_headers())
-
-            print(f"[FIELD API] RESPONSE STATUS: {response.status_code}")
-            print(f"[FIELD API] RESPONSE BODY: {response.text}")
-
             response.raise_for_status()
             data = response.json()
 
-             # ✅ cache ONLY success
+            #  ✅ cache ONLY success
             if isinstance(data, list):
                 irrigation_cache[cache_key] = data
 
@@ -255,6 +387,33 @@ class APIService:
         except httpx.HTTPError as e:
             return {"error": f"Failed to fetch field soil moisture: {str(e)}"}
 
+    # ----------------------------------------------------------------
+
+    async def get_evapotranspiration(self, plot_id: str) -> Dict[str, Any]:
+        """
+        Evapotranspiration (ET) for irrigation logic
+        API: GET /plots/{plot_id}/compute-et/
+        """
+        today = datetime.now().strftime("%Y-%m-%d")
+        cache_key = f"et_{plot_id}"
+
+        if cache_key in irrigation_cache:
+            return irrigation_cache[cache_key]
+
+        try:
+            response = await self.client.get(
+                f"{FIELD_API_URL}/plots/{plot_id}/compute-et/",
+                headers=self._get_headers()
+            )
+            response.raise_for_status()
+            data = response.json()
+            irrigation_cache[cache_key] = data
+            return data
+
+        except httpx.HTTPError as e:
+            return {"error": f"ET fetch failed: {str(e)}"}
+        
+    # ----------------------------------------------------------------
 
     async def get_current_weather(self, plot_id: str) -> Dict[str, Any]:
         """
@@ -288,7 +447,7 @@ class APIService:
         except httpx.HTTPError as e:
             return {"error": f"Failed to fetch current weather: {str(e)}"}
 
-
+    # ----------------------------------------------------------------
     async def get_weather_forecast(self, plot_id: str) -> Dict[str, Any]:
         """
         Get 7-day weather forecast (starts from tomorrow)
@@ -321,16 +480,16 @@ class APIService:
         except httpx.HTTPError as e:
             return {"error": f"Failed to fetch weather forecast: {str(e)}"}
 
-
+    # ----------------------------------------------------------------
 
     async def close(self):
         """Close the HTTP client"""
         await self.client.aclose()
 
 
+
 # Global API service instance (will be initialized with auth token when available)
 api_service: Optional[APIService] = None
-
 
 def get_api_service(auth_token: Optional[str] = None) -> APIService:
     """Get or create API service instance"""

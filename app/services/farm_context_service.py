@@ -1,3 +1,5 @@
+# farm_context_service.py
+
 """
 Farm Context Service
 Extracts and manages farm context (plot, crop, plantation date, etc.)

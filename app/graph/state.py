@@ -11,3 +11,4 @@ class GraphState(TypedDict):
     user_id: Optional[int]  
     auth_token: Optional[str]  
     final_response: Optional[str]
+    short_memory: Optional[List[Dict[str, Any]]] 
