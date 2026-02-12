@@ -61,7 +61,7 @@ class APIService:
     async def get_farmer_profile(self, user_id: Optional[int] = None) -> Dict[str, Any]:
         """
         Get farmer profile with plots information
-        API: GET /farms/my-profile/
+        API: GET /farms/
         """
         cache_key = f"farmer_profile_{user_id or 'default'}"
         
@@ -69,9 +69,10 @@ class APIService:
             return farm_context_cache[cache_key]
         
         try:
-            url = f"{BASE_URL}/farms/my-profile/"
+            url = f"{BASE_URL}/farms/"
             response = await self.client.get(url, headers=self._get_headers())
             response.raise_for_status()
+            print("Backend authentication verified successfully via /farms API.")
             data = response.json()
             
             farm_context_cache[cache_key] = data
@@ -311,7 +312,7 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-            print("RAW data ", data)
+            print("Growth Map RAW data ", data)
             
             return data
 
@@ -395,18 +396,38 @@ class APIService:
         API: GET /plots/{plot_id}/compute-et/
         """
         today = datetime.now().strftime("%Y-%m-%d")
-        cache_key = f"et_{plot_id}"
+        start_date = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+        cache_key = f"et_{plot_id}_{start_date}_{today}"
 
         if cache_key in irrigation_cache:
+            print("[ET CACHE HIT]")
             return irrigation_cache[cache_key]
 
+        url = f"{FIELD_API_URL}/plots/{plot_id}/compute-et/"
+
+        print("\n========== ET API REQUEST ==========")
+        print("METHOD = POST")
+        print("URL =", url)
+        print("HEADERS =", self._get_headers())
+        print("====================================")
+        
         try:
-            response = await self.client.get(
-                f"{FIELD_API_URL}/plots/{plot_id}/compute-et/",
+            url = f"{FIELD_API_URL}/plots/{plot_id}/compute-et/"
+            body = {
+                "plot_name": plot_id,
+                "start_date": start_date,
+                "end_date": today,
+            }
+            response = await self.client.post(
+                url,
+                json=body,
                 headers=self._get_headers()
             )
             response.raise_for_status()
             data = response.json()
+            print("\n✅ ET FETCH SUCCESS")
+            print("DATA =", data)
+
             irrigation_cache[cache_key] = data
             return data
 
