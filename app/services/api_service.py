@@ -1,4 +1,4 @@
-# api_service.py
+# app/services/api_service.py
 
 """
 API Service Layer for CROPEYE Chatbot
@@ -436,7 +436,7 @@ class APIService:
         
     # ----------------------------------------------------------------
 
-    async def get_current_weather(self, plot_id: str) -> Dict[str, Any]:
+    async def get_current_weather(self, plot_id: str, lat: float, lon: float) -> Dict[str, Any]:
         """
         Get current weather for marquee & irrigation cards
         API: GET /current-weather?plot_id=
@@ -450,8 +450,8 @@ class APIService:
             url = f"{WEATHER_API_URL}/current-weather"
             params = {
                 "plot_id": plot_id, 
-                "lat": 19.36470605,
-                "lon": 75.45908165, 
+                "lat": lat,
+                "lon": lon, 
             }
 
             response = await self.client.get(
@@ -469,7 +469,7 @@ class APIService:
             return {"error": f"Failed to fetch current weather: {str(e)}"}
 
     # ----------------------------------------------------------------
-    async def get_weather_forecast(self, plot_id: str) -> Dict[str, Any]:
+    async def get_weather_forecast(self, plot_id: str, lat: float, lon: float) -> Dict[str, Any]:
         """
         Get 7-day weather forecast (starts from tomorrow)
         API: GET /forecast?plot_id=
@@ -483,8 +483,8 @@ class APIService:
             url = f"{WEATHER_API_URL}/forecast"
             params = {
                 "plot_id": plot_id, 
-                "lat": 19.36470605,
-                "lon": 75.45908165, 
+                "lat": lat,
+                "lon": lon
             }
 
             response = await self.client.get(

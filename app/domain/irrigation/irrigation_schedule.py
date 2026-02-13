@@ -1,3 +1,5 @@
+# app/domain/irrigation/irrigation_schedule.py
+
 import json
 import math
 from pathlib import Path
@@ -6,19 +8,6 @@ from typing import Dict, Any, List, Optional, Literal, Tuple
 
 from app.services.api_service import get_api_service
 from app.services.farm_context_service import get_farm_context
-
-# =====================================================
-# LOAD bud.json (same KC source as frontend)
-# =====================================================
-
-# BUD_PATH = Path(__file__).parent / "bud.json"
-
-# if BUD_PATH.exists():
-#     BUD_DATA = json.loads(BUD_PATH.read_text(encoding="utf-8"))
-# else:
-#     print("[IRRIGATION WARNING] bud.json not found. Using fallback KC values.")
-#     BUD_DATA = {}
-
 
 # =====================================================
 # HELPERS
@@ -34,66 +23,6 @@ def _parse_rainfall_value(value: Any) -> float:
         return float(s) if s else 0.0
     except:
         return 0.0
-
-
-# def _get_plot_farm_from_profile(profile: Any, plot_id: str):
-#     if not profile or isinstance(profile, dict) and "error" in profile:
-#         return None, None
-
-#     plots = profile if isinstance(profile, list) else profile.get("plots") or profile.get("data", {}).get("plots") or []
-
-#     for p in plots:
-#         pid = p.get("fastapi_plot_id") or f"{p.get('gat_number','')}_{p.get('plot_number','')}"
-#         if str(pid) == str(plot_id):
-#             farms = p.get("farms") or []
-#             return p, (farms[0] if farms else None)
-
-#     return None, None
-
-
-# =====================================================
-# FRONTEND IDENTICAL KC LOGIC
-# =====================================================
-
-# def _get_crop_stage(days: int) -> str:
-#     if days > 210:
-#         return "Maturity & Ripening"
-#     elif days > 90:
-#         return "Grand Growth"
-#     elif days > 30:
-#         return "Tillering"
-#     return "Germination"
-
-
-# def _kc_from_stage(stage: str) -> float:
-#     kc_value = 0.3
-
-#     for method in BUD_DATA.get("fertilizer_schedule", []):
-#         for st in method.get("stages", []):
-#             if st.get("stage") == stage:
-#                 try:
-#                     kc_value = float(st.get("kc", kc_value))
-#                 except:
-#                     pass
-
-#     return kc_value
-
-
-# def _derive_kc_from_plantation_date(plantation_date: str) -> float:
-#     try:
-#         plant_dt = datetime.fromisoformat(str(plantation_date).replace("Z", "+00:00"))
-#         now = datetime.now(plant_dt.tzinfo or timezone.utc)
-#         days = max(0, (now - plant_dt).days)
-#     except:
-#         return 0.37
-
-#     stage = _get_crop_stage(days)
-#     print("Plantation date =", plantation_date)
-#     print("Days from plantation =", days)
-#     print("Derived stage =", stage)
-#     print("KC from bud.json =", _kc_from_stage(stage))
-
-#     return _kc_from_stage(stage)
 
 
 # =====================================================
