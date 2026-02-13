@@ -1,0 +1,180 @@
+1. Q: Do I need to irrigate my field today?
+A: The need for irrigation depends on current soil moisture, crop water use, and weather conditions shown on this page. Follow the schedule suggested for today.
+
+2. Q: How does CropEye decide how much water my crop needs?
+A: CropEye uses weather data, soil moisture, crop stage, and evapotranspiration to calculate the exact water requirement for your field.
+
+3. Q: Why does the water requirement change every day?
+A: Water need changes daily due to variation in temperature, humidity, sunlight, and crop growth.
+
+4. Q: What is evapotranspiration and why is it important?
+A: Evapotranspiration shows how much water is lost from soil and plants. Higher values mean the crop needs more water.
+
+5. Q: What does soil moisture indicate?
+A: Soil moisture shows how much water is already present in the soil for the crop to use.
+
+6. Q: If soil moisture is high, why is irrigation still recommended?
+A: Even with high soil moisture, the crop may be actively using water due to weather conditions, so irrigation may still be needed.
+
+7. Q: What happens if I skip irrigation when it is recommended?
+A: Skipping irrigation can cause crop stress, affecting growth and yield.
+
+8. Q: What happens if I over-irrigate my field?
+A: Over-irrigation can lead to root damage, nutrient loss, and wastage of water.
+
+9. Q: How does rainfall affect irrigation planning?
+A: Rainfall reduces the need for irrigation because it adds water to the soil naturally.
+
+10. Q: Why is humidity shown on this page?
+A: Humidity affects how quickly plants lose water. Low humidity increases crop water demand.
+
+11. Q: Why is temperature important for irrigation?
+A: Higher temperatures increase water loss from soil and plants, increasing irrigation need.
+
+12. Q: What is plant water uptake?
+A: It shows how actively the plant roots are absorbing water from the soil.
+
+13. Q: What does irrigation efficiency mean?
+A: It indicates how much of the applied water is actually used by the crop.
+
+14. Q: Is drip irrigation better than flood irrigation?
+A: Drip irrigation generally provides better efficiency and reduces water loss compared to flood irrigation.
+
+15. Q: Can I rely on this irrigation schedule daily?
+A: Yes. The schedule is updated regularly using current weather and crop data.
+
+16. Q: How does CropEye know my crop water requirement?
+A: CropEye analyzes satellite data, weather information, soil condition, and crop growth stage using AI models.
+
+17. Q: Why does the system show a 7-day irrigation plan?
+A: The 7-day plan helps you prepare irrigation in advance based on expected weather and crop needs.
+
+18. Q: How can this page help me save water?
+A: By applying only the required water, you avoid over-irrigation and reduce wastage.
+
+19. Q: What if my irrigation method is different from the one shown?
+A: You can adjust the irrigation time based on your method while following the recommended water requirement.
+
+20. Q: How does proper irrigation improve crop yield?
+A: Proper irrigation prevents crop stress, supports healthy growth, and improves overall yield.
+
+21. Q: Why is irrigation advice different for different plots?
+A: Each plot has different soil condition, crop stage, and weather exposure, so water requirement is calculated separately.
+
+22. Q: Does crop growth stage affect irrigation need?
+A: Yes. Young crops, growing crops, and mature crops all have different water requirements.
+
+23. Q: Can irrigation be delayed to the next day?
+A: It depends on current soil moisture and crop stress. Follow the recommended schedule to avoid stress.
+
+24. Q: Why does the system show irrigation even when the soil looks wet?
+A: Surface wetness may not reflect root-zone moisture where the crop actually absorbs water.
+
+25. Q: How does sunlight affect crop water need?
+A: More sunlight increases water loss from plants, increasing irrigation requirement.
+
+26. Q: What is the role of wind in irrigation planning?
+A: Wind increases evaporation from soil and plants, which increases crop water demand.
+
+27. Q: Can I irrigate at any time of the day?
+A: Early morning or evening is best to reduce evaporation loss and improve water absorption.
+
+28. Q: How often should I check this irrigation page?
+A: It is best to check daily, as weather and crop water use change regularly.
+
+29. Q: Does soil type affect irrigation requirement?
+A: Yes. Sandy, clay, and loamy soils hold water differently, affecting irrigation need.
+
+30. Q: What if my field has uneven water distribution?
+A: Uneven distribution reduces irrigation efficiency and can cause crop stress in some areas.
+
+31. Q: Why is my irrigation efficiency low?
+A: Water loss due to runoff, deep percolation, or improper method can reduce efficiency.
+
+32. Q: Can this system help prevent waterlogging?
+A: Yes. By advising only the required amount of water, it helps avoid excess irrigation.
+
+33. Q: How does irrigation affect nutrient availability?
+A: Proper irrigation helps nutrients dissolve and reach plant roots effectively.
+
+34. Q: Can wrong irrigation timing affect crop health?
+A: Yes. Incorrect timing can lead to stress, disease risk, and poor growth.
+
+35. Q: Why is weekly soil moisture trend shown?
+A: It helps understand whether soil is consistently over-wet, dry, or well maintained.
+
+36. Q: What does it mean if soil moisture is always high?
+A: It may indicate over-irrigation or poor drainage in the field.
+
+37. Q: What does it mean if soil moisture is always low?
+A: It indicates insufficient irrigation or soil that cannot retain water well.
+
+38. Q: How can I improve irrigation efficiency in my field?
+A: Using proper method, correct timing, and following recommended water quantity can improve efficiency.
+
+39. Q: Can this irrigation advice reduce electricity or diesel usage?
+A: Yes. By avoiding unnecessary irrigation, it saves pumping time and energy.
+
+40. Q: How does this irrigation plan support better crop growth?
+A: It ensures the crop gets the right amount of water at the right time, preventing stress and improving yield.
+
+41. Q: How does crop stress relate to irrigation?
+A: Crop stress often occurs when water supply does not match plant demand. Proper irrigation helps prevent this stress.
+
+42. Q: Can irrigation advice change after sudden weather changes?
+A: Yes. Sudden changes in weather like heat, wind, or rain can alter crop water needs.
+
+43. Q: Why is root-zone moisture more important than surface moisture?
+A: Plants absorb water from the root zone, so moisture at that depth is more important than surface wetness.
+
+44. Q: Can improper irrigation lead to plant diseases?
+A: Yes. Excess moisture can create conditions favorable for fungal and root diseases.
+
+45. Q: How does irrigation planning help during dry spells?
+A: It ensures the crop receives adequate water even when there is no rainfall.
+
+46. Q: Does crop spacing affect irrigation need?
+A: Yes. Densely planted crops may use water differently compared to widely spaced crops.
+
+47. Q: Why is consistent irrigation important for uniform crop growth?
+A: Consistent water supply ensures all plants grow evenly without stress.
+
+48. Q: Can irrigation planning help reduce fertilizer loss?
+A: Yes. Proper irrigation prevents nutrients from being washed away from the root zone.
+
+49. Q: How does soil drainage affect irrigation decisions?
+A: Poor drainage can cause waterlogging, so irrigation must be carefully managed.
+
+50. Q: Why should irrigation be adjusted during cloudy days?
+A: Cloudy weather reduces water loss from plants, lowering irrigation need.
+
+51. Q: Can over-irrigation affect soil structure?
+A: Yes. Excess water can compact soil and reduce air availability to roots.
+
+52. Q: How does irrigation affect flowering and fruiting stages?
+A: Proper irrigation during these stages supports better yield and crop quality.
+
+53. Q: Can irrigation timing influence weed growth?
+A: Yes. Excess or frequent irrigation can promote weed growth.
+
+54. Q: How does irrigation planning help save labor effort?
+A: By following a clear plan, unnecessary field visits and manual checks are reduced.
+
+55. Q: Why is monitoring soil moisture regularly important?
+A: It helps maintain the right balance between too dry and too wet conditions.
+
+56. Q: Can irrigation advice differ between seasons?
+A: Yes. Seasonal weather patterns greatly influence crop water needs.
+
+57. Q: How does irrigation impact crop quality?
+A: Balanced irrigation improves crop size, weight, and overall quality.
+
+58. Q: Can irrigation planning help during heatwaves?
+A: Yes. It helps ensure crops get enough water to withstand extreme heat.
+
+59. Q: Why should irrigation be reduced after rainfall?
+A: Rainfall adds natural moisture to the soil, reducing irrigation need.
+
+60. Q: How does proper irrigation support long-term soil health?
+A: It prevents erosion, nutrient loss, and maintains healthy soil conditions.
+ 

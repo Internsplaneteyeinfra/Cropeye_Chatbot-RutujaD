@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Base URLs
-BASE_URL = os.getenv("BASE_URL", "https://cropeye-server-1.onrender.com/api")
+BASE_URL = os.getenv("BASE_URL", "https://cropeye-server-flyio.onrender.com/api")
 SOIL_API_URL = os.getenv("SOIL_API_URL", "https://main-cropeye.up.railway.app")
 PLOT_API_URL = os.getenv("PLOT_API_URL", "https://admin-cropeye.up.railway.app")
 EVENTS_API_URL = os.getenv("EVENTS_API_URL", "https://dev-events.cropeye.ai")
@@ -405,11 +405,11 @@ class APIService:
 
         url = f"{FIELD_API_URL}/plots/{plot_id}/compute-et/"
 
-        print("\n========== ET API REQUEST ==========")
-        print("METHOD = POST")
-        print("URL =", url)
-        print("HEADERS =", self._get_headers())
-        print("====================================")
+        # print("\n========== ET API REQUEST ==========")
+        # print("METHOD = POST")
+        # print("URL =", url)
+        # print("HEADERS =", self._get_headers())
+        # print("====================================")
         
         try:
             url = f"{FIELD_API_URL}/plots/{plot_id}/compute-et/"
@@ -425,8 +425,8 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-            print("\n✅ ET FETCH SUCCESS")
-            print("DATA =", data)
+            # print("\n✅ ET FETCH SUCCESS")
+            # print("DATA =", data)
 
             irrigation_cache[cache_key] = data
             return data

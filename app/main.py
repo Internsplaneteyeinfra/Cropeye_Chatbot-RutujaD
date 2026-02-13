@@ -1,16 +1,26 @@
 import base64
-from fastapi import FastAPI, Header
+from fastapi import FastAPI, Header, Depends
 from pydantic import BaseModel
 from typing import Optional
 from app.graph.graph import build_graph
 from fastapi.middleware.cors import CORSMiddleware
 from app.memory.redis_memory import get_memory, save_message
+import logging
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.services.voice_service import (
     transcribe_audio_base64,
     text_to_speech,
     get_tts_lang,
 )
 
+
+# ---------------- LOGGING CONFIG ----------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+)
+logger = logging.getLogger("cropeye-auth")
+# ------------------------------------------------
 
 app = FastAPI(title="CropEye Chatbot API")
 
@@ -23,6 +33,7 @@ app.add_middleware(
 )
 
 graph = build_graph()
+security = HTTPBearer()   # 🔐 Security scheme
 
 DEFAULT_PLOT_ID = "369_12"
 
@@ -30,7 +41,7 @@ DEFAULT_PLOT_ID = "369_12"
 class ChatRequest(BaseModel):
     message: str
     user_id: Optional[int] = None  
-    plot_id: Optional[str] = None
+    plot_id: Optional[str] = None  
 
 
 class VoiceChatRequest(BaseModel):
@@ -54,17 +65,33 @@ def root():
 @app.post("/chat")
 async def chat(
     request: ChatRequest,
-    authorization: Optional[str] = Header(None)
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+
 ):
     # Extract auth token from header (same token as frontend after login)
-    auth_token = None
-    if authorization and authorization.startswith("Bearer "):
-        auth_token = authorization.replace("Bearer ", "")
+    auth_token = credentials.credentials
+
+    logger.info("Authentication token received.")
+    logger.info("Authentication successful.")
+
+    # if authorization:
+    #     auth_token = authorization.replace("Bearer ", "").strip()
+    #     logger.info("Authentication token received.")
+    # else:
+    #     logger.warning("No authentication token provided.")
+
+
+    # if auth_token:
+    #     logger.info("Authentication successful.")
+    # else:
+    #     logger.error("Authentication failed. Token is missing or invalid.")
+
     
 
     user_id = request.user_id if request.user_id is not None else "default"
     plot_id = request.plot_id or DEFAULT_PLOT_ID
     plot_id = str(plot_id)
+
     # 🔹 Load Redis memory
     short_memory = get_memory(user_id, plot_id)
 
@@ -78,8 +105,9 @@ async def chat(
             "plot_id": request.plot_id or DEFAULT_PLOT_ID,
             "user_id": request.user_id,
             "auth_token": auth_token
+            
         },
-        "short_memory": short_memory,
+        # "short_memory": short_memory,
         "analysis": None,
         "final_response": None
     }
@@ -103,9 +131,9 @@ async def chat(
     }
 
 
-# ---------- CropEye VoiceBot: same chatbot via voice (STT -> chat -> TTS) ----------
-VOICE_ERROR_COULDNT_HEAR = "Sorry, I couldn't hear that. Please try again."
-VOICE_ERROR_CHATBOT = "I'm having trouble right now. Please try again shortly."
+# # ---------- CropEye VoiceBot: same chatbot via voice (STT -> chat -> TTS) ----------
+# VOICE_ERROR_COULDNT_HEAR = "Sorry, I couldn't hear that. Please try again."
+# VOICE_ERROR_CHATBOT = "I'm having trouble right now. Please try again shortly."
 
 
 @app.post("/voice/chat")

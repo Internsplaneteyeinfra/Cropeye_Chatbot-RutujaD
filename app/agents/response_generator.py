@@ -51,7 +51,7 @@ def response_generator(state: dict) -> dict:
         f"{m.get('role', '')}: {m.get('message', '')}"
         for m in short_memory
     ) 
-    print("MEMORY TEXT", memory_text)
+    # print("MEMORY TEXT", memory_text)
 
     analysis_str = "No analysis data available"
     if analysis:

@@ -70,8 +70,11 @@ async def _fetch_plantation_date(api: Any, plot_id: str) -> str:
     """Try to get plantation_date from farmer profile (same source as frontend)."""
     try:
         profile = await api.get_farmer_profile()
+
         if not profile or "error" in profile:
+            print("⚠ API error — using default plantation date")
             return _default_plantation_date()
+
         plots = profile.get("plots") or profile.get("data", {}).get("plots") or []
         for plot in plots:
             pid = (
@@ -85,6 +88,7 @@ async def _fetch_plantation_date(api: Any, plot_id: str) -> str:
                     fd = farms[0]
                     pd = fd.get("plantation_date") or fd.get("plantation_Date")
                     if pd and isinstance(pd, str) and pd.strip():
+                        print("✅ Plantation date from API:", pd)
                         return pd.strip()
                 break
     except Exception:
