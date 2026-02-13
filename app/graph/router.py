@@ -51,7 +51,6 @@ def router(state: dict) -> str:
         return "pest_agent"
 
     if intent in FERTILIZER_INTENTS:
-        print("🧭 ROUTER → fertilizer_agent")
         return "fertilizer_agent"
 
     return "response_generator"

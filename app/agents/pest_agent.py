@@ -189,4 +189,6 @@ async def pest_agent(state: dict) -> dict:
         "moderate_risk_weeds": result.get("weeds", {}).get("moderate", []),
         "low_risk_weeds": result.get("weeds", {}).get("low", []),
     }
-    return {"analysis": analysis}
+
+    state["analysis"] = analysis
+    return state

@@ -23,4 +23,5 @@ async def weather_agent(state: dict) -> dict:
     analysis["weather"]["forecast_7day"] = await forecast.fetch(plot_id, lat, lon)
 
     state["analysis"] = analysis
+
     return state

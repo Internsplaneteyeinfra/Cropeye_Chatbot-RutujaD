@@ -108,7 +108,7 @@ INTENT DECISION RULES (VERY IMPORTANT):
 
 8. fertilizer_advice
    Use if the user asks about fertilizer usage, NPK requirement,
-   nutrient recommendations, or fertilizer quantity.
+   nutrient recommendations, or fertilizer quantity, videos, tutorials, or YouTube content related to fertilizer,.
    Examples:
    - Do I need fertilizer?
    - मला खत लागेल का?
@@ -121,6 +121,11 @@ INTENT DECISION RULES (VERY IMPORTANT):
    - next 7 days
    - how much to apply
    - What NPK should I apply?
+   - show fertilizer videos
+   - fertilizer youtube videos
+   - खताबद्दल व्हिडिओ दाखवा
+   - fertilizer tutorial
+   - how to apply fertilizer video
 
 --------------------------------------------------
 
@@ -175,6 +180,10 @@ WHEN intent = irrigation_advice:
 WHEN intent = irrigation_schedule:
 - "7_day_schedule"
    
+WHEN intent = fertilizer_advice:
+- "video_resources"
+- "fertilizer_schedule "
+- "fertilizer_soil_npk_requirements"
 
 --------------------------------------------------
 RULES (STRICT):

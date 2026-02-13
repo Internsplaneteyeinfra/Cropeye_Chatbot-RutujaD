@@ -32,8 +32,8 @@ def _select_domain_prompt(intent: str) -> str:
     if intent in {"irrigation_schedule", "irrigation_advice"}:
         return IRRIGATION_AGENT_PROMPT
 
-    # if intent in {"soil_analysis", "fertilizer_advice"}:
-    #     return SOIL_ANALYSIS_AGENT_PROMPT
+    if intent in {"fertilizer_soil_npk_requirements", "fertilizer_schedule", "video_resources"}:
+        return FERTILIZER_AGENT_PROMPT
 
  
     return ""

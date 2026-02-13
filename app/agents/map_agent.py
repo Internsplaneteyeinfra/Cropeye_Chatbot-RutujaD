@@ -3,6 +3,7 @@ from app.domain.map_intelligence.water_uptake_map import WaterUptakeMap
 from app.domain.map_intelligence.growth_map import GrowthMap
 from app.domain.map_intelligence.pest_map import PestMap
 
+
 async def map_agent(state: dict) -> dict:
     context = state.get("context", {})
     plot_id = context.get("plot_id")
@@ -26,4 +27,5 @@ async def map_agent(state: dict) -> dict:
         analysis["map"]["growth"] = await GrowthMap(auth_token).fetch(plot_id)
 
     state["analysis"] = analysis
+
     return state

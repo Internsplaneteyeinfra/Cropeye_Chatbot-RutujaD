@@ -2,6 +2,8 @@
 
 from app.domain.soil_moisture.soil_moisture_trend import IrrigationSoilMoisture
 from datetime import datetime
+# from app.prompts.soil_moisture_prompt import SOIL_MOISTURE_AGENT_PROMPT
+
 
 async def soil_moisture_agent(state: dict) -> dict:
     context = state.get("context", {})
@@ -18,5 +20,7 @@ async def soil_moisture_agent(state: dict) -> dict:
     state["analysis"] = {
         "soil_moisture": context["soil_moisture_analysis"]
     }
+
+    # state["prompt"] = SOIL_MOISTURE_AGENT_PROMPT
 
     return state

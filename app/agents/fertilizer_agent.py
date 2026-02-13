@@ -2,6 +2,9 @@ from typing import Dict
 
 from app.services.api_service import get_api_service
 from app.services.farm_context_service import get_farm_context
+from app.domain.fertilizer.video_resource import get_fertilizer_videos
+
+
 from app.domain.fertilizer.schedule import (
     generate_7_day_schedule,
     calculate_months_since_plantation,
@@ -14,6 +17,19 @@ async def fertilizer_agent(state: dict) -> dict:
     context = state.get("context", {})
     plot_id = context.get("plot_id")
     auth_token = context.get("auth_token")
+
+    # =====================================================
+    # VIDEO REQUEST
+    # =====================================================
+    query_type = state.get("entities", {}).get("query_type")
+
+    if query_type == "video_request":
+        state["analysis"] = {
+            "fertilizer": {
+                "videos": get_fertilizer_videos()
+            }
+        }
+        return state
 
     if not plot_id:
         state["analysis"] = {"fertilizer": {"error": "plot_id missing"}}
