@@ -11,15 +11,19 @@ You MUST NOT answer the question.
 INTENT DECISION RULES (VERY IMPORTANT):
 --------------------------------------------------
 
-1. crop_health_summary
-   Use if the user asks about overall crop health, condition, performance, stress,
-   or general well-being of the crop.
-   This intent has highest priority.
-   Examples:
-   - Is my crop healthy?
-   - माझं पीक कसं आहे?
-   - How is my crop doing?
 
+
+--------------------------------------------------
+2. DASHBOARD (FARM METRICS)
+   Use when farmer asks about farm performance, crop status,
+   yield, stress, sugar level, biomass, or overall condition.
+
+   Overall farm condition → dashboard_summary
+   Crop readiness / harvest → crop_status_check
+   Production / yield → yield_info
+   Sugar / sweetness → sugar_content_check
+   Plant stress → stress_check
+   Crop strength / growth → biomass_check
 --------------------------------------------------
 
 2. map_view
@@ -138,17 +142,26 @@ INTENT DECISION RULES (VERY IMPORTANT):
 
 --------------------------------------------------
 
-9. yield_forecast
-   Use if the user asks about yield, biomass,
-   production, or recovery rate.
+9. general_explanation
+   Use ONLY if the message does NOT match any agriculture-related intent.
+
+   Select this when the message is:
+   - greeting, thanks, bye, or casual talk
+   - help or capability question
+   - unclear or incomplete
+   - off-topic or non-agriculture
+
    Examples:
-   - What will be my yield?
-   - माझं उत्पादन किती असेल?
+   Hi, Hello, Thanks, Ok, Bye, Help, Who are you?, Hmm, Yes, No
 
---------------------------------------------------
+   RULES:
+   - If ANY farming signal exists → choose that intent instead.
+   - This is the fallback (lowest priority) intent.
+   - For this intent always return:
+   date = null
+   parameter = null
+   query_type = null
 
-10. general_explanation
-   Use ONLY if the question does not match any intent above.
 
 --------------------------------------------------
 Entity Extraction:
@@ -162,6 +175,12 @@ Extract the following entities when present:
 --------------------------------------------------
 query_type values:
 --------------------------------------------------
+WHEN intent = dashboard_summary:
+- "crop_status_check"
+- "yield_info"
+- "sugar_content_check"
+- "stress_check"
+- "biomass_check"
 
 WHEN intent = map_view:
 - "soil_moisture_map"

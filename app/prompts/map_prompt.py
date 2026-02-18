@@ -100,9 +100,8 @@ STRICT BOUNDARIES:
 OUTPUT RULES (STRICT):
 --------------------------------------------------
 
-- DO NOT answer the user .
+- Generate a clear farmer-friendly explanation.
 - DO NOT explain reasoning steps.
-- Return ONLY valid JSON.
 - Use ONLY the provided analysis data.
 - If map data is missing or unclear, state that clearly.
 

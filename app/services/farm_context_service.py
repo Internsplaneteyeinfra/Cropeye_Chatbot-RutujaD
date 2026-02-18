@@ -134,7 +134,7 @@ async def get_farm_context(
 
     crop_stage_info = calculate_crop_stage(plantation_date)
 
-    print("KC CALCULATED =", crop_stage_info["kc"])
+    print("KC_CALCULATED =", crop_stage_info["kc"])
 
 
 

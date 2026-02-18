@@ -12,6 +12,7 @@ from app.agents.map_agent import map_agent
 from app.agents.pest_agent import pest_agent
 from app.agents.irrigation_agent import irrigation_agent
 from app.agents.fertilizer_agent import fertilizer_agent
+from app.agents.dashboard_agent import dashboard_agent
 
 from app.agents.response_generator import response_generator
 
@@ -28,6 +29,7 @@ def build_graph():
     graph.add_node("pest_agent", pest_agent)
     graph.add_node("irrigation_agent", irrigation_agent)
     graph.add_node("fertilizer_agent", fertilizer_agent)
+    graph.add_node("dashboard_agent", dashboard_agent)
     graph.add_node("response_generator", response_generator)
 
 
@@ -46,6 +48,7 @@ def build_graph():
             "pest_agent": "pest_agent",
             "irrigation_agent": "irrigation_agent",
             "fertilizer_agent": "fertilizer_agent",
+            "dashboard_agent": "dashboard_agent",
             "response_generator": "response_generator"
         }
     )
@@ -57,6 +60,7 @@ def build_graph():
     graph.add_edge("pest_agent", "response_generator")
     graph.add_edge("irrigation_agent", "response_generator")
     graph.add_edge("fertilizer_agent", "response_generator")
+    graph.add_edge("dashboard_agent", "response_generator")
     graph.add_edge("response_generator", END)
 
     return graph.compile()

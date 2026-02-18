@@ -144,7 +144,7 @@ class IrrigationSchedule:
     # BUILD SCHEDULE
     # =====================================================
 
-    async def build(self, plot_id: str):
+    async def build(self, plot_id: str, lat, lon):
 
         # ✅ SINGLE SOURCE OF TRUTH FOR KC
         farm_context = await get_farm_context(
@@ -168,8 +168,8 @@ class IrrigationSchedule:
 
         # ------------------------------------------------
 
-        weather_today = await self.api.get_current_weather(plot_id)
-        forecast = await self.api.get_weather_forecast(plot_id)
+        weather_today = await self.api.get_current_weather(plot_id, lat, lon)
+        forecast = await self.api.get_weather_forecast(plot_id, lat, lon)
         et_data = await self.api.get_evapotranspiration(plot_id)
 
         print("\n========== ET API DEBUG ==========")

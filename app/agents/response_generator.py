@@ -9,6 +9,8 @@ from app.prompts.soil_moisture_prompt import SOIL_MOISTURE_AGENT_PROMPT
 from app.prompts.irrigation_prompt import IRRIGATION_AGENT_PROMPT
 from app.prompts.map_prompt import MAP_AGENT_PROMPT
 from app.prompts.pest_prompt import PEST_AGENT_PROMPT
+from app.prompts.fertilizer_prompt import FERTILIZER_AGENT_PROMPT
+from app.prompts.dashboard_prompt import DASHBOARD_AGENT_PROMPT
 
 
 def _select_domain_prompt(intent: str) -> str:
@@ -23,7 +25,7 @@ def _select_domain_prompt(intent: str) -> str:
     if intent in {"soil_status", "soil_moisture_current", "soil_moisture_trend"}:
         return SOIL_MOISTURE_AGENT_PROMPT
 
-    if intent in {"map_view"}:
+    if intent in {"map_view", "soil_moisture_map", "water_uptake_map", "growth_map", "pest_map"}:
         return MAP_AGENT_PROMPT
 
     if intent in {"pest_risk"}:
@@ -34,6 +36,9 @@ def _select_domain_prompt(intent: str) -> str:
 
     if intent in {"fertilizer_soil_npk_requirements", "fertilizer_schedule", "video_resources"}:
         return FERTILIZER_AGENT_PROMPT
+
+    if intent in {"dashboard_summary", "crop_status_check", "yield_info", "sugar_content_check", "stress_check", "biomass_check"}:
+        return DASHBOARD_AGENT_PROMPT
 
  
     return ""

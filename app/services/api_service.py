@@ -18,14 +18,18 @@ load_dotenv()
 BASE_URL = os.getenv("BASE_URL", "https://cropeye-server-flyio.onrender.com/api")
 SOIL_API_URL = os.getenv("SOIL_API_URL", "https://main-cropeye.up.railway.app")
 PLOT_API_URL = os.getenv("PLOT_API_URL", "https://admin-cropeye.up.railway.app")
-EVENTS_API_URL = os.getenv("EVENTS_API_URL", "https://dev-events.cropeye.ai")
+EVENTS_API_URL = os.getenv("EVENTS_API_URL", "https://events-cropeye.up.railway.app")
 FIELD_API_URL = os.getenv("FIELD_API_URL", "https://sef-cropeye.up.railway.app")
 WEATHER_API_URL = os.getenv("WEATHER_API_URL", "https://weather-cropeye.up.railway.app")
 
 # Debug: Print which URLs are being used
-print(f"[API SERVICE INIT] SOIL_API_URL: {SOIL_API_URL}")
-print(f"[API SERVICE INIT] PLOT_API_URL: {PLOT_API_URL}")
-print(f"[API SERVICE INIT] BASE_URL: {BASE_URL}")
+# print(f"[API SERVICE INIT] BASE_URL: {BASE_URL}")
+# print(f"[API SERVICE INIT] SOIL_API_URL: {SOIL_API_URL}")
+# print(f"[API SERVICE INIT] PLOT_API_URL: {PLOT_API_URL}")
+# print(f"[API SERVICE INIT] EVENTS_API_URL: {EVENTS_API_URL}")
+# print(f"[API SERVICE INIT] FIELD_API_UR: {FIELD_API_URL}")
+# print(f"[API SERVICE INIT] WEATHER_API_URL: {WEATHER_API_URL}")
+
 
 
 
@@ -80,6 +84,88 @@ class APIService:
         except httpx.HTTPError as e:
             return {"error": f"Failed to fetch farmer profile: {str(e)}"}
     
+
+    # ==================================================
+    # DASHBOARD APIs
+    # ==================================================
+
+    async def get_stress_events(self, plot_id: str) -> Dict[str, Any]:
+
+        try:
+            url = f"{EVENTS_API_URL}/plots/{plot_id}/stress"
+
+            response = await self.client.get(
+                url,
+                params={"index_type": "NDRE", "threshold": 0.15},
+                headers=self._get_headers()
+            )
+
+            response.raise_for_status()
+            return response.json()
+
+        except httpx.HTTPError as e:
+            return {"error": f"Stress fetch failed: {str(e)}"}
+
+
+    # ----------------------------------------------------------------
+
+    async def get_harvest_status(self, plot_id: str) -> Dict[str, Any]:
+
+        cache_key = f"harvest_status_{plot_id}"
+
+        if cache_key in farm_context_cache:
+            return farm_context_cache[cache_key]
+
+        try:
+            url = f"{EVENTS_API_URL}/sugarcane-harvest"
+            response = await self.client.post(
+                url,
+                params={"plot_name": plot_id},
+                headers=self._get_headers()
+            )
+            response.raise_for_status()
+            data = response.json()
+            # print(f"Harvest status data for plot_id={plot_id}: {data}")
+            farm_context_cache[cache_key] = data
+            return data
+
+        except httpx.HTTPError as e:
+            return {"error": f"Harvest status fetch failed: {str(e)}"}
+
+    # ----------------------------------------------------------------
+    async def get_agro_stats( self, plot_id: str, end_date: Optional[str] = None) -> Dict[str, Any]:
+
+        if not end_date:
+            end_date = datetime.now().strftime("%Y-%m-%d")
+
+        cache_key = f"agro_stats_{plot_id}_{end_date}"
+
+        if cache_key in farm_context_cache:
+            return farm_context_cache[cache_key]
+
+        try:
+            url = f"{EVENTS_API_URL}/plots/agroStats"
+
+            response = await self.client.get(
+                url,
+                params={
+                    "plot_name": plot_id,
+                    "end_date": end_date
+                },
+                headers=self._get_headers()
+            )
+            response.raise_for_status()
+            data = response.json()
+            # print(f"[API SERVICE] Agro stats fetched for plot_id={plot_id}, end_date={end_date}")
+            # print(f"[API SERVICE] Agro stats data: {data}")
+            farm_context_cache[cache_key] = data
+            
+            return data
+
+        except httpx.HTTPError as e:
+            return {"error": f"Agro stats fetch failed: {str(e)}"}
+
+
     # ----------------------------------------------------------------
 
     async def get_soil_analysis(self, plot_name: str, date: Optional[str] = None, fe_days_back: int = 30 ) -> Dict[str, Any]:
@@ -292,6 +378,33 @@ class APIService:
         except httpx.HTTPError as e:
             return {"error": f"Water uptake map fetch failed: {str(e)}"}
    
+    # ----------------------------------------------------------------
+    
+    async def get_pest_map(self, plot_id: str, end_date: Optional[str] = None) -> dict:
+        """
+        Get pest satellite map layer
+        API: POST /pest-map
+        """
+        end_date = end_date or datetime.now().strftime("%Y-%m-%d")
+        cache_key = f"pest_map_{plot_id}_{end_date}"
+
+        if cache_key in map_cache:
+            return map_cache[cache_key]
+
+        try:
+            response = await self.client.post(
+                f"{PLOT_API_URL}/pest-detection",
+                params={"plot_name": plot_id, "end_date": end_date},
+                headers=self._get_headers()
+            )
+            response.raise_for_status()
+            data = response.json()
+            map_cache[cache_key] = data
+            return data
+
+        except httpx.HTTPError as e:
+            return {"error": f"Pest map fetch failed: {str(e)}"}
+
     # ----------------------------------------------------------------
     
     async def get_growth_map(self, plot_id: str, end_date: Optional[str] = None) -> dict:

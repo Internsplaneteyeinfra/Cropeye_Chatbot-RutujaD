@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CropEye Chatbot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-page: linear-gradient(160deg, #f0fdf4 0%, #ecfdf5 40%, #f0f9ff 100%);
+      --card-bg: #ffffff;
+      --card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
+      --header-bg: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+      --header-text: #ffffff;
+      --user-bubble: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      --bot-bubble: #f1f5f9;
+      --bot-text: #1e293b;
+      --input-border: #e2e8f0;
+      --input-focus: #10b981;
+      --focus-ring: rgba(16, 185, 129, 0.25);
+      --muted: #64748b;
+      --online: #22c55e;
+      --radius-sm: 10px;
+      --radius-md: 14px;
+      --radius-lg: 18px;
+      --radius-full: 9999px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Outfit", system-ui, -apple-system, sans-serif;
+      background: var(--bg-page);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .chat-container {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 420px;
+      height: 85vh;
+      min-height: 520px;
+      max-height: 720px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .chat-container:focus-within {
+      box-shadow: 0 32px 64px -16px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    }
+
+    .chat-header {
+      padding: 18px 20px;
+      background: var(--header-bg);
+      color: var(--header-text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      gap: 12px;
+    }
+
+    .chat-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .chat-header-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 20px;
+    }
+
+    .chat-header-text {
+      min-width: 0;
+    }
+
+    .chat-header-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .chat-header-subtitle {
+      font-size: 12px;
+      opacity: 0.92;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--online);
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.35);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: linear-gradient(180deg, #fafafa 0%, #f8fafc 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scroll-behavior: smooth;
+    }
+
+    .chat-messages::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .chat-messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: var(--radius-full);
+    }
+
+    .message-row {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      max-width: 88%;
+      animation: messageIn 0.3s ease-out;
+    }
+
+    .message-row.user {
+      align-items: flex-end;
+      margin-left: auto;
+    }
+
+    @keyframes messageIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message {
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      line-height: 1.5;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      font-weight: 500;
+    }
+
+    .message.user {
+      background: var(--user-bubble);
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
+    }
+
+    .message.bot {
+      background: var(--bot-bubble);
+      color: var(--bot-text);
+      border-bottom-left-radius: 4px;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .timestamp {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .message-row.user .timestamp {
+      text-align: right;
+    }
+
+    .chat-input-area {
+      padding: 14px 16px 18px;
+      border-top: 1px solid #e2e8f0;
+      background: var(--card-bg);
+      flex-shrink: 0;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .chat-input {
+      flex: 1;
+      min-width: 0;
+      border-radius: var(--radius-full);
+      border: 1.5px solid var(--input-border);
+      padding: 12px 18px;
+      font-size: 14px;
+      font-family: inherit;
+      font-weight: 500;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      background: #f8fafc;
+    }
+
+    .chat-input::placeholder {
+      color: #94a3b8;
+    }
+
+    .chat-input:hover {
+      background: #f1f5f9;
+    }
+
+    .chat-input:focus {
+      border-color: var(--input-focus);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+      background: #ffffff;
+    }
+
+    .send-button {
+      border: none;
+      border-radius: var(--radius-full);
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      color: #ffffff;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+    }
+
+    .send-button:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+      box-shadow: none;
+      opacity: 0.8;
+    }
+
+    .send-button:not(:disabled):hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35);
+    }
+
+    .send-button:not(:disabled):active {
+      transform: translateY(0);
+    }
+
+    .voice-button {
+      border: none;
+      border-radius: var(--radius-full);
+      background: #f1f5f9;
+      color: #475569;
+      width: 46px;
+      height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .voice-button:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .voice-button.recording {
+      background: #fef2f2;
+      color: #dc2626;
+      animation: voicePulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes voicePulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
+    }
+
+    .voice-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .typing-dots {
+      display: flex;
+      gap: 4px;
+    }
+
+    .typing-dots span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+      animation: typingBounce 1.4s ease-in-out infinite both;
+    }
+
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingBounce {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 12px; }
+      .chat-container {
+        max-height: none;
+        height: 92vh;
+        min-height: 400px;
+      }
+      .chat-header { padding: 14px 16px; }
+      .chat-header-icon { width: 36px; height: 36px; font-size: 18px; }
+      .chat-header-title { font-size: 16px; }
+      .chat-messages { padding: 12px; gap: 12px; }
+      .message { padding: 10px 14px; font-size: 13px; }
+      .chat-input-area { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <div class="chat-header-icon">🌱</div>
+        <div class="chat-header-text">
+          <div class="chat-header-title">CropEye Assistant</div>
+          <div class="chat-header-subtitle">Crops, pests, fertilizer & more</div>
+        </div>
+      </div>
+      <div class="status">
+        <div class="status-dot"></div>
+        <span>Online</span>
+      </div>
+    </div>
+
+    <div id="chatMessages" class="chat-messages"></div>
+    <div id="typingIndicator" class="typing-indicator hidden">
+      <div class="typing-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <span>Thinking…</span>
+    </div>
+
+    <div class="chat-input-area">
+      <input
+        id="userInput"
+        class="chat-input"
+        type="text"
+        placeholder="Ask about crops, irrigation, pests..."
+        autocomplete="off"
+      />
+      <button id="voiceButton" class="voice-button" type="button" title="Hold to record, or click to start/stop">🎤</button>
+      <button id="sendButton" class="send-button" type="button">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const BACKEND_URL = "http://localhost:8000/chat";
+    const BACKEND_VOICE_URL = "http://localhost:8000/voice/chat";
+    
+    // 🔹 Auth config
+    const AUTH_TOKEN = " eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzcwOTkxNzgzLCJpYXQiOjE3NzA5ODk5ODMsImp0aSI6ImZiYTY1MjEwOWU4ZjRmYTZhOWY3NzAxNDg1ZjVjODNhIiwidXNlcl9pZCI6OTY5fQ.J-ZQ_2-buFS1e41jDknWpVKGRiiFgc0m3EHipPrktlw";
+    const USER_ID = 0;
+    const PLOT_ID = "99999_17";
+    
+    const chatMessages = document.getElementById("chatMessages");
+    const userInput = document.getElementById("userInput");
+    const sendButton = document.getElementById("sendButton");
+    const voiceButton = document.getElementById("voiceButton");
+    const typingIndicator = document.getElementById("typingIndicator");
+    
+    let mediaRecorder = null;
+    let recordingStream = null;
+    let recordingChunks = [];
+    let isRecording = false;
+    
+    /* ---------------- AUTH HEADER HELPER ---------------- */
+    function authHeaders() {
+      return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${AUTH_TOKEN}`
+      };
+    }
+    
+    /* ---------------- MESSAGE UI ---------------- */
+    function appendMessage(text, sender = "bot") {
+      const row = document.createElement("div");
+      row.classList.add("message-row", sender === "user" ? "user" : "bot");
+    
+      const message = document.createElement("div");
+      message.classList.add("message", sender === "user" ? "user" : "bot");
+      message.textContent = text;
+    
+      const timestamp = document.createElement("div");
+      timestamp.classList.add("timestamp");
+      timestamp.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    
+      row.appendChild(message);
+      row.appendChild(timestamp);
+      chatMessages.appendChild(row);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    function setLoading(isLoading) {
+      typingIndicator.classList.toggle("hidden", !isLoading);
+      sendButton.disabled = isLoading;
+      voiceButton.disabled = isLoading;
+    }
+    
+    /* ---------------- AUDIO PLAYER ---------------- */
+    function playAudioBase64(base64Data) {
+      if (!base64Data) return;
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = Array.from(byteCharacters, c => c.charCodeAt(0));
+      const blob = new Blob([new Uint8Array(byteNumbers)], { type: "audio/mpeg" });
+      const url = URL.createObjectURL(blob);
+      new Audio(url).play();
+    }
+    
+    /* ---------------- TEXT MESSAGE ---------------- */
+    async function sendMessage() {
+      const text = userInput.value.trim();
+      if (!text) return;
+    
+      appendMessage(text, "user");
+      userInput.value = "";
+      setLoading(true);
+    
+      try {
+        const response = await fetch(BACKEND_URL, {
+          method: "POST",
+          headers: authHeaders(),
+          body: JSON.stringify({
+            message: text,
+            user_id: USER_ID,
+            plot_id: PLOT_ID
+          }),
+        });
+    
+        if (!response.ok) throw new Error("Backend error " + response.status);
+    
+        const data = await response.json();
+        appendMessage(data.response || "No response", "bot");
+    
+      } catch (err) {
+        console.error(err);
+        appendMessage("Server unreachable. Check backend.", "bot");
+      } finally {
+        setLoading(false);
+        userInput.focus();
+      }
+    }
+    
+    /* ---------------- VOICE MESSAGE ---------------- */
+    async function sendVoiceMessage(blob, type) {
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+    
+      reader.onloadend = async () => {
+        const base64 = reader.result.split(",")[1];
+    
+        setLoading(true);
+    
+        try {
+          const res = await fetch(BACKEND_VOICE_URL, {
+            method: "POST",
+            headers: authHeaders(),
+            body: JSON.stringify({
+              audio_base64: base64,
+              content_type: type,
+              user_id: USER_ID,
+              plot_id: PLOT_ID
+            }),
+          });
+    
+          const data = await res.json();
+    
+          appendMessage(data.transcribed || "(voice)", "user");
+          appendMessage(data.response || "No reply", "bot");
+    
+          if (data.audio_base64) playAudioBase64(data.audio_base64);
+    
+        } catch (err) {
+          console.error(err);
+          appendMessage("Voice request failed.", "bot");
+        } finally {
+          setLoading(false);
+          voiceButton.classList.remove("recording");
+          isRecording = false;
+        }
+      };
+    }
+    
+    /* ---------------- RECORDING ---------------- */
+    function startRecording() {
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+        recordingStream = stream;
+        mediaRecorder = new MediaRecorder(stream);
+        recordingChunks = [];
+    
+        mediaRecorder.ondataavailable = e => recordingChunks.push(e.data);
+    
+        mediaRecorder.onstop = () => {
+          stream.getTracks().forEach(t => t.stop());
+          const blob = new Blob(recordingChunks, { type: mediaRecorder.mimeType });
+          sendVoiceMessage(blob, mediaRecorder.mimeType);
+        };
+    
+        mediaRecorder.start();
+        isRecording = true;
+        voiceButton.classList.add("recording");
+      });
+    }
+    
+    function stopRecording() {
+      if (mediaRecorder && isRecording) mediaRecorder.stop();
+    }
+    
+    voiceButton.addEventListener("click", () => {
+      isRecording ? stopRecording() : startRecording();
+    });
+    
+    sendButton.addEventListener("click", sendMessage);
+    
+    userInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+    
+    appendMessage("Hi! I'm CropEye assistant. How can I help you?", "bot");
+    </script>
+    
+</body>
+</html>
