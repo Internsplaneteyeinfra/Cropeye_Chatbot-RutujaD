@@ -15,11 +15,11 @@ def intent_analyzer(state: dict) -> dict:
     last_intent = None
 
     for h in history:
-        history_text += f"{h['role']}: {h['message']}\n"
+        history_text += f"{h['role']}: {h['message']}"
         if h.get("intent"):
             last_intent = h["intent"]
 
-    prompt = ( BASE_SYSTEM_PROMPT +"Conversation history:\n" + history_text + "\n" + INTENT_PROMPT ).format(user_message=user_message)
+    prompt = ( BASE_SYSTEM_PROMPT +"Conversation history:\n" + history_text  + INTENT_PROMPT ).format(user_message=user_message)
     
     
     try:

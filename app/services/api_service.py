@@ -71,7 +71,7 @@ class APIService:
             response.raise_for_status()
             print("Backend authentication verified successfully via /farms API.")
             data = response.json()
-            
+            # # # data["_source"] = "api"
             redis_manager.set(cache_key, data, ttl=3600)
             return data
         except httpx.HTTPError as e:
@@ -100,6 +100,7 @@ class APIService:
 
             response.raise_for_status()
             data = response.json()
+            # # # data["_source"] = "api"
             redis_manager.set(cache_key, data, ttl=3600)
             return data
 
@@ -115,6 +116,7 @@ class APIService:
 
         cached = redis_manager.get(cache_key)
         if cached:
+
             return cached
 
         try:
@@ -126,7 +128,7 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-
+            # # # # data["_source"] = "api"
             redis_manager.set(cache_key, data, ttl=3600)
             return data
 
@@ -158,7 +160,7 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-            
+            # # # data["_source"] = "api"
             # Filter only requested plot
             if plot_id in data:
                 data = data[plot_id]
@@ -274,7 +276,7 @@ class APIService:
 
             response.raise_for_status()
             data = response.json()
-            
+            # # # data["_source"] = "api"
         #     soil_cache[cache_key] = data
         #     return data
         # except httpx.HTTPStatusError as e:
@@ -324,7 +326,7 @@ class APIService:
             response = await self.client.post(url, params=params, headers=self._get_headers())
             response.raise_for_status()
             data = response.json()
-            
+            # # # data["_source"] = "api"
             redis_manager.set(cache_key, data, ttl=43200)
 
             return data
@@ -359,10 +361,12 @@ class APIService:
                 "plot_name": plot_name,
                 "end_date": end_date
             }
-
+            print("API data")
             response = await self.client.post(url, params=params, headers=self._get_headers())
             response.raise_for_status()
             data = response.json()
+
+            # # # data["_source"] = "api"
 
             redis_manager.set(cache_key, data, ttl=43200)
             return data
@@ -392,6 +396,7 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
+            # # # data["_source"] = "api"
             redis_manager.set(cache_key, data, ttl=43200)
             return data
 
@@ -420,6 +425,7 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
+            # # # data["_source"] = "api"
             redis_manager.set(cache_key, data, ttl=43200)
             return data
 
@@ -451,7 +457,7 @@ class APIService:
             )
             response.raise_for_status()            
             data = response.json()
-           
+            # # # data["_source"] = "api"
             redis_manager.set(cache_key, data, ttl=43200)
             return data
 
@@ -490,7 +496,7 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-            
+            # # # data["_source"] = "api"
             redis_manager.set(cache_key, data, ttl=43200)
             return data
             
@@ -518,7 +524,7 @@ class APIService:
             response = await self.client.post(url, headers=self._get_headers())
             response.raise_for_status()
             data = response.json()
-
+            # # # data["_source"] = "api"
             #  ✅ cache ONLY success
             if isinstance(data, list):
                 redis_manager.set(cache_key, data, ttl=43200)
@@ -565,8 +571,7 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-            # print("\n✅ ET FETCH SUCCESS")
-            # print("DATA =", data)
+            # # # data["_source"] = "api"
 
             redis_manager.set(cache_key, data, ttl=43200)
             return data
@@ -585,6 +590,7 @@ class APIService:
 
         cached = redis_manager.get(cache_key)
         if cached:
+            print(f"[CURRENT WEATHER] Returning cached data for {plot_id}")
             return cached
 
         try:
@@ -602,7 +608,7 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-
+            # # # data["_source"] = "api"
             redis_manager.set(cache_key, data, ttl=7200)
             return data
 
@@ -636,7 +642,7 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-
+            # # # data["_source"] = "api"
             redis_manager.set(cache_key, data, ttl=7200)
             return data
 

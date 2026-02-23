@@ -97,13 +97,26 @@ class RedisManager:
             logger.warning(f"Redis SET failed: {e}")
 
 
+    # def get(self, key):
+    #     try:
+    #         return self._deserialize(self.client.get(key))
+    #     except Exception as e:
+    #         logger.warning(f"Redis GET failed: {e}")
+    #         return None
+
     def get(self, key):
         try:
-            return self._deserialize(self.client.get(key))
+            data = self.client.get(key)
+
+            if data:
+                print(f"[REDIS] Returning cached data for {key}")
+                return self._deserialize(data)
+
+            return None
+
         except Exception as e:
             logger.warning(f"Redis GET failed: {e}")
             return None
-
 
     def delete(self, key):
         try:

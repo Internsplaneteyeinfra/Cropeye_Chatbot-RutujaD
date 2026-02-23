@@ -79,11 +79,11 @@ STRICT RULES
 OUTPUT FORMAT (STRICT JSON ONLY)
 --------------------------------------------------
 
-{
+{{
   "message": "",
   "status": "ok | warning | info",
   "videos": []
-}
+}}
 
 Status meaning:
 ok → normal recommendation

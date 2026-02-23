@@ -87,30 +87,30 @@ async def run_initialization(plot_id, token):
 
         tasks = {
         # ---------- SOIL ANALYSIS AGENT ----------
-        "soil_analysis": api.get_soil_analysis(plot_id, today),
-        "npk_requirements": api.get_npk_requirements(plot_id, today),
+        "soil_analysis": lambda: api.get_soil_analysis(plot_id, today),
+        "npk_requirements": lambda: api.get_npk_requirements(plot_id, today),
 
         # ---------- PEST ----------
-        "pest_detection": api.get_pest_detection(plot_id, today),
+        "pest_detection": lambda: api.get_pest_detection(plot_id, today),
 
         # ---------- IRRIGATION ----------
-        "et": api.get_evapotranspiration(plot_id),
-        "soil_moisture_timeseries": api.get_soil_moisture_timeseries(plot_id),
+        "et": lambda: api.get_evapotranspiration(plot_id),
+        "soil_moisture_timeseries": lambda: api.get_soil_moisture_timeseries(plot_id),
 
         # ---------- WEATHER ----------
-        "current_weather": api.get_current_weather(plot_id, lat, lon),
-        "weather_forecast": api.get_weather_forecast(plot_id, lat, lon),
+        "current_weather": lambda: api.get_current_weather(plot_id, lat, lon),
+        "weather_forecast": lambda: api.get_weather_forecast(plot_id, lat, lon),
 
         # ---------- MAPS ----------
-        "growth_map": api.get_growth_map(plot_id, today),
-        "soil_moisture_map": api.get_soil_moisture_map(plot_id, today),
-        "water_uptake_map": api.get_water_uptake_map(plot_id, today),
-        "pest_map": api.get_pest_map(plot_id, today),
+        "growth_map": lambda: api.get_growth_map(plot_id, today),
+        "soil_moisture_map": lambda: api.get_soil_moisture_map(plot_id, today),
+        "water_uptake_map": lambda: api.get_water_uptake_map(plot_id, today),
+        "pest_map": lambda: api.get_pest_map(plot_id, today),
 
         # ---------- DASHBOARD ----------
-        "agro": api.get_agro_stats(plot_id, today),
-        "harvest": api.get_harvest_status(plot_id),
-        "stress": api.get_stress_events(plot_id),
+        "agro": lambda: api.get_agro_stats(plot_id, today),
+        "harvest": lambda: api.get_harvest_status(plot_id),
+        "stress":  lambda: api.get_stress_events(plot_id),
     }
 
         results = {}
@@ -123,8 +123,17 @@ async def run_initialization(plot_id, token):
             for attempt in range(3):
                 try:
                     start = datetime.now()
-                    results[name] = await task
+                    # data = await task
+                    # results[name] = data
+                    data = await task()
 
+                    # treat API error response as failure
+                    if isinstance(data, dict) and data.get("error"):
+                        raise Exception(data["error"])
+
+                    results[name] = data
+                    break
+                    
                     end = datetime.now()
                     duration = (end - start).total_seconds()
 

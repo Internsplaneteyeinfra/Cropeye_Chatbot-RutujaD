@@ -416,182 +416,232 @@
     </div>
   </div>
 
+
+
   <script>
-    const BACKEND_URL = "http://localhost:8000/chat";
-    const BACKEND_VOICE_URL = "http://localhost:8000/voice/chat";
+    /* ---------------- AUTH TOKEN (TEST MODE) ---------------- */
+    /* 👉 Paste your real token here */
+    const AUTH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzcxNTk1NDkxLCJpYXQiOjE3NzE1OTM2OTEsImp0aSI6ImIyOGMyNGQ5Y2ZiZjQyNzI5Y2YwOTQwOWYwODY2NGFiIiwidXNlcl9pZCI6NDM1fQ.15EB7krSvpchRbTKLUGQ8dFGDOIuVmRJGv4TfU_blzg";
     
-    // 🔹 Auth config
-    const AUTH_TOKEN = " eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzcxNDE0ODIxLCJpYXQiOjE3NzE0MTMwMjEsImp0aSI6IjE2YTFmOGVlODk2MTQ5MmZhNzI0Mjk2N2I1M2FiNDg3IiwidXNlcl9pZCI6NDM1fQ.Ee36BFXGUTWq_Oo55R3VXYq1gr8CFFZBGxCJCilp-ZM";
+    /* ---------------- BACKEND CONFIG ---------------- */
+    const API_BASE = "http://localhost:8000";
+    
+    const ENDPOINTS = {
+      CHAT: `${API_BASE}/chat`,
+      VOICE: `${API_BASE}/voice/chat`,
+      INIT: `${API_BASE}/initialize-plot`,
+      HEALTH: `${API_BASE}/health`
+    };
+    
+    /* ---------------- STATIC TEST VALUES ---------------- */
     const USER_ID = 0;
     const PLOT_ID = "162_1";
     
+    /* ---------------- DOM ---------------- */
     const chatMessages = document.getElementById("chatMessages");
     const userInput = document.getElementById("userInput");
     const sendButton = document.getElementById("sendButton");
     const voiceButton = document.getElementById("voiceButton");
     const typingIndicator = document.getElementById("typingIndicator");
     
-    let mediaRecorder = null;
-    let recordingStream = null;
-    let recordingChunks = [];
-    let isRecording = false;
-    
-    /* ---------------- AUTH HEADER HELPER ---------------- */
-    function authHeaders() {
+    /* ---------------- AUTH HEADER ---------------- */
+    function authHeaders(json=true){
       return {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${AUTH_TOKEN}`
+        ...(json && {"Content-Type":"application/json"}),
+        Authorization:`Bearer ${AUTH_TOKEN}`
       };
     }
     
-    /* ---------------- MESSAGE UI ---------------- */
-    function appendMessage(text, sender = "bot") {
-      const row = document.createElement("div");
-      row.classList.add("message-row", sender === "user" ? "user" : "bot");
+    /* ---------------- UI ---------------- */
+    function appendMessage(text,sender="bot"){
+      const row=document.createElement("div");
+      row.className=`message-row ${sender}`;
     
-      const message = document.createElement("div");
-      message.classList.add("message", sender === "user" ? "user" : "bot");
-      message.textContent = text;
+      const msg=document.createElement("div");
+      msg.className=`message ${sender}`;
+      msg.textContent=text;
     
-      const timestamp = document.createElement("div");
-      timestamp.classList.add("timestamp");
-      timestamp.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      const time=document.createElement("div");
+      time.className="timestamp";
+      time.textContent=new Date().toLocaleTimeString([],{
+        hour:"2-digit",
+        minute:"2-digit"
+      });
     
-      row.appendChild(message);
-      row.appendChild(timestamp);
+      row.appendChild(msg);
+      row.appendChild(time);
       chatMessages.appendChild(row);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+      chatMessages.scrollTop=chatMessages.scrollHeight;
     }
     
-    function setLoading(isLoading) {
-      typingIndicator.classList.toggle("hidden", !isLoading);
-      sendButton.disabled = isLoading;
-      voiceButton.disabled = isLoading;
+    function setLoading(v){
+      typingIndicator.classList.toggle("hidden",!v);
+      sendButton.disabled=v;
+      voiceButton.disabled=v;
     }
     
-    /* ---------------- AUDIO PLAYER ---------------- */
-    function playAudioBase64(base64Data) {
-      if (!base64Data) return;
-      const byteCharacters = atob(base64Data);
-      const byteNumbers = Array.from(byteCharacters, c => c.charCodeAt(0));
-      const blob = new Blob([new Uint8Array(byteNumbers)], { type: "audio/mpeg" });
-      const url = URL.createObjectURL(blob);
-      new Audio(url).play();
+    /* ---------------- BACKEND CHECK ---------------- */
+    async function checkBackend(){
+      try{
+        const r=await fetch(ENDPOINTS.HEALTH);
+        if(!r.ok) throw new Error();
+        console.log("Backend connected");
+        return true;
+      }catch{
+        appendMessage("⚠ Backend not reachable. Start server.");
+        return false;
+      }
     }
     
-    /* ---------------- TEXT MESSAGE ---------------- */
-    async function sendMessage() {
-      const text = userInput.value.trim();
-      if (!text) return;
+    /* ---------------- INITIALIZE PLOT ---------------- */
+    async function initializePlot(){
+      appendMessage(`Loading plot ${PLOT_ID} data...`);
     
-      appendMessage(text, "user");
-      userInput.value = "";
-      setLoading(true);
-    
-      try {
-        const response = await fetch(BACKEND_URL, {
-          method: "POST",
-          headers: authHeaders(),
-          body: JSON.stringify({
-            message: text,
-            user_id: USER_ID,
-            plot_id: PLOT_ID
-          }),
+      try{
+        const res=await fetch(`${ENDPOINTS.INIT}?plot_id=${PLOT_ID}`,{
+          method:"POST",
+          headers:authHeaders(false)
         });
     
-        if (!response.ok) throw new Error("Backend error " + response.status);
-    
-        const data = await response.json();
-        appendMessage(data.response || "No response", "bot");
-    
-      } catch (err) {
-        console.error(err);
-        appendMessage("Server unreachable. Check backend.", "bot");
-      } finally {
-        setLoading(false);
-        userInput.focus();
-      }
-    }
-    
-    /* ---------------- VOICE MESSAGE ---------------- */
-    async function sendVoiceMessage(blob, type) {
-      const reader = new FileReader();
-      reader.readAsDataURL(blob);
-    
-      reader.onloadend = async () => {
-        const base64 = reader.result.split(",")[1];
-    
-        setLoading(true);
-    
-        try {
-          const res = await fetch(BACKEND_VOICE_URL, {
-            method: "POST",
-            headers: authHeaders(),
-            body: JSON.stringify({
-              audio_base64: base64,
-              content_type: type,
-              user_id: USER_ID,
-              plot_id: PLOT_ID
-            }),
-          });
-    
-          const data = await res.json();
-    
-          appendMessage(data.transcribed || "(voice)", "user");
-          appendMessage(data.response || "No reply", "bot");
-    
-          if (data.audio_base64) playAudioBase64(data.audio_base64);
-    
-        } catch (err) {
-          console.error(err);
-          appendMessage("Voice request failed.", "bot");
-        } finally {
-          setLoading(false);
-          voiceButton.classList.remove("recording");
-          isRecording = false;
+        if(res.status===401){
+          appendMessage("Unauthorized. Token invalid.");
+          return;
         }
-      };
-    }
     
-    /* ---------------- RECORDING ---------------- */
-    function startRecording() {
-      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-        recordingStream = stream;
-        mediaRecorder = new MediaRecorder(stream);
-        recordingChunks = [];
-    
-        mediaRecorder.ondataavailable = e => recordingChunks.push(e.data);
-    
-        mediaRecorder.onstop = () => {
-          stream.getTracks().forEach(t => t.stop());
-          const blob = new Blob(recordingChunks, { type: mediaRecorder.mimeType });
-          sendVoiceMessage(blob, mediaRecorder.mimeType);
-        };
-    
-        mediaRecorder.start();
-        isRecording = true;
-        voiceButton.classList.add("recording");
-      });
-    }
-    
-    function stopRecording() {
-      if (mediaRecorder && isRecording) mediaRecorder.stop();
-    }
-    
-    voiceButton.addEventListener("click", () => {
-      isRecording ? stopRecording() : startRecording();
-    });
-    
-    sendButton.addEventListener("click", sendMessage);
-    
-    userInput.addEventListener("keydown", e => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        sendMessage();
+        const data=await res.json();
+        appendMessage(data.message || "Initialization started");
       }
+      catch(err){
+        appendMessage("Init failed.");
+        console.error(err);
+      }
+    }
+    
+    /* ---------------- TEXT CHAT ---------------- */
+    async function sendMessage(){
+      const text=userInput.value.trim();
+      if(!text) return;
+    
+      appendMessage(text,"user");
+      userInput.value="";
+      setLoading(true);
+    
+      try{
+        const res=await fetch(ENDPOINTS.CHAT,{
+          method:"POST",
+          headers:authHeaders(true),
+          body:JSON.stringify({
+            message:text,
+            user_id:USER_ID,
+            plot_id:PLOT_ID
+          })
+        });
+    
+        if(res.status===401){
+          appendMessage("Unauthorized. Token invalid.");
+          return;
+        }
+    
+        const data=await res.json();
+    
+        if(data.status && data.status!=="ready")
+          appendMessage(data.message);
+        else if(data.error)
+          appendMessage(data.error);
+        else
+          appendMessage(data.response || "No response");
+    
+      }catch(err){
+        appendMessage("Connection failed.");
+        console.error(err);
+      }
+      finally{
+        setLoading(false);
+      }
+    }
+    
+    /* ---------------- VOICE ---------------- */
+    let recorder,stream,chunks=[],recording=false;
+    
+    function startRecording(){
+    navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{
+      stream=s;
+      recorder=new MediaRecorder(s);
+      chunks=[];
+    
+      recorder.ondataavailable=e=>chunks.push(e.data);
+    
+      recorder.onstop=()=>{
+        const blob=new Blob(chunks,{type:recorder.mimeType});
+        sendVoice(blob,recorder.mimeType);
+        s.getTracks().forEach(t=>t.stop());
+      };
+    
+      recorder.start();
+      recording=true;
+      voiceButton.classList.add("recording");
+    });
+    }
+    
+    function stopRecording(){
+     if(recorder && recording) recorder.stop();
+    }
+    
+    async function sendVoice(blob,type){
+     setLoading(true);
+    
+     const reader=new FileReader();
+     reader.readAsDataURL(blob);
+    
+     reader.onloadend=async()=>{
+     const base64=reader.result.split(",")[1];
+    
+     try{
+     const res=await fetch(ENDPOINTS.VOICE,{
+       method:"POST",
+       headers:authHeaders(true),
+       body:JSON.stringify({
+         audio_base64:base64,
+         content_type:type,
+         user_id:USER_ID,
+         plot_id:PLOT_ID
+       })
+     });
+    
+     const data=await res.json();
+    
+     appendMessage(data.transcribed || "(voice)","user");
+     appendMessage(data.response || "No reply");
+    
+     if(data.audio_base64)
+       new Audio(`data:audio/mp3;base64,${data.audio_base64}`).play();
+     }
+     catch(err){
+       appendMessage("Voice failed.");
+       console.error(err);
+     }
+    
+     setLoading(false);
+     voiceButton.classList.remove("recording");
+     recording=false;
+     };
+    }
+    
+    /* ---------------- EVENTS ---------------- */
+    sendButton.onclick=sendMessage;
+    
+    userInput.addEventListener("keydown",e=>{
+     if(e.key==="Enter"){ e.preventDefault(); sendMessage(); }
     });
     
-    appendMessage("Hi! I'm CropEye assistant. How can I help you?", "bot");
+    voiceButton.onclick=()=> recording?stopRecording():startRecording();
+    
+    /* ---------------- START ---------------- */
+    appendMessage("Hi! I'm CropEye assistant.");
+    
+    checkBackend().then(ok=>{
+     if(ok) initializePlot();
+    });
     </script>
     
 </body>

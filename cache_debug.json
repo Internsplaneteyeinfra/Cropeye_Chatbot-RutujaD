@@ -3,7 +3,7 @@
     "key": "plot_status:162_1",
     "value": "ready",
     "ttl": null,
-    "time": "2026-02-20T10:21:53.852494"
+    "time": "2026-02-23T12:03:01.476268"
   },
   "farmer_profile_default": {
     "key": "farmer_profile_default",
@@ -227,10 +227,10 @@
       ]
     },
     "ttl": 3600,
-    "time": "2026-02-20T11:33:24.472465"
+    "time": "2026-02-23T15:45:29.061368"
   },
-  "soil_analysis_162_1_2026-02-20": {
-    "key": "soil_analysis_162_1_2026-02-20",
+  "soil_analysis_162_1_2026-02-23": {
+    "key": "soil_analysis_162_1_2026-02-23",
     "value": {
       "features": [
         {
@@ -263,7 +263,7 @@
           },
           "properties": {
             "plot_name": "162_1",
-            "date": "2026-02-20",
+            "date": "2026-02-23",
             "statistics": {
               "bulk_density": 1.38,
               "soil_organic_carbon": 1.47,
@@ -271,19 +271,19 @@
               "cation_exchange_capacity": 12.1,
               "organic_carbon_stock": 14.5749,
               "phh2o": 7.4,
-              "fe_index_primary": 6.3166,
-              "fe_index_difference": 6.4573,
-              "fe_index_normalized": -0.261,
-              "fe_ppm_estimated": 7.5532,
-              "vv_backscatter_db": -8.9706,
-              "vh_backscatter_db": -15.4279,
-              "fe_image_date": "2026-02-14",
+              "fe_index_primary": 5.2392,
+              "fe_index_difference": 6.4199,
+              "fe_index_normalized": -0.2328,
+              "fe_ppm_estimated": 6.6914,
+              "vv_backscatter_db": -10.7295,
+              "vh_backscatter_db": -17.1494,
+              "fe_image_date": "2026-02-21",
               "fe_polarizations": [
                 "VV",
                 "VH"
               ],
               "fe_orbit_pass": "DESCENDING",
-              "fe_search_period": "2026-01-21 to 2026-02-20",
+              "fe_search_period": "2026-01-24 to 2026-02-23",
               "fe_images_found": 4,
               "fe_sensor_type": "Sentinel-1 SAR",
               "potassium": 146.9384,
@@ -295,29 +295,29 @@
       ]
     },
     "ttl": 43200,
-    "time": "2026-02-20T10:20:13.797181"
+    "time": "2026-02-23T12:01:15.252469"
   },
-  "npk_requirements_162_1_2026-02-20": {
-    "key": "npk_requirements_162_1_2026-02-20",
+  "npk_requirements_162_1_2026-02-23": {
+    "key": "npk_requirements_162_1_2026-02-23",
     "value": {
       "plot_name": "162_1",
-      "days_since_plantation": 361,
+      "days_since_plantation": 364,
       "soil_analysis_value": 430.0,
-      "max_yield": 75.97,
-      "required_n_per_acre": 208.94974099554838,
+      "max_yield": 77.35,
+      "required_n_per_acre": 217.20550789154186,
       "gndvi": 246.89,
-      "soilN": 221.05,
-      "soilP": 72.95,
-      "soilK": 148.1,
-      "plantanalysis_n": 208.95,
-      "plantanalysis_p": 68.95,
-      "plantanalysis_k": 140.0
+      "soilN": 212.79,
+      "soilP": 70.22,
+      "soilK": 142.57,
+      "plantanalysis_n": 217.21,
+      "plantanalysis_p": 71.68,
+      "plantanalysis_k": 145.53
     },
     "ttl": 43200,
-    "time": "2026-02-20T10:20:19.952825"
+    "time": "2026-02-23T12:01:21.310193"
   },
-  "pest_detection_162_1_2026-02-20_7": {
-    "key": "pest_detection_162_1_2026-02-20_7",
+  "pest_detection_162_1_2026-02-23_7": {
+    "key": "pest_detection_162_1_2026-02-23_7",
     "value": {
       "type": "FeatureCollection",
       "features": [
@@ -352,26 +352,31 @@
           },
           "properties": {
             "plot_name": "162_1",
-            "start_date": "2026-02-05",
-            "end_date": "2026-02-20",
+            "start_date": "2026-02-08",
+            "end_date": "2026-02-23",
             "image_count": 4,
             "image_dates": [
-              "2026-02-06",
               "2026-02-09",
               "2026-02-14",
-              "2026-02-18"
+              "2026-02-18",
+              "2026-02-21"
             ],
-            "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/16074b5bf9f4e6ff43d2b1a4886cb1ab-7fcaf0b245e321673c321c25af46be7a/tiles/{z}/{x}/{y}",
-            "last_updated": "2026-02-20T04:53:32.765680"
+            "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/35c9dc1bdf023f8a8f343e87c87a8668-32d026cb703114505ee6676dd9ccc112/tiles/{z}/{x}/{y}",
+            "last_updated": "2026-02-23T06:34:47.587636"
           }
         }
       ],
       "pixel_summary": {
         "total_pixel_count": 11,
-        "healthy_pixel_count": 11,
-        "chewing_affected_pixel_count": 0,
-        "chewing_affected_pixel_percentage": 0.0,
-        "chewing_affected_pixel_coordinates": [],
+        "healthy_pixel_count": 10,
+        "chewing_affected_pixel_count": 1,
+        "chewing_affected_pixel_percentage": 9.090909090909092,
+        "chewing_affected_pixel_coordinates": [
+          [
+            77.58753600516728,
+            29.205891770001266
+          ]
+        ],
         "fungi_affected_pixel_count": 0,
         "fungi_affected_pixel_percentage": 0.0,
         "fungi_affected_pixel_coordinates": [],
@@ -386,122 +391,122 @@
         "SoilBorn_affected_pixel_coordinates": [],
         "baseline_start_date": "2025-06-01",
         "baseline_end_date": "2025-10-30",
-        "analysis_start_date": "2026-02-05",
-        "analysis_end_date": "2026-02-20"
+        "analysis_start_date": "2026-02-08",
+        "analysis_end_date": "2026-02-23"
       }
     },
     "ttl": 43200,
-    "time": "2026-02-20T10:20:38.078095"
+    "time": "2026-02-23T12:01:50.227499"
   },
-  "et_162_1_2026-02-13_2026-02-20": {
-    "key": "et_162_1_2026-02-13_2026-02-20",
+  "et_162_1_2026-02-16_2026-02-23": {
+    "key": "et_162_1_2026-02-16_2026-02-23",
     "value": {
       "plot_name": "162_1",
-      "start_date": "2026-02-20",
-      "end_date": "2026-02-20",
+      "start_date": "2026-02-23",
+      "end_date": "2026-02-23",
       "area_hectares": 0.1,
-      "ET_mean_mm_per_day": 3.6,
+      "ET_mean_mm_per_day": 3.54,
       "hourly_records_et": [
         {
-          "time": "2026-02-20T00:00",
+          "time": "2026-02-23T00:00",
           "et0_fao_evapotranspiration": 0.0
         },
         {
-          "time": "2026-02-20T01:00",
+          "time": "2026-02-23T01:00",
           "et0_fao_evapotranspiration": 0.0
         },
         {
-          "time": "2026-02-20T02:00",
+          "time": "2026-02-23T02:00",
           "et0_fao_evapotranspiration": 0.01
         },
         {
-          "time": "2026-02-20T03:00",
-          "et0_fao_evapotranspiration": 0.07
+          "time": "2026-02-23T03:00",
+          "et0_fao_evapotranspiration": 0.06
         },
         {
-          "time": "2026-02-20T04:00",
-          "et0_fao_evapotranspiration": 0.21
+          "time": "2026-02-23T04:00",
+          "et0_fao_evapotranspiration": 0.19
         },
         {
-          "time": "2026-02-20T05:00",
-          "et0_fao_evapotranspiration": 0.35
+          "time": "2026-02-23T05:00",
+          "et0_fao_evapotranspiration": 0.36
         },
         {
-          "time": "2026-02-20T06:00",
-          "et0_fao_evapotranspiration": 0.46
+          "time": "2026-02-23T06:00",
+          "et0_fao_evapotranspiration": 0.48
         },
         {
-          "time": "2026-02-20T07:00",
-          "et0_fao_evapotranspiration": 0.53
+          "time": "2026-02-23T07:00",
+          "et0_fao_evapotranspiration": 0.54
         },
         {
-          "time": "2026-02-20T08:00",
+          "time": "2026-02-23T08:00",
           "et0_fao_evapotranspiration": 0.55
         },
         {
-          "time": "2026-02-20T09:00",
-          "et0_fao_evapotranspiration": 0.51
+          "time": "2026-02-23T09:00",
+          "et0_fao_evapotranspiration": 0.5
         },
         {
-          "time": "2026-02-20T10:00",
-          "et0_fao_evapotranspiration": 0.43
+          "time": "2026-02-23T10:00",
+          "et0_fao_evapotranspiration": 0.41
         },
         {
-          "time": "2026-02-20T11:00",
-          "et0_fao_evapotranspiration": 0.3
+          "time": "2026-02-23T11:00",
+          "et0_fao_evapotranspiration": 0.28
         },
         {
-          "time": "2026-02-20T12:00",
-          "et0_fao_evapotranspiration": 0.14
+          "time": "2026-02-23T12:00",
+          "et0_fao_evapotranspiration": 0.13
         },
         {
-          "time": "2026-02-20T13:00",
-          "et0_fao_evapotranspiration": 0.04
+          "time": "2026-02-23T13:00",
+          "et0_fao_evapotranspiration": 0.03
         },
         {
-          "time": "2026-02-20T14:00",
+          "time": "2026-02-23T14:00",
+          "et0_fao_evapotranspiration": 0.01
+        },
+        {
+          "time": "2026-02-23T15:00",
           "et0_fao_evapotranspiration": 0.0
         },
         {
-          "time": "2026-02-20T15:00",
+          "time": "2026-02-23T16:00",
           "et0_fao_evapotranspiration": 0.0
         },
         {
-          "time": "2026-02-20T16:00",
+          "time": "2026-02-23T17:00",
           "et0_fao_evapotranspiration": 0.0
         },
         {
-          "time": "2026-02-20T17:00",
+          "time": "2026-02-23T18:00",
           "et0_fao_evapotranspiration": 0.0
         },
         {
-          "time": "2026-02-20T18:00",
+          "time": "2026-02-23T19:00",
           "et0_fao_evapotranspiration": 0.0
         },
         {
-          "time": "2026-02-20T19:00",
+          "time": "2026-02-23T20:00",
           "et0_fao_evapotranspiration": 0.0
         },
         {
-          "time": "2026-02-20T20:00",
+          "time": "2026-02-23T21:00",
           "et0_fao_evapotranspiration": 0.0
         },
         {
-          "time": "2026-02-20T21:00",
+          "time": "2026-02-23T22:00",
           "et0_fao_evapotranspiration": 0.0
         },
         {
-          "time": "2026-02-20T22:00",
-          "et0_fao_evapotranspiration": 0.0
-        },
-        {
-          "time": "2026-02-20T23:00",
+          "time": "2026-02-23T23:00",
           "et0_fao_evapotranspiration": 0.0
         }
       ]
     },
     "ttl": 43200,
-    "time": "2026-02-20T10:20:40.431504"
+    "time": "2026-02-23T12:01:51.670873"
   },
   "current_weather_162_1": {
     "key": "current_weather_162_1",
@@ -509,93 +514,93 @@
       "location": "Sardhana",
       "region": "Uttar Pradesh",
       "country": "India",
-      "localtime": "2026-02-20 10:06",
+      "localtime": "2026-02-23 14:06",
       "latitude": 29.15,
       "longitude": 77.617,
-      "temperature_c": 24.9,
-      "humidity": 33,
-      "wind_kph": 7.9,
+      "temperature_c": 30.9,
+      "humidity": 13,
+      "wind_kph": 10.4,
       "precip_mm": 0.0
     },
     "ttl": 7200,
-    "time": "2026-02-20T10:20:57.012031"
+    "time": "2026-02-23T14:03:33.559477"
   },
   "weather_forecast_162_1": {
     "key": "weather_forecast_162_1",
     "value": {
-      "source": "cache",
+      "source": "api",
       "data": [
         {
-          "date": "2026-02-20",
-          "temperature_max": "26.7 \u00b0C",
+          "date": "2026-02-23",
+          "temperature_max": "27.1 \u00b0C",
           "temperature_min": "11.8 \u00b0C",
           "precipitation": "0.0 mm",
-          "wind_speed_max": "8.7 km/h",
-          "humidity_max": "96 %"
-        },
-        {
-          "date": "2026-02-21",
-          "temperature_max": "26.0 \u00b0C",
-          "temperature_min": "12.6 \u00b0C",
-          "precipitation": "0.0 mm",
-          "wind_speed_max": "11.9 km/h",
-          "humidity_max": "95 %"
-        },
-        {
-          "date": "2026-02-22",
-          "temperature_max": "26.6 \u00b0C",
-          "temperature_min": "12.2 \u00b0C",
-          "precipitation": "0.0 mm",
-          "wind_speed_max": "8.6 km/h",
-          "humidity_max": "91 %"
-        },
-        {
-          "date": "2026-02-23",
-          "temperature_max": "27.2 \u00b0C",
-          "temperature_min": "13.2 \u00b0C",
-          "precipitation": "0.0 mm",
-          "wind_speed_max": "8.0 km/h",
-          "humidity_max": "91 %"
+          "wind_speed_max": "4.2 km/h",
+          "humidity_max": "100 %"
         },
         {
           "date": "2026-02-24",
-          "temperature_max": "27.3 \u00b0C",
-          "temperature_min": "13.0 \u00b0C",
+          "temperature_max": "27.6 \u00b0C",
+          "temperature_min": "13.2 \u00b0C",
           "precipitation": "0.0 mm",
-          "wind_speed_max": "4.8 km/h",
-          "humidity_max": "91 %"
+          "wind_speed_max": "9.0 km/h",
+          "humidity_max": "89 %"
         },
         {
           "date": "2026-02-25",
-          "temperature_max": "27.5 \u00b0C",
-          "temperature_min": "14.0 \u00b0C",
+          "temperature_max": "27.2 \u00b0C",
+          "temperature_min": "11.5 \u00b0C",
           "precipitation": "0.0 mm",
-          "wind_speed_max": "9.6 km/h",
-          "humidity_max": "87 %"
+          "wind_speed_max": "11.3 km/h",
+          "humidity_max": "88 %"
         },
         {
           "date": "2026-02-26",
-          "temperature_max": "28.2 \u00b0C",
-          "temperature_min": "13.0 \u00b0C",
+          "temperature_max": "28.4 \u00b0C",
+          "temperature_min": "12.8 \u00b0C",
           "precipitation": "0.0 mm",
-          "wind_speed_max": "15.5 km/h",
-          "humidity_max": "84 %"
+          "wind_speed_max": "16.6 km/h",
+          "humidity_max": "89 %"
         },
         {
           "date": "2026-02-27",
-          "temperature_max": "30.3 \u00b0C",
-          "temperature_min": "13.0 \u00b0C",
+          "temperature_max": "29.5 \u00b0C",
+          "temperature_min": "12.4 \u00b0C",
           "precipitation": "0.0 mm",
-          "wind_speed_max": "15.0 km/h",
+          "wind_speed_max": "10.9 km/h",
+          "humidity_max": "86 %"
+        },
+        {
+          "date": "2026-02-28",
+          "temperature_max": "30.3 \u00b0C",
+          "temperature_min": "13.3 \u00b0C",
+          "precipitation": "0.0 mm",
+          "wind_speed_max": "9.6 km/h",
+          "humidity_max": "84 %"
+        },
+        {
+          "date": "2026-03-01",
+          "temperature_max": "30.0 \u00b0C",
+          "temperature_min": "13.9 \u00b0C",
+          "precipitation": "0.0 mm",
+          "wind_speed_max": "13.0 km/h",
+          "humidity_max": "85 %"
+        },
+        {
+          "date": "2026-03-02",
+          "temperature_max": "30.4 \u00b0C",
+          "temperature_min": "12.3 \u00b0C",
+          "precipitation": "0.0 mm",
+          "wind_speed_max": "18.4 km/h",
           "humidity_max": "76 %"
         }
       ]
     },
     "ttl": 7200,
-    "time": "2026-02-20T10:20:57.878789"
+    "time": "2026-02-23T14:03:34.482178"
   },
-  "growth_map_162_1_2026-02-20": {
-    "key": "growth_map_162_1_2026-02-20",
+  "growth_map_162_1_2026-02-23": {
+    "key": "growth_map_162_1_2026-02-23",
     "value": {
       "type": "FeatureCollection",
       "features": [
@@ -631,87 +636,81 @@
           "properties": {
             "plot_name": "162_1",
             "area_acres": 0.24,
-            "start_date": "2026-02-05",
-            "end_date": "2026-02-20",
+            "start_date": "2026-02-08",
+            "end_date": "2026-02-23",
             "image_count": 1,
-            "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/fb35482aeeb48011bdafcb15fb48f0fb-aeb5262f4e31ec7aa5d9a9c82e38a01d/tiles/{z}/{x}/{y}",
-            "data_source": "Sentinel-1 VH",
-            "latest_image_date": "2026-02-18",
-            "last_updated": "2026-02-20T04:54:03.496363"
+            "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/1b0feeb79fbeb125d97e2ecb51a28cac-058d8b1dc1d16320d07ebfffeb09f543/tiles/{z}/{x}/{y}",
+            "data_source": "Sentinel-2 NDVI",
+            "latest_image_date": "2026-02-22",
+            "last_updated": "2026-02-23T06:35:17.113373"
           }
         }
       ],
       "pixel_summary": {
         "total_pixel_count": 11,
-        "healthy_pixel_count": 5,
-        "healthy_pixel_percentage": 45.45454545454545,
-        "healthy_pixel_coordinates": [
+        "healthy_pixel_count": 0,
+        "healthy_pixel_percentage": 0.0,
+        "healthy_pixel_coordinates": [],
+        "moderate_pixel_count": 0,
+        "moderate_pixel_percentage": 0.0,
+        "moderate_pixel_coordinates": [],
+        "weak_pixel_count": 11,
+        "weak_pixel_percentage": 100.0,
+        "weak_pixel_coordinates": [
           [
-            77.58771755518464,
-            29.205707875935826
+            77.58748463469432,
+            29.205847239377935
           ],
           [
-            77.58772208788996,
-            29.205888204974762
+            77.58758513711683,
+            29.205755086591758
           ],
           [
-            77.58771982153213,
-            29.205798040455985
+            77.5876879056752,
+            29.205753098263074
           ],
           [
-            77.5876147866738,
-            29.205709864284483
+            77.58758966959911,
+            29.20593541564833
           ],
           [
-            77.58761705293153,
-            29.20580002881195
+            77.587692438337,
+            29.205933427305023
+          ],
+          [
+            77.5875874033528,
+            29.20584525112073
+          ],
+          [
+            77.58738186602551,
+            29.20584922755635
+          ],
+          [
+            77.58769017200092,
+            29.20584326278474
+          ],
+          [
+            77.58779294063869,
+            29.205841274369952
+          ],
+          [
+            77.58748690085089,
+            29.20593740391284
           ]
         ],
-        "moderate_pixel_count": 4,
-        "moderate_pixel_percentage": 36.36363636363637,
-        "moderate_pixel_coordinates": [
-          [
-            77.58751881668755,
-            29.205982346154553
-          ],
-          [
-            77.5876193191996,
-            29.205890193338043
-          ],
-          [
-            77.58762158547802,
-            29.205980357862753
-          ],
-          [
-            77.58751428432059,
-            29.205802017089127
-          ]
-        ],
-        "weak_pixel_count": 0,
-        "weak_pixel_percentage": 0.0,
-        "weak_pixel_coordinates": [],
-        "stress_pixel_count": 2,
-        "stress_pixel_percentage": 18.181818181818183,
-        "stress_pixel_coordinates": [
-          [
-            77.58741378178784,
-            29.205894169828223
-          ],
-          [
-            77.5875165504989,
-            29.205892181622527
-          ]
-        ],
-        "analysis_start_date": "2026-02-05",
-        "analysis_end_date": "2026-02-20",
-        "latest_image_date": "2026-02-18"
+        "stress_pixel_count": 0,
+        "stress_pixel_percentage": 0.0,
+        "stress_pixel_coordinates": [],
+        "analysis_start_date": "2026-02-08",
+        "analysis_end_date": "2026-02-23",
+        "latest_image_date": "2026-02-22"
       }
     },
     "ttl": 43200,
-    "time": "2026-02-20T10:21:10.232430"
+    "time": "2026-02-23T12:02:21.160090"
   },
-  "soil_moisture_map_162_1_2026-02-20": {
-    "key": "soil_moisture_map_162_1_2026-02-20",
+  "soil_moisture_map_162_1_2026-02-23": {
+    "key": "soil_moisture_map_162_1_2026-02-23",
     "value": {
       "type": "FeatureCollection",
       "features": [
@@ -746,55 +745,55 @@
           },
           "properties": {
             "plot_name": "162_1",
-            "start_date": "2026-02-05",
-            "end_date": "2026-02-20",
+            "start_date": "2026-02-08",
+            "end_date": "2026-02-23",
             "sensor_used": "Sentinel-2",
-            "latest_image_date": "2026-02-17",
+            "latest_image_date": "2026-02-22",
             "image_count": 3,
-            "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/4016c5bc084c86e11b62e9f04b623dd6-fc67cd51e407dd397ffa5445de454e30/tiles/{z}/{x}/{y}",
-            "last_updated": "2026-02-20T04:54:21.629710"
+            "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/f4b47735bd95d3fd55c74811ea0115ab-433007bb53621ea2b831b91003d3274d/tiles/{z}/{x}/{y}",
+            "last_updated": "2026-02-23T06:35:37.066224"
           }
         }
       ],
       "pixel_summary": {
         "total_pixel_count": 11,
-        "start_date": "2026-02-05",
-        "end_date": "2026-02-20",
-        "latest_image_date": "2026-02-17",
+        "start_date": "2026-02-08",
+        "end_date": "2026-02-23",
+        "latest_image_date": "2026-02-22",
         "sensor_used": "Sentinel-2",
         "s1_available": true,
         "s2_available": true,
-        "s1_latest_date": "2026-02-14",
-        "s2_latest_date": "2026-02-17",
+        "s1_latest_date": "2026-02-21",
+        "s2_latest_date": "2026-02-22",
         "less_pixel_count": 0,
         "less_pixel_percentage": 0.0,
         "less_pixel_coordinates": [],
-        "adequate_pixel_count": 4,
-        "adequate_pixel_percentage": 36.36,
+        "adequate_pixel_count": 3,
+        "adequate_pixel_percentage": 27.27,
         "adequate_pixel_coordinates": [
-          [
-            77.58753600516728,
-            29.205801938472852
-          ],
           [
             77.58753600516728,
             29.205891770001266
           ],
           [
-            77.5876258366957,
-            29.205801938472852
+            77.5877156682241,
+            29.205891770001266
           ],
           [
             77.5876258366957,
             29.205891770001266
           ]
         ],
-        "excellent_pixel_count": 7,
-        "excellent_pixel_percentage": 63.64,
+        "excellent_pixel_count": 8,
+        "excellent_pixel_percentage": 72.73,
         "excellent_pixel_coordinates": [
           [
-            77.5877156682241,
-            29.205891770001266
+            77.5876258366957,
+            29.205801938472852
+          ],
+          [
+            77.58753600516728,
+            29.205801938472852
           ],
           [
             77.58753600516728,
@@ -805,12 +804,12 @@
             29.205801938472852
           ],
           [
-            77.58744617363887,
-            29.205891770001266
-          ],
-          [
             77.5877156682241,
             29.20571210694444
+          ],
+          [
+            77.58744617363887,
+            29.205891770001266
           ],
           [
             77.5877156682241,
@@ -830,10 +829,10 @@
       }
     },
     "ttl": 43200,
-    "time": "2026-02-20T10:21:27.004431"
+    "time": "2026-02-23T12:02:39.694323"
   },
-  "water_uptake_map_162_1_2026-02-20": {
-    "key": "water_uptake_map_162_1_2026-02-20",
+  "water_uptake_map_162_1_2026-02-23": {
+    "key": "water_uptake_map_162_1_2026-02-23",
     "value": {
       "type": "FeatureCollection",
       "features": [
@@ -868,32 +867,34 @@
           },
           "properties": {
             "plot_name": "162_1",
-            "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/f673598eee1803e145ab8816ddd0f1b8-a501ee1b2236c628006db40967362ab8/tiles/{z}/{x}/{y}",
-            "sensor": "s1",
-            "image_count_in_range": 4,
+            "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/2966cc7fa4801706d84c38f6ebfccbd2-0c929211960ae96955513e0a090297bb/tiles/{z}/{x}/{y}",
+            "sensor": "s2",
+            "image_count_in_range": 3,
             "analysis_dates": {
-              "start_date": "2026-02-05",
-              "end_date": "2026-02-20",
-              "latest_image_date": "2026-02-18",
-              "previous_image_date": "2026-02-14"
+              "start_date": "2026-02-08",
+              "end_date": "2026-02-23",
+              "latest_image_date": "2026-02-22",
+              "previous_image_date": null
             },
-            "last_updated": "2026-02-20T04:54:32.022998"
+            "last_updated": "2026-02-23T06:35:46.386412"
           }
         }
       ],
       "pixel_summary": {
         "total_pixel_count": 11,
-        "deficient_pixel_count": 1,
-        "deficient_pixel_percentage": 9.090909090909092,
-        "deficient_pixel_coordinates": [
+        "deficient_pixel_count": 0,
+        "deficient_pixel_percentage": 0.0,
+        "deficient_pixel_coordinates": [],
+        "less_pixel_count": 0,
+        "less_pixel_percentage": 0.0,
+        "less_pixel_coordinates": [],
+        "adequat_pixel_count": 11,
+        "adequat_pixel_percentage": 100.0,
+        "adequat_pixel_coordinates": [
           [
             77.5877156682241,
             29.205891770001266
-          ]
-        ],
-        "less_pixel_count": 6,
-        "less_pixel_percentage": 54.54545454545454,
-        "less_pixel_coordinates": [
+          ],
           [
             77.5876258366957,
             29.205801938472852
@@ -901,13 +902,29 @@
           [
             77.5876258366957,
             29.205891770001266
+          ],
+          [
+            77.58753600516728,
+            29.205801938472852
           ],
           [
             77.58753600516728,
             29.205981601529675
           ],
           [
+            77.58744617363887,
+            29.205801938472852
+          ],
+          [
             77.58753600516728,
+            29.205891770001266
+          ],
+          [
+            77.5877156682241,
+            29.20571210694444
+          ],
+          [
+            77.58744617363887,
             29.205891770001266
           ],
           [
@@ -916,26 +933,6 @@
           ],
           [
             77.5876258366957,
-            29.20571210694444
-          ]
-        ],
-        "adequat_pixel_count": 4,
-        "adequat_pixel_percentage": 36.36363636363637,
-        "adequat_pixel_coordinates": [
-          [
-            77.58753600516728,
-            29.205801938472852
-          ],
-          [
-            77.58744617363887,
-            29.205801938472852
-          ],
-          [
-            77.58744617363887,
-            29.205891770001266
-          ],
-          [
-            77.5877156682241,
             29.20571210694444
           ]
         ],
@@ -945,15 +942,15 @@
         "excess_pixel_count": 0,
         "excess_pixel_percentage": 0.0,
         "excess_pixel_coordinates": [],
-        "analysis_start_date": "2026-02-05",
-        "analysis_end_date": "2026-02-20"
+        "analysis_start_date": "2026-02-08",
+        "analysis_end_date": "2026-02-23"
       }
     },
     "ttl": 43200,
-    "time": "2026-02-20T10:21:37.367969"
+    "time": "2026-02-23T12:02:48.947985"
   },
-  "pest_map_162_1_2026-02-20": {
-    "key": "pest_map_162_1_2026-02-20",
+  "pest_map_162_1_2026-02-23": {
+    "key": "pest_map_162_1_2026-02-23",
     "value": {
       "type": "FeatureCollection",
       "features": [
@@ -988,26 +985,31 @@
           },
           "properties": {
             "plot_name": "162_1",
-            "start_date": "2026-02-05",
-            "end_date": "2026-02-20",
+            "start_date": "2026-02-08",
+            "end_date": "2026-02-23",
             "image_count": 4,
             "image_dates": [
-              "2026-02-06",
               "2026-02-09",
               "2026-02-14",
-              "2026-02-18"
+              "2026-02-18",
+              "2026-02-21"
             ],
-            "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/16074b5bf9f4e6ff43d2b1a4886cb1ab-6fa3f2b9903ca16b7a304e9ca2640cf1/tiles/{z}/{x}/{y}",
-            "last_updated": "2026-02-20T04:54:42.687344"
+            "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/35c9dc1bdf023f8a8f343e87c87a8668-6db0f724942986cdb1e233f4c353799e/tiles/{z}/{x}/{y}",
+            "last_updated": "2026-02-23T06:35:52.844390"
           }
         }
       ],
       "pixel_summary": {
         "total_pixel_count": 11,
-        "healthy_pixel_count": 11,
-        "chewing_affected_pixel_count": 0,
-        "chewing_affected_pixel_percentage": 0.0,
-        "chewing_affected_pixel_coordinates": [],
+        "healthy_pixel_count": 10,
+        "chewing_affected_pixel_count": 1,
+        "chewing_affected_pixel_percentage": 9.090909090909092,
+        "chewing_affected_pixel_coordinates": [
+          [
+            77.58753600516728,
+            29.205891770001266
+          ]
+        ],
         "fungi_affected_pixel_count": 0,
         "fungi_affected_pixel_percentage": 0.0,
         "fungi_affected_pixel_coordinates": [],
@@ -1022,15 +1024,15 @@
         "SoilBorn_affected_pixel_coordinates": [],
         "baseline_start_date": "2025-06-01",
         "baseline_end_date": "2025-10-30",
-        "analysis_start_date": "2026-02-05",
-        "analysis_end_date": "2026-02-20"
+        "analysis_start_date": "2026-02-08",
+        "analysis_end_date": "2026-02-23"
       }
     },
     "ttl": 43200,
-    "time": "2026-02-20T10:21:47.965660"
+    "time": "2026-02-23T12:02:55.449368"
   },
-  "agro_stats_162_1_2026-02-20": {
-    "key": "agro_stats_162_1_2026-02-20",
+  "agro_stats_162_1_2026-02-23": {
+    "key": "agro_stats_162_1_2026-02-23",
     "value": {
       "geometry": {
         "type": "Polygon",
@@ -1066,44 +1068,44 @@
       },
       "brix_sugar": {
         "brix": {
-          "mean": 20.63,
-          "min": 19.48,
-          "max": 22.89,
-          "median": 20.2,
-          "stdDev": 1.15
+          "mean": 20.81,
+          "min": 19.44,
+          "max": 23.2,
+          "median": 21.01,
+          "stdDev": 1.2
         },
         "recovery": {
-          "mean": 9.08,
-          "min": 8.57,
-          "max": 10.07,
-          "median": 8.89,
-          "stdDev": 0.51
+          "mean": 9.16,
+          "min": 8.55,
+          "max": 10.21,
+          "median": 9.25,
+          "stdDev": 0.53
         },
         "sugar_yield": {
-          "mean": 50.06133333333333,
-          "min": 44.50666666666667,
-          "max": 61.48266666666667,
-          "median": 47.89066666666667,
-          "stdDev": 5.672
+          "mean": 50.967999999999996,
+          "min": 44.349333333333334,
+          "max": 63.135999999999996,
+          "median": 51.81333333333334,
+          "stdDev": 5.949333333333333
         }
       },
       "biomass": {
-        "mean": 63.58,
-        "min": 56.52,
-        "max": 78.08,
-        "total": 63.58
+        "mean": 64.73,
+        "min": 56.32,
+        "max": 80.18,
+        "total": 64.73
       },
       "Sugarcane_Status": "Growing",
       "area_acres": 0.24,
       "distance_km": null,
-      "days_to_harvest": 4,
+      "days_to_harvest": 1,
       "current_growth_stage": "Maturity",
       "plantation_date": "2025-02-24",
       "plantation_type": "suru",
       "eligibility_status": "Eligible"
     },
     "ttl": 3600,
-    "time": "2026-02-20T10:21:49.756777"
+    "time": "2026-02-23T12:02:57.976615"
   },
   "harvest_status_162_1": {
     "key": "harvest_status_162_1",
@@ -1143,12 +1145,12 @@
             "plot_name": "162_1",
             "plantation_date": "2025-02-24",
             "plantation_type": "Suru",
-            "end_date": "2026-02-20",
+            "end_date": "2026-02-23",
             "harvest_date": null,
             "has_harvest": null,
             "harvest_status": "Ready to harvest",
             "image_count": 0,
-            "last_updated": "2026-02-20T04:54:45.247660",
+            "last_updated": "2026-02-23T06:35:56.556765",
             "source": "harvest_overrides"
           }
         }
@@ -1156,7 +1158,7 @@
       "harvest_summary": {
         "plantation_date": "2025-02-24",
         "plantation_type": "Suru",
-        "end_date": "2026-02-20",
+        "end_date": "2026-02-23",
         "harvest_date": null,
         "has_harvest": null,
         "harvest_status": "Ready to harvest",
@@ -1168,7 +1170,18 @@
       "timeseries": []
     },
     "ttl": 3600,
-    "time": "2026-02-20T10:21:50.473497"
+    "time": "2026-02-23T12:02:59.239969"
+  },
+  "stress_162_1": {
+    "key": "stress_162_1",
+    "value": {
+      "total_events": 0,
+      "threshold_used": 0.15,
+      "index_type": "NDRE",
+      "events": []
+    },
+    "ttl": 3600,
+    "time": "2026-02-23T12:03:00.903182"
   },
   "plot:162_1": {
     "key": "plot:162_1",
@@ -1205,7 +1218,7 @@
             },
             "properties": {
               "plot_name": "162_1",
-              "date": "2026-02-20",
+              "date": "2026-02-23",
               "statistics": {
                 "bulk_density": 1.38,
                 "soil_organic_carbon": 1.47,
@@ -1213,19 +1226,19 @@
                 "cation_exchange_capacity": 12.1,
                 "organic_carbon_stock": 14.5749,
                 "phh2o": 7.4,
-                "fe_index_primary": 6.3166,
-                "fe_index_difference": 6.4573,
-                "fe_index_normalized": -0.261,
-                "fe_ppm_estimated": 7.5532,
-                "vv_backscatter_db": -8.9706,
-                "vh_backscatter_db": -15.4279,
-                "fe_image_date": "2026-02-14",
+                "fe_index_primary": 5.2392,
+                "fe_index_difference": 6.4199,
+                "fe_index_normalized": -0.2328,
+                "fe_ppm_estimated": 6.6914,
+                "vv_backscatter_db": -10.7295,
+                "vh_backscatter_db": -17.1494,
+                "fe_image_date": "2026-02-21",
                 "fe_polarizations": [
                   "VV",
                   "VH"
                 ],
                 "fe_orbit_pass": "DESCENDING",
-                "fe_search_period": "2026-01-21 to 2026-02-20",
+                "fe_search_period": "2026-01-24 to 2026-02-23",
                 "fe_images_found": 4,
                 "fe_sensor_type": "Sentinel-1 SAR",
                 "potassium": 146.9384,
@@ -1237,21 +1250,21 @@
         ],
         "_from_cache": false,
         "_api_called": true,
-        "_cache_key": "soil_analysis_162_1_2026-02-20"
+        "_cache_key": "soil_analysis_162_1_2026-02-23"
       },
       "npk_requirements": {
         "plot_name": "162_1",
-        "days_since_plantation": 361,
+        "days_since_plantation": 364,
         "soil_analysis_value": 430.0,
-        "max_yield": 75.97,
-        "required_n_per_acre": 208.94974099554838,
+        "max_yield": 77.35,
+        "required_n_per_acre": 217.20550789154186,
         "gndvi": 246.89,
-        "soilN": 221.05,
-        "soilP": 72.95,
-        "soilK": 148.1,
-        "plantanalysis_n": 208.95,
-        "plantanalysis_p": 68.95,
-        "plantanalysis_k": 140.0
+        "soilN": 212.79,
+        "soilP": 70.22,
+        "soilK": 142.57,
+        "plantanalysis_n": 217.21,
+        "plantanalysis_p": 71.68,
+        "plantanalysis_k": 145.53
       },
       "pest_detection": {
         "type": "FeatureCollection",
@@ -1287,26 +1300,31 @@
             },
             "properties": {
               "plot_name": "162_1",
-              "start_date": "2026-02-05",
-              "end_date": "2026-02-20",
+              "start_date": "2026-02-08",
+              "end_date": "2026-02-23",
               "image_count": 4,
               "image_dates": [
-                "2026-02-06",
                 "2026-02-09",
                 "2026-02-14",
-                "2026-02-18"
+                "2026-02-18",
+                "2026-02-21"
               ],
-              "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/16074b5bf9f4e6ff43d2b1a4886cb1ab-7fcaf0b245e321673c321c25af46be7a/tiles/{z}/{x}/{y}",
-              "last_updated": "2026-02-20T04:53:32.765680"
+              "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/35c9dc1bdf023f8a8f343e87c87a8668-32d026cb703114505ee6676dd9ccc112/tiles/{z}/{x}/{y}",
+              "last_updated": "2026-02-23T06:34:47.587636"
             }
           }
         ],
         "pixel_summary": {
           "total_pixel_count": 11,
-          "healthy_pixel_count": 11,
-          "chewing_affected_pixel_count": 0,
-          "chewing_affected_pixel_percentage": 0.0,
-          "chewing_affected_pixel_coordinates": [],
+          "healthy_pixel_count": 10,
+          "chewing_affected_pixel_count": 1,
+          "chewing_affected_pixel_percentage": 9.090909090909092,
+          "chewing_affected_pixel_coordinates": [
+            [
+              77.58753600516728,
+              29.205891770001266
+            ]
+          ],
           "fungi_affected_pixel_count": 0,
           "fungi_affected_pixel_percentage": 0.0,
           "fungi_affected_pixel_coordinates": [],
@@ -1321,111 +1339,111 @@
           "SoilBorn_affected_pixel_coordinates": [],
           "baseline_start_date": "2025-06-01",
           "baseline_end_date": "2025-10-30",
-          "analysis_start_date": "2026-02-05",
-          "analysis_end_date": "2026-02-20"
+          "analysis_start_date": "2026-02-08",
+          "analysis_end_date": "2026-02-23"
         }
       },
       "et": {
         "plot_name": "162_1",
-        "start_date": "2026-02-20",
-        "end_date": "2026-02-20",
+        "start_date": "2026-02-23",
+        "end_date": "2026-02-23",
         "area_hectares": 0.1,
-        "ET_mean_mm_per_day": 3.6,
+        "ET_mean_mm_per_day": 3.54,
         "hourly_records_et": [
           {
-            "time": "2026-02-20T00:00",
+            "time": "2026-02-23T00:00",
             "et0_fao_evapotranspiration": 0.0
           },
           {
-            "time": "2026-02-20T01:00",
+            "time": "2026-02-23T01:00",
             "et0_fao_evapotranspiration": 0.0
           },
           {
-            "time": "2026-02-20T02:00",
+            "time": "2026-02-23T02:00",
             "et0_fao_evapotranspiration": 0.01
           },
           {
-            "time": "2026-02-20T03:00",
-            "et0_fao_evapotranspiration": 0.07
+            "time": "2026-02-23T03:00",
+            "et0_fao_evapotranspiration": 0.06
           },
           {
-            "time": "2026-02-20T04:00",
-            "et0_fao_evapotranspiration": 0.21
+            "time": "2026-02-23T04:00",
+            "et0_fao_evapotranspiration": 0.19
           },
           {
-            "time": "2026-02-20T05:00",
-            "et0_fao_evapotranspiration": 0.35
+            "time": "2026-02-23T05:00",
+            "et0_fao_evapotranspiration": 0.36
           },
           {
-            "time": "2026-02-20T06:00",
-            "et0_fao_evapotranspiration": 0.46
+            "time": "2026-02-23T06:00",
+            "et0_fao_evapotranspiration": 0.48
           },
           {
-            "time": "2026-02-20T07:00",
-            "et0_fao_evapotranspiration": 0.53
+            "time": "2026-02-23T07:00",
+            "et0_fao_evapotranspiration": 0.54
           },
           {
-            "time": "2026-02-20T08:00",
+            "time": "2026-02-23T08:00",
             "et0_fao_evapotranspiration": 0.55
           },
           {
-            "time": "2026-02-20T09:00",
-            "et0_fao_evapotranspiration": 0.51
+            "time": "2026-02-23T09:00",
+            "et0_fao_evapotranspiration": 0.5
           },
           {
-            "time": "2026-02-20T10:00",
-            "et0_fao_evapotranspiration": 0.43
+            "time": "2026-02-23T10:00",
+            "et0_fao_evapotranspiration": 0.41
           },
           {
-            "time": "2026-02-20T11:00",
-            "et0_fao_evapotranspiration": 0.3
+            "time": "2026-02-23T11:00",
+            "et0_fao_evapotranspiration": 0.28
           },
           {
-            "time": "2026-02-20T12:00",
-            "et0_fao_evapotranspiration": 0.14
+            "time": "2026-02-23T12:00",
+            "et0_fao_evapotranspiration": 0.13
           },
           {
-            "time": "2026-02-20T13:00",
-            "et0_fao_evapotranspiration": 0.04
+            "time": "2026-02-23T13:00",
+            "et0_fao_evapotranspiration": 0.03
           },
           {
-            "time": "2026-02-20T14:00",
+            "time": "2026-02-23T14:00",
+            "et0_fao_evapotranspiration": 0.01
+          },
+          {
+            "time": "2026-02-23T15:00",
             "et0_fao_evapotranspiration": 0.0
           },
           {
-            "time": "2026-02-20T15:00",
+            "time": "2026-02-23T16:00",
             "et0_fao_evapotranspiration": 0.0
           },
           {
-            "time": "2026-02-20T16:00",
+            "time": "2026-02-23T17:00",
             "et0_fao_evapotranspiration": 0.0
           },
           {
-            "time": "2026-02-20T17:00",
+            "time": "2026-02-23T18:00",
             "et0_fao_evapotranspiration": 0.0
           },
           {
-            "time": "2026-02-20T18:00",
+            "time": "2026-02-23T19:00",
             "et0_fao_evapotranspiration": 0.0
           },
           {
-            "time": "2026-02-20T19:00",
+            "time": "2026-02-23T20:00",
             "et0_fao_evapotranspiration": 0.0
           },
           {
-            "time": "2026-02-20T20:00",
+            "time": "2026-02-23T21:00",
             "et0_fao_evapotranspiration": 0.0
           },
           {
-            "time": "2026-02-20T21:00",
+            "time": "2026-02-23T22:00",
             "et0_fao_evapotranspiration": 0.0
           },
           {
-            "time": "2026-02-20T22:00",
-            "et0_fao_evapotranspiration": 0.0
-          },
-          {
-            "time": "2026-02-20T23:00",
+            "time": "2026-02-23T23:00",
             "et0_fao_evapotranspiration": 0.0
           }
         ]
@@ -1436,53 +1454,53 @@
         "longitude": 77.587376,
         "soil_moisture_stack": [
           {
-            "day": "2026-02-13",
-            "soil_moisture": 79.52,
-            "rainfall_mm_yesterday": 0.0,
-            "rainfall_provisional": false,
-            "et_mean_mm_yesterday": 2.86
-          },
-          {
-            "day": "2026-02-14",
-            "soil_moisture": 79.07,
-            "rainfall_mm_yesterday": 0.0,
-            "rainfall_provisional": false,
-            "et_mean_mm_yesterday": 2.71
-          },
-          {
-            "day": "2026-02-15",
-            "soil_moisture": 78.62,
-            "rainfall_mm_yesterday": 0.0,
-            "rainfall_provisional": false,
-            "et_mean_mm_yesterday": 2.71
-          },
-          {
             "day": "2026-02-16",
-            "soil_moisture": 78.19,
+            "soil_moisture": 79.57,
             "rainfall_mm_yesterday": 0.0,
             "rainfall_provisional": false,
             "et_mean_mm_yesterday": 2.57
           },
           {
             "day": "2026-02-17",
-            "soil_moisture": 77.76,
+            "soil_moisture": 79.14,
             "rainfall_mm_yesterday": 0.0,
             "rainfall_provisional": false,
             "et_mean_mm_yesterday": 2.57
           },
           {
             "day": "2026-02-18",
-            "soil_moisture": 77.33,
+            "soil_moisture": 78.72,
             "rainfall_mm_yesterday": 0.0,
             "rainfall_provisional": false,
             "et_mean_mm_yesterday": 2.57
           },
           {
             "day": "2026-02-19",
-            "soil_moisture": 77.21,
+            "soil_moisture": 78.59,
             "rainfall_mm_yesterday": 1.8,
             "rainfall_provisional": false,
             "et_mean_mm_yesterday": 2.56
+          },
+          {
+            "day": "2026-02-20",
+            "soil_moisture": 78.26,
+            "rainfall_mm_yesterday": 0.6,
+            "rainfall_provisional": false,
+            "et_mean_mm_yesterday": 2.56
+          },
+          {
+            "day": "2026-02-21",
+            "soil_moisture": 77.84,
+            "rainfall_mm_yesterday": 0.0,
+            "rainfall_provisional": false,
+            "et_mean_mm_yesterday": 2.55
+          },
+          {
+            "day": "2026-02-22",
+            "soil_moisture": 77.41,
+            "rainfall_mm_yesterday": 0.0,
+            "rainfall_provisional": false,
+            "et_mean_mm_yesterday": 2.55
           }
         ]
       },
@@ -1490,79 +1508,79 @@
         "location": "Sardhana",
         "region": "Uttar Pradesh",
         "country": "India",
-        "localtime": "2026-02-20 10:06",
+        "localtime": "2026-02-23 12:05",
         "latitude": 29.15,
         "longitude": 77.617,
-        "temperature_c": 24.9,
-        "humidity": 33,
-        "wind_kph": 7.9,
+        "temperature_c": 28.2,
+        "humidity": 21,
+        "wind_kph": 7.2,
         "precip_mm": 0.0
       },
       "weather_forecast": {
-        "source": "cache",
+        "source": "api",
         "data": [
           {
-            "date": "2026-02-20",
-            "temperature_max": "26.7 \u00b0C",
+            "date": "2026-02-23",
+            "temperature_max": "27.1 \u00b0C",
             "temperature_min": "11.8 \u00b0C",
             "precipitation": "0.0 mm",
-            "wind_speed_max": "8.7 km/h",
-            "humidity_max": "96 %"
-          },
-          {
-            "date": "2026-02-21",
-            "temperature_max": "26.0 \u00b0C",
-            "temperature_min": "12.6 \u00b0C",
-            "precipitation": "0.0 mm",
-            "wind_speed_max": "11.9 km/h",
-            "humidity_max": "95 %"
-          },
-          {
-            "date": "2026-02-22",
-            "temperature_max": "26.6 \u00b0C",
-            "temperature_min": "12.2 \u00b0C",
-            "precipitation": "0.0 mm",
-            "wind_speed_max": "8.6 km/h",
-            "humidity_max": "91 %"
-          },
-          {
-            "date": "2026-02-23",
-            "temperature_max": "27.2 \u00b0C",
-            "temperature_min": "13.2 \u00b0C",
-            "precipitation": "0.0 mm",
-            "wind_speed_max": "8.0 km/h",
-            "humidity_max": "91 %"
+            "wind_speed_max": "4.2 km/h",
+            "humidity_max": "100 %"
           },
           {
             "date": "2026-02-24",
-            "temperature_max": "27.3 \u00b0C",
-            "temperature_min": "13.0 \u00b0C",
+            "temperature_max": "27.6 \u00b0C",
+            "temperature_min": "13.2 \u00b0C",
             "precipitation": "0.0 mm",
-            "wind_speed_max": "4.8 km/h",
-            "humidity_max": "91 %"
+            "wind_speed_max": "9.0 km/h",
+            "humidity_max": "89 %"
           },
           {
             "date": "2026-02-25",
-            "temperature_max": "27.5 \u00b0C",
-            "temperature_min": "14.0 \u00b0C",
+            "temperature_max": "27.2 \u00b0C",
+            "temperature_min": "11.5 \u00b0C",
             "precipitation": "0.0 mm",
-            "wind_speed_max": "9.6 km/h",
-            "humidity_max": "87 %"
+            "wind_speed_max": "11.3 km/h",
+            "humidity_max": "88 %"
           },
           {
             "date": "2026-02-26",
-            "temperature_max": "28.2 \u00b0C",
-            "temperature_min": "13.0 \u00b0C",
+            "temperature_max": "28.4 \u00b0C",
+            "temperature_min": "12.8 \u00b0C",
             "precipitation": "0.0 mm",
-            "wind_speed_max": "15.5 km/h",
-            "humidity_max": "84 %"
+            "wind_speed_max": "16.6 km/h",
+            "humidity_max": "89 %"
           },
           {
             "date": "2026-02-27",
-            "temperature_max": "30.3 \u00b0C",
-            "temperature_min": "13.0 \u00b0C",
+            "temperature_max": "29.5 \u00b0C",
+            "temperature_min": "12.4 \u00b0C",
             "precipitation": "0.0 mm",
-            "wind_speed_max": "15.0 km/h",
+            "wind_speed_max": "10.9 km/h",
+            "humidity_max": "86 %"
+          },
+          {
+            "date": "2026-02-28",
+            "temperature_max": "30.3 \u00b0C",
+            "temperature_min": "13.3 \u00b0C",
+            "precipitation": "0.0 mm",
+            "wind_speed_max": "9.6 km/h",
+            "humidity_max": "84 %"
+          },
+          {
+            "date": "2026-03-01",
+            "temperature_max": "30.0 \u00b0C",
+            "temperature_min": "13.9 \u00b0C",
+            "precipitation": "0.0 mm",
+            "wind_speed_max": "13.0 km/h",
+            "humidity_max": "85 %"
+          },
+          {
+            "date": "2026-03-02",
+            "temperature_max": "30.4 \u00b0C",
+            "temperature_min": "12.3 \u00b0C",
+            "precipitation": "0.0 mm",
+            "wind_speed_max": "18.4 km/h",
             "humidity_max": "76 %"
           }
         ]
@@ -1602,80 +1620,74 @@
             "properties": {
               "plot_name": "162_1",
               "area_acres": 0.24,
-              "start_date": "2026-02-05",
-              "end_date": "2026-02-20",
+              "start_date": "2026-02-08",
+              "end_date": "2026-02-23",
               "image_count": 1,
-              "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/fb35482aeeb48011bdafcb15fb48f0fb-aeb5262f4e31ec7aa5d9a9c82e38a01d/tiles/{z}/{x}/{y}",
-              "data_source": "Sentinel-1 VH",
-              "latest_image_date": "2026-02-18",
-              "last_updated": "2026-02-20T04:54:03.496363"
+              "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/1b0feeb79fbeb125d97e2ecb51a28cac-058d8b1dc1d16320d07ebfffeb09f543/tiles/{z}/{x}/{y}",
+              "data_source": "Sentinel-2 NDVI",
+              "latest_image_date": "2026-02-22",
+              "last_updated": "2026-02-23T06:35:17.113373"
             }
           }
         ],
         "pixel_summary": {
           "total_pixel_count": 11,
-          "healthy_pixel_count": 5,
-          "healthy_pixel_percentage": 45.45454545454545,
-          "healthy_pixel_coordinates": [
+          "healthy_pixel_count": 0,
+          "healthy_pixel_percentage": 0.0,
+          "healthy_pixel_coordinates": [],
+          "moderate_pixel_count": 0,
+          "moderate_pixel_percentage": 0.0,
+          "moderate_pixel_coordinates": [],
+          "weak_pixel_count": 11,
+          "weak_pixel_percentage": 100.0,
+          "weak_pixel_coordinates": [
             [
-              77.58771755518464,
-              29.205707875935826
+              77.58748463469432,
+              29.205847239377935
             ],
             [
-              77.58772208788996,
-              29.205888204974762
+              77.58758513711683,
+              29.205755086591758
             ],
             [
-              77.58771982153213,
-              29.205798040455985
+              77.5876879056752,
+              29.205753098263074
             ],
             [
-              77.5876147866738,
-              29.205709864284483
+              77.58758966959911,
+              29.20593541564833
             ],
             [
-              77.58761705293153,
-              29.20580002881195
+              77.587692438337,
+              29.205933427305023
+            ],
+            [
+              77.5875874033528,
+              29.20584525112073
+            ],
+            [
+              77.58738186602551,
+              29.20584922755635
+            ],
+            [
+              77.58769017200092,
+              29.20584326278474
+            ],
+            [
+              77.58779294063869,
+              29.205841274369952
+            ],
+            [
+              77.58748690085089,
+              29.20593740391284
             ]
           ],
-          "moderate_pixel_count": 4,
-          "moderate_pixel_percentage": 36.36363636363637,
-          "moderate_pixel_coordinates": [
-            [
-              77.58751881668755,
-              29.205982346154553
-            ],
-            [
-              77.5876193191996,
-              29.205890193338043
-            ],
-            [
-              77.58762158547802,
-              29.205980357862753
-            ],
-            [
-              77.58751428432059,
-              29.205802017089127
-            ]
-          ],
-          "weak_pixel_count": 0,
-          "weak_pixel_percentage": 0.0,
-          "weak_pixel_coordinates": [],
-          "stress_pixel_count": 2,
-          "stress_pixel_percentage": 18.181818181818183,
-          "stress_pixel_coordinates": [
-            [
-              77.58741378178784,
-              29.205894169828223
-            ],
-            [
-              77.5875165504989,
-              29.205892181622527
-            ]
-          ],
-          "analysis_start_date": "2026-02-05",
-          "analysis_end_date": "2026-02-20",
-          "latest_image_date": "2026-02-18"
+          "stress_pixel_count": 0,
+          "stress_pixel_percentage": 0.0,
+          "stress_pixel_coordinates": [],
+          "analysis_start_date": "2026-02-08",
+          "analysis_end_date": "2026-02-23",
+          "latest_image_date": "2026-02-22"
         }
       },
       "soil_moisture_map": {
@@ -1712,55 +1724,55 @@
             },
             "properties": {
               "plot_name": "162_1",
-              "start_date": "2026-02-05",
-              "end_date": "2026-02-20",
+              "start_date": "2026-02-08",
+              "end_date": "2026-02-23",
               "sensor_used": "Sentinel-2",
-              "latest_image_date": "2026-02-17",
+              "latest_image_date": "2026-02-22",
               "image_count": 3,
-              "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/4016c5bc084c86e11b62e9f04b623dd6-fc67cd51e407dd397ffa5445de454e30/tiles/{z}/{x}/{y}",
-              "last_updated": "2026-02-20T04:54:21.629710"
+              "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/f4b47735bd95d3fd55c74811ea0115ab-433007bb53621ea2b831b91003d3274d/tiles/{z}/{x}/{y}",
+              "last_updated": "2026-02-23T06:35:37.066224"
             }
           }
         ],
         "pixel_summary": {
           "total_pixel_count": 11,
-          "start_date": "2026-02-05",
-          "end_date": "2026-02-20",
-          "latest_image_date": "2026-02-17",
+          "start_date": "2026-02-08",
+          "end_date": "2026-02-23",
+          "latest_image_date": "2026-02-22",
           "sensor_used": "Sentinel-2",
           "s1_available": true,
           "s2_available": true,
-          "s1_latest_date": "2026-02-14",
-          "s2_latest_date": "2026-02-17",
+          "s1_latest_date": "2026-02-21",
+          "s2_latest_date": "2026-02-22",
           "less_pixel_count": 0,
           "less_pixel_percentage": 0.0,
           "less_pixel_coordinates": [],
-          "adequate_pixel_count": 4,
-          "adequate_pixel_percentage": 36.36,
+          "adequate_pixel_count": 3,
+          "adequate_pixel_percentage": 27.27,
           "adequate_pixel_coordinates": [
-            [
-              77.58753600516728,
-              29.205801938472852
-            ],
             [
               77.58753600516728,
               29.205891770001266
             ],
             [
-              77.5876258366957,
-              29.205801938472852
+              77.5877156682241,
+              29.205891770001266
             ],
             [
               77.5876258366957,
               29.205891770001266
             ]
           ],
-          "excellent_pixel_count": 7,
-          "excellent_pixel_percentage": 63.64,
+          "excellent_pixel_count": 8,
+          "excellent_pixel_percentage": 72.73,
           "excellent_pixel_coordinates": [
             [
-              77.5877156682241,
-              29.205891770001266
+              77.5876258366957,
+              29.205801938472852
+            ],
+            [
+              77.58753600516728,
+              29.205801938472852
             ],
             [
               77.58753600516728,
@@ -1771,12 +1783,12 @@
               29.205801938472852
             ],
             [
-              77.58744617363887,
-              29.205891770001266
-            ],
-            [
               77.5877156682241,
               29.20571210694444
+            ],
+            [
+              77.58744617363887,
+              29.205891770001266
             ],
             [
               77.5877156682241,
@@ -1829,32 +1841,34 @@
             },
             "properties": {
               "plot_name": "162_1",
-              "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/f673598eee1803e145ab8816ddd0f1b8-a501ee1b2236c628006db40967362ab8/tiles/{z}/{x}/{y}",
-              "sensor": "s1",
-              "image_count_in_range": 4,
+              "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/2966cc7fa4801706d84c38f6ebfccbd2-0c929211960ae96955513e0a090297bb/tiles/{z}/{x}/{y}",
+              "sensor": "s2",
+              "image_count_in_range": 3,
               "analysis_dates": {
-                "start_date": "2026-02-05",
-                "end_date": "2026-02-20",
-                "latest_image_date": "2026-02-18",
-                "previous_image_date": "2026-02-14"
+                "start_date": "2026-02-08",
+                "end_date": "2026-02-23",
+                "latest_image_date": "2026-02-22",
+                "previous_image_date": null
               },
-              "last_updated": "2026-02-20T04:54:32.022998"
+              "last_updated": "2026-02-23T06:35:46.386412"
             }
           }
         ],
         "pixel_summary": {
           "total_pixel_count": 11,
-          "deficient_pixel_count": 1,
-          "deficient_pixel_percentage": 9.090909090909092,
-          "deficient_pixel_coordinates": [
+          "deficient_pixel_count": 0,
+          "deficient_pixel_percentage": 0.0,
+          "deficient_pixel_coordinates": [],
+          "less_pixel_count": 0,
+          "less_pixel_percentage": 0.0,
+          "less_pixel_coordinates": [],
+          "adequat_pixel_count": 11,
+          "adequat_pixel_percentage": 100.0,
+          "adequat_pixel_coordinates": [
             [
               77.5877156682241,
               29.205891770001266
-            ]
-          ],
-          "less_pixel_count": 6,
-          "less_pixel_percentage": 54.54545454545454,
-          "less_pixel_coordinates": [
+            ],
             [
               77.5876258366957,
               29.205801938472852
@@ -1862,13 +1876,29 @@
             [
               77.5876258366957,
               29.205891770001266
+            ],
+            [
+              77.58753600516728,
+              29.205801938472852
             ],
             [
               77.58753600516728,
               29.205981601529675
             ],
             [
+              77.58744617363887,
+              29.205801938472852
+            ],
+            [
               77.58753600516728,
+              29.205891770001266
+            ],
+            [
+              77.5877156682241,
+              29.20571210694444
+            ],
+            [
+              77.58744617363887,
               29.205891770001266
             ],
             [
@@ -1877,26 +1907,6 @@
             ],
             [
               77.5876258366957,
-              29.20571210694444
-            ]
-          ],
-          "adequat_pixel_count": 4,
-          "adequat_pixel_percentage": 36.36363636363637,
-          "adequat_pixel_coordinates": [
-            [
-              77.58753600516728,
-              29.205801938472852
-            ],
-            [
-              77.58744617363887,
-              29.205801938472852
-            ],
-            [
-              77.58744617363887,
-              29.205891770001266
-            ],
-            [
-              77.5877156682241,
               29.20571210694444
             ]
           ],
@@ -1906,8 +1916,8 @@
           "excess_pixel_count": 0,
           "excess_pixel_percentage": 0.0,
           "excess_pixel_coordinates": [],
-          "analysis_start_date": "2026-02-05",
-          "analysis_end_date": "2026-02-20"
+          "analysis_start_date": "2026-02-08",
+          "analysis_end_date": "2026-02-23"
         }
       },
       "pest_map": {
@@ -1944,26 +1954,31 @@
             },
             "properties": {
               "plot_name": "162_1",
-              "start_date": "2026-02-05",
-              "end_date": "2026-02-20",
+              "start_date": "2026-02-08",
+              "end_date": "2026-02-23",
               "image_count": 4,
               "image_dates": [
-                "2026-02-06",
                 "2026-02-09",
                 "2026-02-14",
-                "2026-02-18"
+                "2026-02-18",
+                "2026-02-21"
               ],
-              "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/16074b5bf9f4e6ff43d2b1a4886cb1ab-6fa3f2b9903ca16b7a304e9ca2640cf1/tiles/{z}/{x}/{y}",
-              "last_updated": "2026-02-20T04:54:42.687344"
+              "tile_url": "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/35c9dc1bdf023f8a8f343e87c87a8668-6db0f724942986cdb1e233f4c353799e/tiles/{z}/{x}/{y}",
+              "last_updated": "2026-02-23T06:35:52.844390"
             }
           }
         ],
         "pixel_summary": {
           "total_pixel_count": 11,
-          "healthy_pixel_count": 11,
-          "chewing_affected_pixel_count": 0,
-          "chewing_affected_pixel_percentage": 0.0,
-          "chewing_affected_pixel_coordinates": [],
+          "healthy_pixel_count": 10,
+          "chewing_affected_pixel_count": 1,
+          "chewing_affected_pixel_percentage": 9.090909090909092,
+          "chewing_affected_pixel_coordinates": [
+            [
+              77.58753600516728,
+              29.205891770001266
+            ]
+          ],
           "fungi_affected_pixel_count": 0,
           "fungi_affected_pixel_percentage": 0.0,
           "fungi_affected_pixel_coordinates": [],
@@ -1978,8 +1993,8 @@
           "SoilBorn_affected_pixel_coordinates": [],
           "baseline_start_date": "2025-06-01",
           "baseline_end_date": "2025-10-30",
-          "analysis_start_date": "2026-02-05",
-          "analysis_end_date": "2026-02-20"
+          "analysis_start_date": "2026-02-08",
+          "analysis_end_date": "2026-02-23"
         }
       },
       "agro": {
@@ -2017,37 +2032,37 @@
         },
         "brix_sugar": {
           "brix": {
-            "mean": 20.63,
-            "min": 19.48,
-            "max": 22.89,
-            "median": 20.2,
-            "stdDev": 1.15
+            "mean": 20.81,
+            "min": 19.44,
+            "max": 23.2,
+            "median": 21.01,
+            "stdDev": 1.2
           },
           "recovery": {
-            "mean": 9.08,
-            "min": 8.57,
-            "max": 10.07,
-            "median": 8.89,
-            "stdDev": 0.51
+            "mean": 9.16,
+            "min": 8.55,
+            "max": 10.21,
+            "median": 9.25,
+            "stdDev": 0.53
           },
           "sugar_yield": {
-            "mean": 50.06133333333333,
-            "min": 44.50666666666667,
-            "max": 61.48266666666667,
-            "median": 47.89066666666667,
-            "stdDev": 5.672
+            "mean": 50.967999999999996,
+            "min": 44.349333333333334,
+            "max": 63.135999999999996,
+            "median": 51.81333333333334,
+            "stdDev": 5.949333333333333
           }
         },
         "biomass": {
-          "mean": 63.58,
-          "min": 56.52,
-          "max": 78.08,
-          "total": 63.58
+          "mean": 64.73,
+          "min": 56.32,
+          "max": 80.18,
+          "total": 64.73
         },
         "Sugarcane_Status": "Growing",
         "area_acres": 0.24,
         "distance_km": null,
-        "days_to_harvest": 4,
+        "days_to_harvest": 1,
         "current_growth_stage": "Maturity",
         "plantation_date": "2025-02-24",
         "plantation_type": "suru",
@@ -2089,12 +2104,12 @@
               "plot_name": "162_1",
               "plantation_date": "2025-02-24",
               "plantation_type": "Suru",
-              "end_date": "2026-02-20",
+              "end_date": "2026-02-23",
               "harvest_date": null,
               "has_harvest": null,
               "harvest_status": "Ready to harvest",
               "image_count": 0,
-              "last_updated": "2026-02-20T04:54:45.247660",
+              "last_updated": "2026-02-23T06:35:56.556765",
               "source": "harvest_overrides"
             }
           }
@@ -2102,7 +2117,7 @@
         "harvest_summary": {
           "plantation_date": "2025-02-24",
           "plantation_type": "Suru",
-          "end_date": "2026-02-20",
+          "end_date": "2026-02-23",
           "harvest_date": null,
           "has_harvest": null,
           "harvest_status": "Ready to harvest",
@@ -2121,32 +2136,33 @@
       }
     },
     "ttl": 86400,
-    "time": "2026-02-20T10:21:53.541597"
+    "time": "2026-02-23T12:03:01.192285"
   },
   "chatmemory:0:162_1": {
     "key": "chatmemory:0:162_1",
     "value": [
       {
+        "role": "bot",
+        "message": "Currently, the soil moisture in your plot 162_1 is at 77.41%, which is a good level. This falls nicely within the optimal range of 60\u201380%."
+      },
+      {
         "role": "user",
-        "message": "what does soil moisture map shows?"
+        "message": "current soil moisture?"
       },
       {
         "role": "bot",
-        "message": "The soil moisture map shows that your field has excellent moisture across 63.64% of the area, and adequate moisture in the remaining 36.36%. Overall, the soil moisture conditions are very healthy."
+        "message": "Currently, your plot's soil moisture is at 77.41%, which is a good level and falls within the optimal range of 60\u201380%. Over the last week, the moisture has shown a slight decrease."
+      },
+      {
+        "role": "user",
+        "message": "current soil moisture?"
+      },
+      {
+        "role": "bot",
+        "message": "Currently, your plot's soil moisture is at 77.41%, which is a good level. This falls nicely within the optimal range of 60\u201380% for healthy crop growth."
       }
     ],
     "ttl": 900,
-    "time": "2026-02-20T11:33:33.356574"
-  },
-  "stress_162_1": {
-    "key": "stress_162_1",
-    "value": {
-      "total_events": 0,
-      "threshold_used": 0.15,
-      "index_type": "NDRE",
-      "events": []
-    },
-    "ttl": 3600,
-    "time": "2026-02-20T10:52:34.096333"
+    "time": "2026-02-23T15:52:06.597840"
   }
 }

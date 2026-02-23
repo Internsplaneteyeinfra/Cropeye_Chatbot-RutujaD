@@ -10,7 +10,7 @@ from app.domain.fertilizer.schedule import (
     calculate_months_since_plantation,
     PLANTATION_TYPE_MONTHS,
 )
-
+from app.utils.cache_helper import get_cached_or_fail
 
 async def fertilizer_agent(state: dict) -> dict:
 
@@ -111,9 +111,12 @@ async def fertilizer_agent(state: dict) -> dict:
     # =====================================================
     # NPK REQUIREMENTS
     # =====================================================
-    api = get_api_service(auth_token)
-    npk = await api.get_npk_requirements(plot_id)
-
+    # api = get_api_service(auth_token)
+    # npk = await api.get_npk_requirements(plot_id)
+    
+    cached = context.get("cached_data", {})
+    npk = get_cached_or_fail(cached, "npk_requirements")
+    
     npk_data: Dict = (
         {
             "plantanalysis_n": npk.get("plantanalysis_n"),

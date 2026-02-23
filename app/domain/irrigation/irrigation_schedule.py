@@ -144,7 +144,7 @@ class IrrigationSchedule:
     # BUILD SCHEDULE
     # =====================================================
 
-    async def build(self, plot_id: str, lat, lon):
+    async def build(self, plot_id: str, lat, lon, cached):
 
         # ✅ SINGLE SOURCE OF TRUTH FOR KC
         farm_context = await get_farm_context(
@@ -168,15 +168,19 @@ class IrrigationSchedule:
 
         # ------------------------------------------------
 
-        weather_today = await self.api.get_current_weather(plot_id, lat, lon)
-        forecast = await self.api.get_weather_forecast(plot_id, lat, lon)
-        et_data = await self.api.get_evapotranspiration(plot_id)
+        # weather_today = await self.api.get_current_weather(plot_id, lat, lon)
+        # forecast = await self.api.get_weather_forecast(plot_id, lat, lon)
+        # et_data = await self.api.get_evapotranspiration(plot_id)
 
-        print("\n========== ET API DEBUG ==========")
-        print("Plot ID =", plot_id)
-        print("Raw ET response =", et_data)
-        print("Type =", type(et_data))
-        print("==================================")
+        weather_today = cached.get("current_weather", {})
+        forecast = cached.get("weather_forecast", {})
+        et_data = cached.get("et", {})
+
+        # print("\n========== ET API DEBUG ==========")
+        # print("Plot ID =", plot_id)
+        # # print("Raw ET response =", et_data)
+        # print("Type =", type(et_data))
+        # print("==================================")
 
         print("\n[IRRIGATION DEBUG]")
         # print("Area hectares =", area_hectares)
