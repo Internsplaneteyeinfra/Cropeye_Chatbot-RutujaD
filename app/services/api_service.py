@@ -45,38 +45,66 @@ class APIService:
             timeout=30.0,
             follow_redirects=True)
     
-    def _get_headers(self) -> Dict[str, str]:
-        """Get headers with authentication if available"""
-        headers = {"Accept": "application/json", "Content-Type": "application/json"}
-        if self.auth_token:
-            headers["Authorization"] = f"Bearer {self.auth_token}"
-        return headers
+    # def _get_headers(self) -> Dict[str, str]:
+    #     """Get headers with authentication if available"""
+    #     headers = {"Accept": "application/json", "Content-Type": "application/json"}
+    #     if self.auth_token:
+    #         headers["Authorization"] = f"Bearer {self.auth_token}"
+    #     return headers
     
+    def _get_headers(self) -> Dict[str, str]:
+        return {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        }
     # ----------------------------------------------------------------
 
-    async def get_farmer_profile(self, user_id: Optional[int] = None) -> Dict[str, Any]:
-        """
-        Get farmer profile with plots information
-        API: GET /farms/
-        """
-        cache_key = f"farmer_profile_{user_id or 'default'}"
+    # async def get_farmer_profile(self, user_id: Optional[int] = None) -> Dict[str, Any]:
+    #     """
+    #     Get farmer profile with plots information
+    #     API: GET /farms/
+    #     """
+    #     cache_key = f"farmer_profile_{user_id or 'default'}"
         
+    #     cached = redis_manager.get(cache_key)
+    #     if cached:
+    #         return cached
+            
+    #     try:
+    #         url = f"{BASE_URL}/farms/"
+    #         response = await self.client.get(url, headers=self._get_headers())
+    #         response.raise_for_status()
+    #         print("Backend authentication verified successfully via /farms API.")
+    #         data = response.json()
+    #         # # # data["_source"] = "api"
+    #         redis_manager.set(cache_key, data, ttl=3600)
+    #         return data
+    #     except httpx.HTTPError as e:
+    #         return {"error": f"Failed to fetch farmer profile: {str(e)}"}
+    
+
+    async def get_public_plots(self) -> Dict[str, Any]:
+        """
+        Get public plots (no auth required)
+        API: GET /plots/public/
+        """
+        cache_key = "public_plots"
+
         cached = redis_manager.get(cache_key)
         if cached:
             return cached
-            
+
         try:
-            url = f"{BASE_URL}/farms/"
-            response = await self.client.get(url, headers=self._get_headers())
+            url = f"{BASE_URL}/plots/public/"
+            response = await self.client.get(url)  # ❌ no headers
             response.raise_for_status()
-            print("Backend authentication verified successfully via /farms API.")
             data = response.json()
-            # # # data["_source"] = "api"
+
             redis_manager.set(cache_key, data, ttl=3600)
             return data
+
         except httpx.HTTPError as e:
-            return {"error": f"Failed to fetch farmer profile: {str(e)}"}
-    
+            return {"error": f"Failed to fetch public plots: {str(e)}"}
 
     # ==================================================
     # DASHBOARD APIs

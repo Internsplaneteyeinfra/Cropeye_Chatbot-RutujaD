@@ -26,8 +26,8 @@ class RedisManager:
             self.client = redis.from_url(
                 REDIS_URL,
                 decode_responses=True,
-                socket_connect_timeout=5,
-                socket_timeout=5,
+                socket_connect_timeout=15,
+                socket_timeout=30,
                 retry_on_timeout=True,
                 health_check_interval=30
             )

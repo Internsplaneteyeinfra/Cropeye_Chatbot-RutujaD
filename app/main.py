@@ -12,7 +12,7 @@ from app.services.api_service import get_api_service
 
 from app.memory.redis_manager import redis_manager
 
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+# from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.services.voice_service import (
     transcribe_audio_base64,
     text_to_speech,
@@ -40,7 +40,7 @@ app.add_middleware(
 )
 
 graph = build_graph()
-security = HTTPBearer()
+# security = HTTPBearer()
 
 
 class ChatRequest(BaseModel):
@@ -59,24 +59,54 @@ class VoiceChatRequest(BaseModel):
     include_audio: Optional[bool] = True  # if True, return TTS as base64 
 
 
+@app.on_event("startup")
+async def preload_public_plots():
+    print("\n🚀 Preloading public plots into cache...\n")
+
+    api = get_api_service(None)
+
+    try:
+        data = await api.get_public_plots()
+
+        if "error" not in data:
+            redis_manager.set("public_plots", data, ttl=86400)
+            print("✅ Public plots cached successfully")
+        else:
+            print("❌ Failed to preload plots:", data)
+
+    except Exception as e:
+        print("❌ Startup preload failed:", str(e))
+        
 
 async def run_initialization(plot_id, token):
 
     api = get_api_service(token)
 
     try:
-        profile = await api.get_farmer_profile()
+        # profile = await api.get_farmer_profile()
+        # lat, lon = None, None
+
+        # for farm in profile.get("results", []):
+        #     plot = farm.get("plot", {})
+        #     pid = f"{plot.get('gat_number')}_{plot.get('plot_number')}"
+
+        #     if str(pid) == str(plot_id):
+        #         coords = plot.get("location", {}).get("coordinates", [])
+        #         if len(coords) >= 2:
+        #             lon = coords[0]
+        #             lat = coords[1]
+        #         break
+
+        plots = await api.get_public_plots()
         lat, lon = None, None
 
-        for farm in profile.get("results", []):
-            plot = farm.get("plot", {})
-            pid = f"{plot.get('gat_number')}_{plot.get('plot_number')}"
+        for plot in plots.get("results", []):
+            pid = plot.get("fastapi_plot_id")
 
             if str(pid) == str(plot_id):
-                coords = plot.get("location", {}).get("coordinates", [])
-                if len(coords) >= 2:
-                    lon = coords[0]
-                    lat = coords[1]
+                loc = plot.get("location", {})
+                lat = loc.get("latitude")
+                lon = loc.get("longitude")
                 break
 
         if lat is None or lon is None:
@@ -271,11 +301,15 @@ def redis_health():
 #         "cached_keys": list(cache_data.keys())
 #     }
 
+# @app.post("/initialize-plot")
+# async def initialize_plot(plot_id: str, credentials: HTTPAuthorizationCredentials = Depends(security)):
+
 @app.post("/initialize-plot")
-async def initialize_plot(plot_id: str, credentials: HTTPAuthorizationCredentials = Depends(security)):
+async def initialize_plot(plot_id: str):
     redis_manager.set_plot_status(plot_id, "processing")
 
-    asyncio.create_task(run_initialization(plot_id, credentials.credentials))
+    # asyncio.create_task(run_initialization(plot_id, credentials.credentials))
+    asyncio.create_task(run_initialization(plot_id, None))
 
     return {
         "status": "initializing",
@@ -284,15 +318,16 @@ async def initialize_plot(plot_id: str, credentials: HTTPAuthorizationCredential
 
 
 @app.post("/chat")
-async def chat(
-    request: ChatRequest,
-    credentials: HTTPAuthorizationCredentials = Depends(security)
+# async def chat(
+#     request: ChatRequest,
+#     credentials: HTTPAuthorizationCredentials = Depends(security)
+# ):
+async def chat(request: ChatRequest):
+    auth_token = None
+    # auth_token = credentials.credentials
 
-):
-    auth_token = credentials.credentials
-
-    logger.info("Authentication token received.")
-    logger.info("Authentication successful.")
+    # logger.info("Authentication token received.")
+    # logger.info("Authentication successful.")
 
     user_id = request.user_id 
     plot_id = request.plot_id 
@@ -376,17 +411,19 @@ VOICE_ERROR_CHATBOT = "I'm having trouble right now. Please try again shortly."
 
 
 @app.post("/voice/chat")
-async def voice_chat(
-    request: VoiceChatRequest,
-    credentials: HTTPAuthorizationCredentials = Depends(security)
-):
+# async def voice_chat(
+#     request: VoiceChatRequest,
+#     credentials: HTTPAuthorizationCredentials = Depends(security)
+# ):
+async def voice_chat(request: VoiceChatRequest):
+    auth_token = None
     """
     CropEye VoiceBot: accept voice (audio) or text; pass to existing chatbot unchanged;
     return text response and optional TTS audio in the user's language.
     """
     # 🔐 Extract token safely (same method as /chat endpoint)
-    auth_token = credentials.credentials
-    logger.info("Voice endpoint authentication successful.")
+    # auth_token = credentials.credentials
+    # logger.info("Voice endpoint authentication successful.")
 
     user_id = request.user_id 
     plot_id = request.plot_id 
@@ -492,8 +529,10 @@ async def voice_chat(
     }
 
 @app.post("/refresh-plot")
-async def refresh_plot(plot_id:str, credentials: HTTPAuthorizationCredentials = Depends(security)):
-    return await initialize_plot(plot_id, credentials)
+# async def refresh_plot(plot_id:str, credentials: HTTPAuthorizationCredentials = Depends(security)):
+#     return await initialize_plot(plot_id, credentials)
+async def refresh_plot(plot_id:str):
+    return await initialize_plot(plot_id)
 
 @app.get("/health")
 def health_check():
