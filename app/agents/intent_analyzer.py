@@ -3,11 +3,12 @@ from app.prompts.intent_prompt import INTENT_PROMPT
 from app.utils.json_utils import safe_json
 from app.prompts.base_system_prompt import BASE_SYSTEM_PROMPT
 from app.config import llm
+from app.utils.lang_detect import detect_lang
 
 def intent_analyzer(state: dict) -> dict:
     
     user_message = state.get("user_message", "")
-    # Use short_memory from state (loaded in main from Redis)
+    state["user_language"] = detect_lang(user_message)
     history = state.get("short_memory", []) or []
 
     # Build conversation context
@@ -23,10 +24,6 @@ def intent_analyzer(state: dict) -> dict:
     
     
     try:
-        # prompt = (BASE_SYSTEM_PROMPT + INTENT_PROMPT).format(
-        #     user_message=state.get("user_message", "")
-        # )
-
         response = llm.invoke(prompt)
         
         # Handle different response formats
@@ -46,19 +43,11 @@ def intent_analyzer(state: dict) -> dict:
         intent = result.get("intent")
         entities = result.get("entities")
 
-        # HARD GUARANTEE: intent must exist
-        # if not intent or not isinstance(intent, str):
-        #     intent = "general_explanation"
-
-        # if not isinstance(entities, dict):
-        #     entities = {}
-
         if not intent:
-            intent = last_intent  # reuse previous intent
+            intent = last_intent  
 
         state["intent"] = intent
         state["entities"] = entities if isinstance(entities, dict) else {}
-        # short_memory stays as loaded from main; user/bot messages saved in main after graph
 
     except Exception as e:
         print(f"INTENT_ANALYZER_ERROR: {str(e)}")
