@@ -22,6 +22,14 @@ PEST_INTENTS = {
 FERTILIZER_INTENTS = {
     "fertilizer_advice",
 }
+DASHBOARD_INTENTS = {
+    "dashboard_summary",
+    "crop_status_check",
+    "yield_info",
+    "sugar_content_check",
+    "stress_check",
+    "biomass_check"
+}
 
 def router(state: dict) -> str:
     """
@@ -51,8 +59,10 @@ def router(state: dict) -> str:
         return "pest_agent"
 
     if intent in FERTILIZER_INTENTS:
-        print("🧭 ROUTER → fertilizer_agent")
         return "fertilizer_agent"
+
+    if intent in DASHBOARD_INTENTS:
+        return "dashboard_agent"
 
     return "response_generator"
 

@@ -16,11 +16,11 @@ class CurrentWeather:
             return "Warm"
         return "Hot"
 
-    async def fetch(self, plot_id: str) -> dict:
+    async def fetch(self, plot_id: str, lat: float, lon: float) -> dict:
         """
         Fetch current weather for marquee & irrigation cards
         """
-        data = await self.api.get_current_weather(plot_id)
+        data = await self.api.get_current_weather(plot_id, lat, lon)
 
         if "error" in data:
             return data

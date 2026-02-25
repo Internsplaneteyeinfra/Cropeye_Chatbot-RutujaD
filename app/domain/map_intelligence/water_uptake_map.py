@@ -15,11 +15,11 @@ class WaterUptakeMap:
 
         return {
             "classification": {
+                "deficient": pixel.get("deficient_pixel_percentage"),
                 "less": pixel.get("less_pixel_percentage"),
-                "adequate": pixel.get("adequate_pixel_percentage"),
+                "Adequate": pixel.get("adequate_pixel_percentage"),
                 "excellent": pixel.get("excellent_pixel_percentage"),
                 "excess": pixel.get("excess_pixel_percentage"),
-                "shallow": pixel.get("shallow_water_pixel_percentage"),
             },
             "map_layer": {
                 "tile_url": properties.get("tile_url")

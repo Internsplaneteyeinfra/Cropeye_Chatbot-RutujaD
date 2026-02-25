@@ -1,2 +1,21 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual env
+venv/
+.venv/
+
+# Environment
 .env
-venv
+
+# Chroma DB
+chroma_db/
+
+# Audio debug
+*.webm
+*.wav
+
+# Logs
+*.log
+

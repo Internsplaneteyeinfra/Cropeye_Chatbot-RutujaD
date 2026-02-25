@@ -29,10 +29,10 @@ class GrowthMap:
 
         return {
             "classification": {
-                "poor": pixel.get("poor_pixel_percentage"),
+                "week": pixel.get("weak_pixel_percentage"),
+                "stress": pixel.get("stress_pixel_percentage"),
                 "moderate": pixel.get("moderate_pixel_percentage"),
-                "good": pixel.get("good_pixel_percentage"),
-                "excellent": pixel.get("excellent_pixel_percentage"),
+                "healthy": pixel.get("healthy_pixel_percentage"),
             },
             "map_layer": {
                 "tile_url": properties.get("tile_url")

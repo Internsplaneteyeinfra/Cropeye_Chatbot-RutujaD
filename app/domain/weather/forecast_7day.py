@@ -7,11 +7,11 @@ class WeatherForecast:
     def __init__(self, auth_token=None):
         self.api = get_api_service(auth_token)
 
-    async def fetch(self, plot_id: str) -> dict:
+    async def fetch(self, plot_id: str, lat: float, lon: float) -> dict:
         """
         Fetch 7-day forecast starting from tomorrow
         """
-        response = await self.api.get_weather_forecast(plot_id)
+        response = await self.api.get_weather_forecast(plot_id, lat, lon)
 
         if "error" in response:
             return response
