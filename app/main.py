@@ -26,7 +26,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
 )
-logger = logging.getLogger("cropeye-auth")
+logger = logging.getLogger("cropeye-chatbot")
 # ------------------------------------------------
 
 app = FastAPI(title="CropEye Chatbot API")
@@ -368,6 +368,27 @@ async def chat(request: ChatRequest):
 
     if state["context"].get("lat") is None:
         return {"error": "Plot location missing"}
+
+    # farm_context = await get_farm_context(
+    # plot_name=state["context"]["plot_id"],
+    # user_id=state["context"]["user_id"],
+    # auth_token=state["context"]["auth_token"]
+    # )
+
+    # if farm_context:
+    #     state["context"].update(farm_context)
+
+    # # try cached plot if lat missing
+    # if state["context"].get("lat") is None:
+    #     cached_plot = redis_manager.get_plot(request.plot_id)
+
+    #     if cached_plot and "current_weather" in cached_plot:
+    #         cw = cached_plot["current_weather"]
+    #         state["context"]["lat"] = cw.get("lat")
+    #         state["context"]["lon"] = cw.get("lon")
+
+    # if state["context"].get("lat") is None:
+    #     return {"error": "Plot location missing"}
 
     try:
         status = redis_manager.get_plot_status(plot_id)

@@ -395,6 +395,8 @@
       </div>
     </div>
 
+    <div id="plotInfo" style="padding: 10px 20px; font-size: 13px; color: #059669; font-weight: 600;"></div>
+
     <div id="chatMessages" class="chat-messages"></div>
     <div id="typingIndicator" class="typing-indicator hidden">
       <div class="typing-dots">
@@ -419,23 +421,43 @@
 
 
   <script>
-    /* ---------------- AUTH TOKEN (TEST MODE) ---------------- */
-    /* 👉 Paste your real token here */
-    const AUTH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzcxNTk1NDkxLCJpYXQiOjE3NzE1OTM2OTEsImp0aSI6ImIyOGMyNGQ5Y2ZiZjQyNzI5Y2YwOTQwOWYwODY2NGFiIiwidXNlcl9pZCI6NDM1fQ.15EB7krSvpchRbTKLUGQ8dFGDOIuVmRJGv4TfU_blzg";
-    
+        /* ---------------- PLOT INFO FETCH ---------------- */
+        // Default values for testing
+        const DEFAULT_PLOT_ID = "162_1";
+        const DEFAULT_LAT = 29.205850692414078;
+        const DEFAULT_LON = 77.58759806410129;
+
+        async function fetchPlotInfo(plotId) {
+          try {
+            const res = await fetch(`${API_BASE}/plots/public/`);
+            if (!res.ok) throw new Error("Failed to fetch plot info");
+            const data = await res.json();
+            const plot = (data.results || []).find(p => String(p.fastapi_plot_id) === String(plotId));
+            if (plot && plot.location && plot.location.latitude && plot.location.longitude) {
+              document.getElementById("plotInfo").textContent = `Plot ${plotId}: Lat ${plot.location.latitude}, Lon ${plot.location.longitude}`;
+            } else {
+              document.getElementById("plotInfo").textContent = `Plot ${plotId}: Lat ${DEFAULT_LAT}, Lon ${DEFAULT_LON} (default)`;
+            }
+          } catch (err) {
+            document.getElementById("plotInfo").textContent = `Plot ${plotId}: Lat ${DEFAULT_LAT}, Lon ${DEFAULT_LON} (default)`;
+          }
+        }
     /* ---------------- BACKEND CONFIG ---------------- */
+    // Update API_BASE if backend is deployed elsewhere
     const API_BASE = "http://localhost:8000";
-    
+
     const ENDPOINTS = {
       CHAT: `${API_BASE}/chat`,
       VOICE: `${API_BASE}/voice/chat`,
       INIT: `${API_BASE}/initialize-plot`,
-      HEALTH: `${API_BASE}/health`
+      HEALTH: `${API_BASE}/health/redis` // Updated health endpoint
     };
-    
+
     /* ---------------- STATIC TEST VALUES ---------------- */
+    // These should be set based on user/session or plot selection
     const USER_ID = 0;
-    const PLOT_ID = "162_1";
+    // Use default plot id for testing
+    const PLOT_ID = DEFAULT_PLOT_ID;
     
     /* ---------------- DOM ---------------- */
     const chatMessages = document.getElementById("chatMessages");
@@ -446,10 +468,8 @@
     
     /* ---------------- AUTH HEADER ---------------- */
     function authHeaders(json=true){
-      return {
-        ...(json && {"Content-Type":"application/json"}),
-        Authorization:`Bearer ${AUTH_TOKEN}`
-      };
+      // Only Content-Type header, no Authorization
+      return json ? {"Content-Type": "application/json"} : {};
     }
     
     /* ---------------- UI ---------------- */
@@ -485,6 +505,8 @@
       try{
         const r=await fetch(ENDPOINTS.HEALTH);
         if(!r.ok) throw new Error();
+        const data = await r.json();
+        if(data.status !== "ok") throw new Error();
         console.log("Backend connected");
         return true;
       }catch{
@@ -496,20 +518,25 @@
     /* ---------------- INITIALIZE PLOT ---------------- */
     async function initializePlot(){
       appendMessage(`Loading plot ${PLOT_ID} data...`);
-    
+
       try{
         const res=await fetch(`${ENDPOINTS.INIT}?plot_id=${PLOT_ID}`,{
           method:"POST",
           headers:authHeaders(false)
         });
-    
+
         if(res.status===401){
           appendMessage("Unauthorized. Token invalid.");
           return;
         }
-    
+
         const data=await res.json();
-        appendMessage(data.message || "Initialization started");
+        if(data.status && data.status !== "ready")
+          appendMessage(data.message || "Initialization started");
+        else if(data.error)
+          appendMessage(data.error);
+        else
+          appendMessage("Plot initialization complete.");
       }
       catch(err){
         appendMessage("Init failed.");
@@ -533,24 +560,26 @@
           body:JSON.stringify({
             message:text,
             user_id:USER_ID,
-            plot_id:PLOT_ID
+            plot_id: PLOT_ID
           })
         });
-    
+
         if(res.status===401){
           appendMessage("Unauthorized. Token invalid.");
           return;
         }
-    
+
         const data=await res.json();
-    
+
         if(data.status && data.status!=="ready")
           appendMessage(data.message);
         else if(data.error)
           appendMessage(data.error);
+        else if(data.response)
+          appendMessage(data.response);
         else
-          appendMessage(data.response || "No response");
-    
+          appendMessage("No response");
+
       }catch(err){
         appendMessage("Connection failed.");
         console.error(err);
@@ -589,13 +618,13 @@
     
     async function sendVoice(blob,type){
      setLoading(true);
-    
+
      const reader=new FileReader();
      reader.readAsDataURL(blob);
-    
+
      reader.onloadend=async()=>{
      const base64=reader.result.split(",")[1];
-    
+
      try{
      const res=await fetch(ENDPOINTS.VOICE,{
        method:"POST",
@@ -607,12 +636,21 @@
          plot_id:PLOT_ID
        })
      });
-    
+
      const data=await res.json();
-    
-     appendMessage(data.transcribed || "(voice)","user");
-     appendMessage(data.response || "No reply");
-    
+
+     if(data.transcribed)
+       appendMessage(data.transcribed,"user");
+     else
+       appendMessage("(voice)","user");
+
+     if(data.response)
+       appendMessage(data.response);
+     else if(data.error)
+       appendMessage(data.error);
+     else
+       appendMessage("No reply");
+
      if(data.audio_base64)
        new Audio(`data:audio/mp3;base64,${data.audio_base64}`).play();
      }
@@ -620,7 +658,7 @@
        appendMessage("Voice failed.");
        console.error(err);
      }
-    
+
      setLoading(false);
      voiceButton.classList.remove("recording");
      recording=false;
@@ -638,9 +676,9 @@
     
     /* ---------------- START ---------------- */
     appendMessage("Hi! I'm CropEye assistant.");
-    
+    fetchPlotInfo(PLOT_ID);
     checkBackend().then(ok=>{
-     if(ok) initializePlot();
+      if(ok) initializePlot();
     });
     </script>
     
