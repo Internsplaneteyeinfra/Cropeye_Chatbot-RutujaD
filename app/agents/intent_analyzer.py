@@ -22,7 +22,6 @@ def intent_analyzer(state: dict) -> dict:
 
     prompt = ( BASE_SYSTEM_PROMPT +"Conversation history:\n" + history_text  + INTENT_PROMPT ).format(user_message=user_message)
     
-    
     try:
         response = llm.invoke(prompt)
         

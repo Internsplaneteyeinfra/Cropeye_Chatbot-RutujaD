@@ -19,18 +19,6 @@ They will ask in natural language. Interpret meaning.
 
 --------------------------------------------------
 
-dashboard_summary
-Use when farmer asks about overall farm or field condition.
-
-Examples:
-- How is my farm?
-- Field condition?
-- माझं शेत कसं आहे?
-
-query_type:
-- "dashboard_summary"
-
---------------------------------------------------
 
 crop_status_check
 Use when farmer asks about crop readiness or harvest timing.

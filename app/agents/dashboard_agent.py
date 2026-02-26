@@ -34,6 +34,9 @@ async def dashboard_agent(state: dict):
     elif dashboard_type == "sugar_content_check":
         analysis["dashboard"]["sugar_content"] = await SugarContent().fetch(cached)
 
+    # elif dashboard_type == "indices_check":
+    # analysis["dashboard"]["indices"] = await FieldIndices().fetch(cached)
+
     state["analysis"] = analysis
     return state
 

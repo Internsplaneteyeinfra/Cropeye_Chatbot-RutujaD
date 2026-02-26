@@ -12,7 +12,6 @@ from app.services.api_service import get_api_service
 
 from app.memory.redis_manager import redis_manager
 
-# from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.services.voice_service import (
     transcribe_audio_base64,
     text_to_speech,
@@ -34,19 +33,21 @@ app = FastAPI(title="CropEye Chatbot API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 graph = build_graph()
-# security = HTTPBearer()
-
 
 class ChatRequest(BaseModel):
     message: str
     user_id: Optional[int] = None  
     plot_id: Optional[str] = None  
+
+
+class InitializePlotRequest(BaseModel):
+    plot_id: str
 
 
 class VoiceChatRequest(BaseModel):
@@ -83,20 +84,6 @@ async def run_initialization(plot_id, token):
     api = get_api_service(token)
 
     try:
-        # profile = await api.get_farmer_profile()
-        # lat, lon = None, None
-
-        # for farm in profile.get("results", []):
-        #     plot = farm.get("plot", {})
-        #     pid = f"{plot.get('gat_number')}_{plot.get('plot_number')}"
-
-        #     if str(pid) == str(plot_id):
-        #         coords = plot.get("location", {}).get("coordinates", [])
-        #         if len(coords) >= 2:
-        #             lon = coords[0]
-        #             lat = coords[1]
-        #         break
-
         plots = await api.get_public_plots()
         lat, lon = None, None
 
@@ -153,11 +140,8 @@ async def run_initialization(plot_id, token):
             for attempt in range(3):
                 try:
                     start = datetime.now()
-                    # data = await task
-                    # results[name] = data
                     data = await task()
 
-                    # treat API error response as failure
                     if isinstance(data, dict) and data.get("error"):
                         raise Exception(data["error"])
 
@@ -202,113 +186,11 @@ def redis_health():
         return {"status": "fail", "redis": "down"}
 
 
-# @app.post("/initialize-plot")
-# async def initialize_plot(
-#     plot_id: str,
-#     credentials: HTTPAuthorizationCredentials = Depends(security)
-# ):
-#     token = credentials.credentials
-#     api = get_api_service(token)
-
-#     # --------------------------------------------------
-#     # STEP 1 — Get required context (lat, lon, dates)
-#     # --------------------------------------------------
-#     profile = await api.get_farmer_profile()
-#     plot_data = None
-
-#     for farm in profile.get("results", []):
-#         plot = farm.get("plot", {})
-
-#         pid = f"{plot.get('gat_number')}_{plot.get('plot_number')}"
-
-#         if str(pid) == str(plot_id):
-#             plot_data = plot
-#             plantation_date = farm.get("plantation_date")
-#             break
-
-
-#     if not plot_data:
-#         return {"error": "Plot not found"}
-
-#     coords = plot_data.get("location", {}).get("coordinates", [])
-#     lon = coords[0] if len(coords) >= 2 else None
-#     lat = coords[1] if len(coords) >= 2 else None
-
-#     plantation_date = plot_data.get("plantation_date")
-
-#     if not lat or not lon:
-#         return {"error": "Plot coordinates missing"}
-
-#     today = datetime.now().strftime("%Y-%m-%d")
-
-#     # --------------------------------------------------
-#     # STEP 2 — Prepare async API tasks
-#     # --------------------------------------------------
-#     tasks = {
-#         # ---------- SOIL ANALYSIS AGENT ----------
-#         "soil_analysis": api.get_soil_analysis(plot_id, today),
-#         "npk_requirements": api.get_npk_requirements(plot_id, today),
-
-#         # ---------- PEST ----------
-#         "pest_detection": api.get_pest_detection(plot_id, today),
-
-#         # ---------- IRRIGATION ----------
-#         "et": api.get_evapotranspiration(plot_id),
-#         "soil_moisture_timeseries": api.get_soil_moisture_timeseries(plot_id),
-
-#         # ---------- WEATHER ----------
-#         "current_weather": api.get_current_weather(plot_id, lat, lon),
-#         "weather_forecast": api.get_weather_forecast(plot_id, lat, lon),
-
-#         # ---------- MAPS ----------
-#         "growth_map": api.get_growth_map(plot_id, today),
-#         "soil_moisture_map": api.get_soil_moisture_map(plot_id, today),
-#         "water_uptake_map": api.get_water_uptake_map(plot_id, today),
-#         "pest_map": api.get_pest_map(plot_id, today),
-
-#         # ---------- DASHBOARD ----------
-#         "agro": api.get_agro_stats(plot_id, today),
-#         "harvest": api.get_harvest_status(plot_id),
-#         "stress": api.get_stress_events(plot_id),
-#     }
-
-#     # --------------------------------------------------
-#     # STEP 3 — Run all APIs in parallel
-#     # --------------------------------------------------
-#     results = await asyncio.gather(
-#         *tasks.values(),
-#         return_exceptions=True
-#     )
-#     cache_data = {}
-
-#     for key, result in zip(tasks.keys(), results):
-
-#         if isinstance(result, Exception):
-#             continue
-
-#         if isinstance(result, dict) and result.get("error"):
-#             continue
-            
-#         print(f"[SUCCESS] {key}")
-#         cache_data[key] = result
-        
-#     redis_manager.set_plot(plot_id, cache_data)
-#     await api.close()
-
-#     return {
-#         "status": "initialized",
-#         "plot_id": plot_id,
-#         "cached_keys": list(cache_data.keys())
-#     }
-
-# @app.post("/initialize-plot")
-# async def initialize_plot(plot_id: str, credentials: HTTPAuthorizationCredentials = Depends(security)):
-
 @app.post("/initialize-plot")
-async def initialize_plot(plot_id: str):
+async def initialize_plot(request: InitializePlotRequest):
+    plot_id = request.plot_id
     redis_manager.set_plot_status(plot_id, "processing")
 
-    # asyncio.create_task(run_initialization(plot_id, credentials.credentials))
     asyncio.create_task(run_initialization(plot_id, None))
 
     return {
@@ -318,17 +200,10 @@ async def initialize_plot(plot_id: str):
 
 
 @app.post("/chat")
-# async def chat(
-#     request: ChatRequest,
-#     credentials: HTTPAuthorizationCredentials = Depends(security)
-# ):
+
 async def chat(request: ChatRequest):
     auth_token = None
-    # auth_token = credentials.credentials
-
-    # logger.info("Authentication token received.")
-    # logger.info("Authentication successful.")
-
+    
     user_id = request.user_id 
     plot_id = request.plot_id 
     plot_id = str(plot_id)
@@ -369,27 +244,6 @@ async def chat(request: ChatRequest):
     if state["context"].get("lat") is None:
         return {"error": "Plot location missing"}
 
-    # farm_context = await get_farm_context(
-    # plot_name=state["context"]["plot_id"],
-    # user_id=state["context"]["user_id"],
-    # auth_token=state["context"]["auth_token"]
-    # )
-
-    # if farm_context:
-    #     state["context"].update(farm_context)
-
-    # # try cached plot if lat missing
-    # if state["context"].get("lat") is None:
-    #     cached_plot = redis_manager.get_plot(request.plot_id)
-
-    #     if cached_plot and "current_weather" in cached_plot:
-    #         cw = cached_plot["current_weather"]
-    #         state["context"]["lat"] = cw.get("lat")
-    #         state["context"]["lon"] = cw.get("lon")
-
-    # if state["context"].get("lat") is None:
-    #     return {"error": "Plot location missing"}
-
     try:
         status = redis_manager.get_plot_status(plot_id)
 
@@ -410,7 +264,6 @@ async def chat(request: ChatRequest):
     state["context"]["cached_data"] = cached
 
     result = await graph.ainvoke(state)
-    # print("FINAL GRAPH STATE", result)
 
     redis_manager.save_message(user_id, plot_id, "user", request.message)
     if result.get("final_response"):
@@ -432,19 +285,13 @@ VOICE_ERROR_CHATBOT = "I'm having trouble right now. Please try again shortly."
 
 
 @app.post("/voice/chat")
-# async def voice_chat(
-#     request: VoiceChatRequest,
-#     credentials: HTTPAuthorizationCredentials = Depends(security)
-# ):
+
 async def voice_chat(request: VoiceChatRequest):
     auth_token = None
     """
     CropEye VoiceBot: accept voice (audio) or text; pass to existing chatbot unchanged;
     return text response and optional TTS audio in the user's language.
     """
-    # 🔐 Extract token safely (same method as /chat endpoint)
-    # auth_token = credentials.credentials
-    # logger.info("Voice endpoint authentication successful.")
 
     user_id = request.user_id 
     plot_id = request.plot_id 
@@ -550,8 +397,7 @@ async def voice_chat(request: VoiceChatRequest):
     }
 
 @app.post("/refresh-plot")
-# async def refresh_plot(plot_id:str, credentials: HTTPAuthorizationCredentials = Depends(security)):
-#     return await initialize_plot(plot_id, credentials)
+
 async def refresh_plot(plot_id:str):
     return await initialize_plot(plot_id)
 
