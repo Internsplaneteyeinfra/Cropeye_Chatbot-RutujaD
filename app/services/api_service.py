@@ -57,31 +57,7 @@ class APIService:
             "Accept": "application/json",
             "Content-Type": "application/json"
         }
-    # ----------------------------------------------------------------
-
-    # async def get_farmer_profile(self, user_id: Optional[int] = None) -> Dict[str, Any]:
-    #     """
-    #     Get farmer profile with plots information
-    #     API: GET /farms/
-    #     """
-    #     cache_key = f"farmer_profile_{user_id or 'default'}"
-        
-    #     cached = redis_manager.get(cache_key)
-    #     if cached:
-    #         return cached
-            
-    #     try:
-    #         url = f"{BASE_URL}/farms/"
-    #         response = await self.client.get(url, headers=self._get_headers())
-    #         response.raise_for_status()
-    #         print("Backend authentication verified successfully via /farms API.")
-    #         data = response.json()
-    #         # # # data["_source"] = "api"
-    #         redis_manager.set(cache_key, data, ttl=3600)
-    #         return data
-    #     except httpx.HTTPError as e:
-    #         return {"error": f"Failed to fetch farmer profile: {str(e)}"}
-    
+   
 
     async def get_public_plots(self) -> Dict[str, Any]:
         """
@@ -201,6 +177,53 @@ class APIService:
         except httpx.HTTPError as e:
             return {"error": f"Agro stats fetch failed: {str(e)}"}
 
+    # ----------------------------------------------------------------
+    async def get_field_indices( self, plot_id: str, start_date: Optional[str] = None,end_date: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Fetch field indices time-series
+        API: GET /plots/{plot_id}/indices
+        """
+
+        if not end_date:
+            end_date = datetime.now().strftime("%Y-%m-%d")
+
+        cache_key = f"indices_{plot_id}_{start_date}_{end_date}"
+        cached = redis_manager.get(cache_key)
+        if cached:
+            return cached
+
+        try:
+            url = f"{EVENTS_API_URL}/plots/{plot_id}/indices"
+
+            params = {"end_date": end_date}
+            if start_date:
+                params["start_date"] = start_date
+
+            response = await self.client.get(
+                url,
+                params=params,
+                headers=self._get_headers()
+            )
+            response.raise_for_status()
+            data = response.json()
+
+            # Normalize format for agents
+            formatted = [
+                {
+                    "date": item.get("date"),
+                    "growth": item.get("NDVI"),
+                    "stress": item.get("NDMI"),
+                    "water": item.get("NDWI"),
+                    "moisture": item.get("NDRE"),
+                }
+                for item in data
+            ]
+
+            redis_manager.set(cache_key, formatted, ttl=43200)
+            return formatted
+
+        except httpx.HTTPError as e:
+            return {"error": f"Indices fetch failed: {str(e)}"}
 
     # ----------------------------------------------------------------
 

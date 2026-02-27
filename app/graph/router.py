@@ -28,7 +28,8 @@ DASHBOARD_INTENTS = {
     "yield_info",
     "sugar_content_check",
     "stress_check",
-    "biomass_check"
+    "biomass_check",
+    "indices_check" 
 }
 
 def router(state: dict) -> str:

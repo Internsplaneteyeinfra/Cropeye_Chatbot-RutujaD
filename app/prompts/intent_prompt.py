@@ -243,6 +243,13 @@ INTENTS
    -Sugar / sweetness → sugar_content_check
    -Plant stress → stress_check
    -Crop strength / growth → biomass_check
+   - Field indices / crop graph / trend → indices_check
+   - Growth trend → indices_check
+   - Stress trend → indices_check
+   - Water trend → indices_check
+   - Moisture trend → indices_check
+   - When stress increased → indices_check
+   - When water low → indices_check
 
 2. map_view → spatial/visual field maps
 
@@ -282,6 +289,7 @@ dashboard_summary →
 - sugar_content_check
 - stress_check
 - biomass_check
+- indices_check
 
 map_view →
 - soil_moisture_map
