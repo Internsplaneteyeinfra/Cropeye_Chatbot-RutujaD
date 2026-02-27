@@ -90,8 +90,9 @@ class RedisManager:
             if ttl:
                 self.client.setex(key, ttl, self._serialize(value))
             else:
-                self.client.set(key, self._serialize(value))            
-            self._debug_log_cache(key, value, ttl)
+                self.client.set(key, self._serialize(value))
+            # ---------- DISABLE DEBUG LOGGING FOR PERFORMANCE ----------
+            # self._debug_log_cache(key, value, ttl)
 
         except Exception as e:
             logger.warning(f"Redis SET failed: {e}")

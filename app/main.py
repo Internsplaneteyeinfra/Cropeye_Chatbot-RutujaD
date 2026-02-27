@@ -225,6 +225,16 @@ async def chat(request: ChatRequest):
 
     short_memory = redis_manager.get_memory(user_id, plot_id)
 
+    # ---------- FAST GREETING DETECTION (skip farm context for simple greetings) ----------
+    message_lower = request.message.lower().strip()
+    simple_greetings = {
+        "hi", "hello", "hey", "namaste", "नमस्ते", "thanks", "thank you", "bye", 
+        "goodbye", "ok", "okay", "yes", "no", "hmm", "help", "who are you", "how are you", "how are you doing"
+    }
+    is_simple_greeting = message_lower in simple_greetings or (
+        len(message_lower.split()) <= 2 and any(word in message_lower for word in ["hi", "hello", "hey", "thanks", "bye", "how are you", "how are you doing"])
+    )
+
     # ---------- INITIAL GRAPH STATE ----------
     state = {
         "user_message": request.message,
@@ -242,41 +252,42 @@ async def chat(request: ChatRequest):
         "final_response": None
     }
 
-   # ---------- ENRICH CONTEXT WITH FARM DATA ----------
-    farm_context = await get_farm_context(
-        plot_name=state["context"]["plot_id"],
-        user_id=state["context"]["user_id"],
-        auth_token=state["context"]["auth_token"]
-    )
+    # ---------- SKIP FARM CONTEXT FOR SIMPLE GREETINGS ----------
+    if not is_simple_greeting:
+        # ---------- ENRICH CONTEXT WITH FARM DATA ----------
+        farm_context = await get_farm_context(
+            plot_name=state["context"]["plot_id"],
+            user_id=state["context"]["user_id"],
+            auth_token=state["context"]["auth_token"]
+        )
 
-    state["context"].update(farm_context)
+        state["context"].update(farm_context)
 
-    logger.info(f"PLOT DEBUG → plot_id={state['context'].get('plot_id')} "
-            f"lat={state['context'].get('lat')} "
-            f"lon={state['context'].get('lon')}")
+        logger.info(f"PLOT DEBUG → plot_id={state['context'].get('plot_id')} "
+                f"lat={state['context'].get('lat')} "
+                f"lon={state['context'].get('lon')}")
 
+        if state["context"].get("lat") is None:
+            return {"error": "Plot location missing"}
 
-    if state["context"].get("lat") is None:
-        return {"error": "Plot location missing"}
+        try:
+            status = redis_manager.get_plot_status(plot_id)
 
-    try:
-        status = redis_manager.get_plot_status(plot_id)
+            if status != "ready":
+                return {
+                    "status": status,
+                    "message": "Plot data still loading. Please wait..."
+                }
 
-        if status != "ready":
+            cached = redis_manager.get_plot(plot_id)
+        except:
+            cached = None
+
+        if not cached:
             return {
-                "status": status,
-                "message": "Plot data still loading. Please wait..."
+                "error": "Plot not initialized. Please call /initialize-plot first."
             }
-
-        cached = redis_manager.get_plot(plot_id)
-    except:
-        cached = None
-
-    if not cached:
-        return {
-            "error": "Plot not initialized. Please call /initialize-plot first."
-        }
-    state["context"]["cached_data"] = cached
+        state["context"]["cached_data"] = cached
 
     result = await graph.ainvoke(state)
 
@@ -316,8 +327,9 @@ async def voice_chat(request: VoiceChatRequest):
         transcribed, _detected_lang = transcribe_audio_base64(
             request.audio_base64, request.content_type
         )
-        print("🎤 RAW TRANSCRIBED TEXT:", transcribed)
-        print("🌐 DETECTED LANGUAGE:", _detected_lang)
+        # ---------- DISABLE VERBOSE LOGGING FOR PERFORMANCE ----------
+        # print("🎤 RAW TRANSCRIBED TEXT:", transcribed)
+        # print("🌐 DETECTED LANGUAGE:", _detected_lang)
         
         user_message = (transcribed or "").strip()
 

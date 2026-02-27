@@ -85,6 +85,14 @@ async def get_farm_context(
     if not plot_name:
         return {"error": "Plot name is required"}
 
+    # ---------- CACHE FARM CONTEXT PER PLOT TO AVOID RE-PARSING ----------
+    from app.memory.redis_manager import redis_manager
+    cache_key = f"farm_context:{plot_name}"
+    cached_context = redis_manager.get(cache_key)
+    
+    if cached_context and not cached_context.get("error"):
+        return cached_context
+
     api_service = get_api_service(auth_token)
     profile_data = await api_service.get_public_plots()
 
@@ -115,25 +123,24 @@ async def get_farm_context(
     plantation_type = farm.get("plantation_type")
     planting_method = farm.get("planting_method")
 
-
-    print("PLANTATION DATE =", plantation_date)
-    print("PLANTATION TYPE =", plantation_type)
-    print("PLANTATION METHOD =", planting_method)
-
+    # ---------- DISABLE VERBOSE LOGGING FOR PERFORMANCE ----------
+    # print("PLANTATION DATE =", plantation_date)
+    # print("PLANTATION TYPE =", plantation_type)
+    # print("PLANTATION METHOD =", planting_method)
 
     if not plantation_date:
         return {"error": "Plantation date missing"}
 
     crop_stage_info = calculate_crop_stage(plantation_date)
 
-    print("KC_CALCULATED =", crop_stage_info["kc"])
+    # print("KC_CALCULATED =", crop_stage_info["kc"])
 
     location = selected_plot.get("location", {}).get("coordinates", [])
 
     lon = location[0] if len(location) >= 2 else None
     lat = location[1] if len(location) >= 2 else None
 
-    return {
+    farm_context = {
         "plot_id": plot_name,
         "plantation_date": plantation_date,
         "crop_stage": crop_stage_info["stage"],
@@ -145,3 +152,8 @@ async def get_farm_context(
         "lon": lon,
         "error": None
     }
+    
+    # ---------- CACHE FARM CONTEXT FOR 24 HOURS ----------
+    redis_manager.set(cache_key, farm_context, ttl=86400)
+    
+    return farm_context
