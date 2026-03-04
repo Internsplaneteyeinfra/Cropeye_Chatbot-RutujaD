@@ -1,8 +1,11 @@
 # unified_agent.py
-from app.prompts.unified_prompt import UNIFIED_SYSTEM_PROMPT
+# from app.prompts.unified_prompt import UNIFIED_SYSTEM_PROMPT
+from app.prompts.intent_prompt import INTENT_SYSTEM_PROMPT
+from app.prompts.response_prompt import RESPONSE_PROMPT
 from app.utils.json_utils import safe_json
 from app.config import llm
 from app.utils.lang_detect import detect_lang
+from app.utils.filter_analysis import filter_analysis_by_intent
 import json
 
 def unified_agent(state: dict) -> dict:
@@ -16,6 +19,12 @@ def unified_agent(state: dict) -> dict:
     existing_intent = state.get("intent")
     language = state.get("user_language")
     analysis = state.get("analysis", {})
+
+    # analysis = state.get("analysis", {})
+    # filtered_analysis = filter_analysis_by_intent(
+    #     existing_intent,
+    #     analysis
+    # )
     context = state.get("context", {})
     history = state.get("short_memory", []) or []
     
@@ -68,70 +77,16 @@ def unified_agent(state: dict) -> dict:
                 state["user_language"] = language or "en"
                 return state
 
-    # MODE 1: Intent Detection (when intent is not set)
     if not existing_intent:
-        # Build intent detection prompt
-        intent_prompt = f"""{UNIFIED_SYSTEM_PROMPT}
+      
+        intent_prompt = f"""{INTENT_SYSTEM_PROMPT}
+        Conversation history:
+        {history_text}
 
-TASK: Intent Detection and Entity Extraction
-
-You must identify the farmer's intent and extract relevant entities.
-DO NOT answer the question yet.
-
-Conversation history:
-{history_text}
-
---------------------------------
-INTENT SELECTION RULES
---------------------------------
-
-1. dashboard_summary → overall farm condition, crop status, yield, stress, sugar, biomass, indices
-2. map_view → spatial/visual field maps
-3. soil_moisture → soil wetness level or trend (NOT irrigation advice)
-4. irrigation_advice → irrigation decision/action
-5. irrigation_schedule → multi-day water plan
-6. soil_analysis → soil quality, nutrients, fertility, NPK, soil report
-7. weather_forecast → weather, rain, temp, humidity, wind
-8. fertilizer_advice → fertilizer usage, NPK, schedule, videos
-9. pest_risk → pests, disease, weeds
-10. general_explanation → greeting/help/off-topic (ONLY if no agriculture meaning)
-
-RULE: If ANY farming meaning exists → NEVER use general_explanation.
-
---------------------------------
-ENTITY EXTRACTION
---------------------------------
-Extract only if present:
-- date: tomorrow / उद्या / etc (or null)
-- parameter: pH / N / P / K etc (or null)
-- query_type: based on intent mapping (or null)
-
---------------------------------
-QUERY_TYPE MAPPING
---------------------------------
-dashboard_summary → crop_status_check, yield_info, sugar_content_check, stress_check, biomass_check, indices_check
-map_view → soil_moisture_map, water_uptake_map, growth_map, pest_map
-soil_moisture → soil_moisture_current, soil_moisture_trend
-irrigation_advice → irrigate_today, water_required
-irrigation_schedule → 7_day_schedule
-fertilizer_advice → video_resources, fertilizer_schedule, fertilizer_soil_npk_requirements
-
---------------------------------
-OUTPUT FORMAT (JSON ONLY)
---------------------------------
-{{
-  "intent": "intent_name",
-  "entities": {{
-    "date": null,
-    "parameter": null,
-    "query_type": null
-  }}
-}}
-
-Farmer message:
-"{user_message}"
-"""
-        
+        Farmer message:
+        "{user_message}"
+        """
+  
         try:
             response = llm.invoke(intent_prompt)
             
@@ -146,11 +101,11 @@ Farmer message:
             else:
                 content = str(response)
                 
-            # ---------- DISABLE VERBOSE LOGGING FOR PERFORMANCE ----------
-            # print("RAW LLM RESPONSE (INTENT):", content)
+          
             
             result = safe_json(content)
             intent = result.get("intent")
+            print("\nDEBUG INTENT DETECTED:", intent)
             entities = result.get("entities")
             
             if not intent:
@@ -158,7 +113,38 @@ Farmer message:
             
             state["intent"] = intent
             state["entities"] = entities if isinstance(entities, dict) else {}
+
+            cached_data = state.get("context", {}).get("cached_data", {})
+            print("\nDEBUG CACHED DATA KEYS:", list(cached_data.keys()))
             
+            filtered = filter_analysis_by_intent(intent, cached_data)
+
+            # Extract only useful context (NOT cached_data)
+            context_for_analysis = {
+                "plot_id": context.get("plot_id"),
+                "plantation_date": context.get("plantation_date"),
+                "crop_stage": context.get("crop_stage"),
+                "days_since_plantation": context.get("days_since_plantation"),
+                "plantation_type": context.get("plantation_type"),
+                "planting_method": context.get("planting_method"),
+                "kc": context.get("kc"),
+                "lat": context.get("lat"),
+                "lon": context.get("lon")
+            }
+
+            analysis_payload = {
+                "context": context_for_analysis,
+                "data": filtered
+            }
+
+            print("\nDEBUG FILTERED DATA KEYS:", list(filtered.keys()))
+            state["analysis"] = analysis_payload
+            analysis = analysis_payload
+            
+            # REMOVE large cached data after filtering
+            state["context"].pop("cached_data", None)
+
+
             # If intent is general_explanation, generate response immediately
             if intent == "general_explanation":
                 # Continue to response generation below
@@ -177,14 +163,13 @@ Farmer message:
             else:
                 return state
     
-    # MODE 2: Response Generation (when intent is already set)
-    # Use existing_intent if available, otherwise get from state
     response_intent = existing_intent or state.get("intent", "general_explanation")
     
-    # Build response generation prompt
     analysis_str = "No analysis data available"
     if analysis:
         try:
+            # if isinstance(filtered_analysis, dict):
+            #     analysis_str = json.dumps(filtered_analysis, indent=2, ensure_ascii=False)
             if isinstance(analysis, dict):
                 analysis_str = json.dumps(analysis, indent=2, ensure_ascii=False)
             else:
@@ -193,86 +178,28 @@ Farmer message:
             analysis_str = str(analysis)
     
     # ---------- REMOVE cached_data FOR general_explanation TO REDUCE PROMPT SIZE ----------
-    context_str = "No context available"
-    if context:
-        try:
-            # For general_explanation, only keep minimal context (no cached_data)
-            if response_intent == "general_explanation":
-                minimal_context = {
-                    "plot_id": context.get("plot_id"),
-                    "user_id": context.get("user_id")
-                }
-                context_str = json.dumps(minimal_context, indent=2, ensure_ascii=False)
-            else:
-                context_str = json.dumps(context, indent=2, ensure_ascii=False)
-        except Exception:
-            context_str = str(context)
+    # context_str = "No context available"
+    # if context:
+    #     try:
+    #         if response_intent == "general_explanation":
+    #             minimal_context = {
+    #                 "plot_id": context.get("plot_id"),
+    #                 "user_id": context.get("user_id")
+    #             }
+    #             context_str = json.dumps(minimal_context, indent=2, ensure_ascii=False)
+    #         else:
+    #             context_str = json.dumps(context, indent=2, ensure_ascii=False)
+    #     except Exception:
+    #         context_str = str(context)
     
-    response_prompt = f"""{UNIFIED_SYSTEM_PROMPT}
-
-TASK: Generate Final Response
-
-You must generate a natural, farmer-friendly reply in the same language as the user.
-This response will be used for both text and voice interfaces.
-
-Context:
-- User intent: {response_intent}
-- User language: {language}
-- Conversation history:
-{history_text}
-
-Farm Context:
-{context_str}
-
-Analysis Data:
-{analysis_str}
-
---------------------------------
-RESPONSE GENERATION RULES
---------------------------------
-
-PRIORITY:
-1. If intent is greeting/general_explanation → reply greeting only, no data mention
-2. Respond in SAME language as user ({language})
-3. Maximum 3-4 short lines
-4. Use ONLY provided analysis and context
-5. DO NOT invent, assume, or guess any data
-6. Speak like a real agronomist helping a farmer
-7. Natural spoken tone (works for both text and voice)
-8. No technical jargon, no UI references
-9. No system details, APIs, satellites, models, calculations
-10. Include numeric values with clear units when present
-11. Add meaning to values (good / low / high / improving / stable)
-12. If data missing → say naturally it is unavailable
-13. For spatial queries → describe WHERE differences occur
-14. For partial data → mention uncertainty naturally
-
---------------------------------
-DOMAIN-SPECIFIC INTERPRETATION
---------------------------------
-
-DASHBOARD: Interpret farm metrics meaning naturally.
-MAP: Describe spatial variation only. Never recommend actions.
-SOIL MOISTURE: Use value vs optimal range (below→low, within→good, above→high)
-WEATHER: Interpret using temp/rain/wind/humidity values only. Explain from tomorrow.
-FERTILIZER: Positive→needed, Negative→excess, Zero→balanced
-PEST + CROP HEALTH: Include growth stage, health, pests, disease, weeds, action if needed
-IRRIGATION: Multi-day→schedule, Decision→advice
-
---------------------------------
-OUTPUT
---------------------------------
-Return ONLY the final answer text.
-No JSON, no explanation, no metadata, no intent label.
-
-User message:
-"{user_message}"
-"""
+    response_prompt = f"""{RESPONSE_PROMPT}
+        User message: "{user_message}"
+        Analysis: {analysis_str}
+        """
     
     try:
         response = llm.invoke(response_prompt)
-        
-        # Handle different response formats
+
         content = ""
         if hasattr(response, 'content'):
             content = response.content

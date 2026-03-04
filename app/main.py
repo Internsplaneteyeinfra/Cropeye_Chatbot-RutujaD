@@ -289,7 +289,16 @@ async def chat(request: ChatRequest):
             }
         state["context"]["cached_data"] = cached
 
+    print("\nDEBUG STATE BEFORE GRAPH:", {
+    "message": state["user_message"],
+    "context_keys": list(state["context"].keys())
+})
     result = await graph.ainvoke(state)
+
+    print("\nDEBUG RESULT AFTER GRAPH:", {
+    "intent": result.get("intent"),
+    "analysis_keys": list(result.get("analysis", {}).keys())
+})
 
     redis_manager.save_message(user_id, plot_id, "user", request.message)
     if result.get("final_response"):
@@ -299,7 +308,7 @@ async def chat(request: ChatRequest):
         "language": result.get("user_language"),
         "intent": result.get("intent"),
         "entities": result.get("entities"),
-        "context": result.get("context"),
+        # "context": result.get("context"),
         "analysis": result.get("analysis"),
         "response": result.get("final_response")
     }
