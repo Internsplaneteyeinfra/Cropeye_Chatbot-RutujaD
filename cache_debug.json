@@ -79785,7 +79785,7 @@
       ]
     },
     "ttl": 86400,
-    "time": "2026-03-04T14:05:19.954249"
+    "time": "2026-03-04T14:37:53.787114"
   },
   "plot_status:162_1": {
     "key": "plot_status:162_1",
@@ -82281,26 +82281,26 @@
     "value": [
       {
         "role": "bot",
-        "message": "It looks like your crop has completed its 10-month fertilizer schedule. Based on our analysis, no further fertilizer is needed at this stage."
+        "message": "\u0938\u0927\u094d\u092f\u093e\u091a\u094d\u092f\u093e \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923\u093e\u0928\u0941\u0938\u093e\u0930, \u0924\u0941\u092e\u091a\u094d\u092f\u093e \u092a\u093f\u0915\u093e\u0932\u093e \u0915\u0940\u091f\u0915 \u0915\u093f\u0902\u0935\u093e \u0930\u094b\u0917\u093e\u0902\u091a\u093e \u091c\u093e\u0938\u094d\u0924 \u0927\u094b\u0915\u093e \u0926\u093f\u0938\u0924 \u0928\u093e\u0939\u0940\u092f\u0947.\n\u092a\u0923, \u0939\u0930\u093f\u092f\u093e\u0933\u0940 \u0906\u0923\u093f \u0915\u093e\u0901\u0917\u094d\u0930\u0947\u0938 \u0917\u0935\u0924 \u092f\u093e\u0902\u0938\u093e\u0930\u0916\u094d\u092f\u093e \u0924\u0923\u093e\u0902\u091a\u093e \u0927\u094b\u0915\u093e \u091c\u093e\u0938\u094d\u0924 \u0906\u0939\u0947.\n\u0924\u0941\u092e\u091a\u0902 \u092a\u0940\u0915 \u0938\u0927\u094d\u092f\u093e '\u092a\u093f\u0915\u0923\u094d\u092f\u093e\u091a\u094d\u092f\u093e \u0906\u0923\u093f \u092a\u0930\u093f\u092a\u0915\u094d\u0935\u0924\u0947\u091a\u094d\u092f\u093e' \u0905\u0935\u0938\u094d\u0925\u0947\u0924 \u0906\u0939\u0947."
       },
       {
         "role": "user",
-        "message": "what is growth status"
+        "message": "what is my current weather?"
       },
       {
         "role": "bot",
-        "message": "Hmm, it looks like I don't have the current growth status details for your crop right now."
+        "message": "Alright, for Sardhana, it's currently quite warm at 34.3\u00b0C. Humidity is very low at 9%, with a moderate wind of 21.2 kph. No rain is expected."
       },
       {
         "role": "user",
-        "message": "what is my Pest status"
+        "message": "\u092e\u093e\u091d\u094d\u092f\u093e \u092a\u093f\u0915\u093e\u0924 \u0915\u0940\u091f\u0915\u093e\u0902\u091a\u093e \u0927\u094b\u0915\u093e \u0906\u0939\u0947 \u0915\u093e?"
       },
       {
         "role": "bot",
-        "message": "Alright, for your plot in the Ripening & Maturity stage, we're not seeing any high or moderate risks from insect pests or diseases at the moment.\nHowever, there's a high risk from weeds like Hariali and Congress Grass.\nThese are aggressive and spread quickly, so it's good to be vigilant."
+        "message": "\u0938\u0927\u094d\u092f\u093e\u091a\u094d\u092f\u093e \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923\u093e\u0928\u0941\u0938\u093e\u0930, \u0924\u0941\u092e\u091a\u094d\u092f\u093e \u092a\u093f\u0915\u093e\u0932\u093e \u0915\u0940\u091f\u0915 \u0915\u093f\u0902\u0935\u093e \u0930\u094b\u0917\u093e\u0902\u091a\u093e \u091c\u093e\u0938\u094d\u0924 \u0927\u094b\u0915\u093e \u0926\u093f\u0938\u0924 \u0928\u093e\u0939\u0940\u092f\u0947.\n\u092a\u0923, \u0939\u0930\u093f\u092f\u093e\u0933\u0940 \u0906\u0923\u093f \u0915\u093e\u0901\u0917\u094d\u0930\u0947\u0938 \u0917\u0935\u0924 \u092f\u093e\u0902\u0938\u093e\u0930\u0916\u094d\u092f\u093e \u0924\u0923\u093e\u0902\u091a\u093e \u0927\u094b\u0915\u093e \u091c\u093e\u0938\u094d\u0924 \u0906\u0939\u0947.\n\u0924\u0941\u092e\u091a\u0902 \u092a\u0940\u0915 \u0938\u0927\u094d\u092f\u093e '\u092a\u093f\u0915\u0923\u094d\u092f\u093e\u091a\u094d\u092f\u093e \u0906\u0923\u093f \u092a\u0930\u093f\u092a\u0915\u094d\u0935\u0924\u0947\u091a\u094d\u092f\u093e' \u0905\u0935\u0938\u094d\u0925\u0947\u0924 \u0906\u0939\u0947."
       }
     ],
     "ttl": 900,
-    "time": "2026-03-04T14:07:05.015649"
+    "time": "2026-03-04T14:39:13.300018"
   }
 }
