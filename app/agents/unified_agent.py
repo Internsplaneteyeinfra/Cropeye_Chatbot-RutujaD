@@ -8,7 +8,7 @@ from app.prompts.intent_prompt import INTENT_SYSTEM_PROMPT
 from app.prompts.response_prompt import RESPONSE_PROMPT
 from app.utils.cache_filter import filter_cache_by_intent
 from app.utils.analysis_compressor import compress_analysis
-
+import time
 
 def unified_agent(state: dict) -> dict:
     """
@@ -21,6 +21,9 @@ def unified_agent(state: dict) -> dict:
     existing_intent = state.get("intent")
     language = state.get("user_language")
     analysis = state.get("analysis", {})
+    print("\n===== ANALYSIS DATA =====")
+    print(json.dumps(analysis, indent=2, ensure_ascii=False))
+    print("=========================\n")
     context = state.get("context", {})
     
     history = state.get("short_memory", []) or []
@@ -82,7 +85,9 @@ def unified_agent(state: dict) -> dict:
             """
         
         try:
+            start = time.perf_counter()
             response = llm.invoke(intent_prompt)
+            print(f"⏱ Intent LLM time: {time.perf_counter() - start:.3f}s")
             
             # Handle different response formats
             content = ""
@@ -164,6 +169,8 @@ def unified_agent(state: dict) -> dict:
                     "user_id": context.get("user_id")
                 }
                 context_str = json.dumps(minimal_context, indent=2, ensure_ascii=False)
+                print(f"CONTEXT SENT TO LLM: {context_str}")
+
             else:
                 # context_str = json.dumps(context, indent=2, ensure_ascii=False)
                 minimal_context = {
@@ -171,9 +178,11 @@ def unified_agent(state: dict) -> dict:
                     "crop_stage": context.get("crop_stage"),
                     "plantation_date": context.get("plantation_date"),
                 }
-                if context.get("cached_data"):
-                    minimal_context["cached_data"] = context["cached_data"]
+                context.pop("cached_data", None)
+              
+                pass
                 context_str = json.dumps(minimal_context, indent=2, ensure_ascii=False)
+                print(f"FARM CONTEXT SENT TO LLM: {context_str}")
 
         except Exception:
             context_str = str(context)
@@ -185,8 +194,10 @@ def unified_agent(state: dict) -> dict:
         """
     
     try:
+        print("PROMPT LENGTH:", len(response_prompt))
+        start = time.perf_counter()
         response = llm.invoke(response_prompt)
-        
+        print(f"⏱ LLM call took {time.perf_counter()-start:.3f}s")
         # Handle different response formats
         content = ""
         if hasattr(response, 'content'):

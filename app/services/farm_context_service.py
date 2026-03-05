@@ -4,12 +4,14 @@
 Farm Context Service
 Extracts and manages farm context (plot, crop, plantation date, etc.)
 """
+import time
+import json
+from pathlib import Path
 
 from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
-from app.services.api_service import get_api_service
-import json
-from pathlib import Path
+from app.memory.redis_manager import redis_manager
+# from app.services.api_service import get_api_service
 
 BUD_PATH = Path("app/domain/irrigation/bud.json")
 
@@ -82,22 +84,22 @@ async def get_farm_context(
     auth_token: Optional[str] = None
 ) -> Dict[str, Any]:
 
+    start_total = time.perf_counter()
     if not plot_name:
         return {"error": "Plot name is required"}
 
-    # ---------- CACHE FARM CONTEXT PER PLOT TO AVOID RE-PARSING ----------
-    from app.memory.redis_manager import redis_manager
     cache_key = f"farm_context:{plot_name}"
     cached_context = redis_manager.get(cache_key)
     
     if cached_context and not cached_context.get("error"):
         return cached_context
 
-    api_service = get_api_service(auth_token)
-    profile_data = await api_service.get_public_plots()
+    start = time.perf_counter()
+    profile_data = redis_manager.get("public_plots")
+    print(f"⏱ Redis public_plots fetch: {time.perf_counter() - start:.3f}s")
 
-    if "error" in profile_data:
-        return {"error": profile_data["error"]}
+    if not profile_data:
+        return {"error": "public_plots cache not found"}
 
     plots = profile_data.get("results", [])
 
@@ -109,6 +111,8 @@ async def get_farm_context(
         if str(pid) == str(plot_name):
             selected_plot = plot
             break
+    print(f"⏱ Plot search time: {time.perf_counter() - start:.3f}s")
+
 
     if not selected_plot:
         return {"error": f"Plot {plot_name} not found"}
@@ -123,18 +127,13 @@ async def get_farm_context(
     plantation_type = farm.get("plantation_type")
     planting_method = farm.get("planting_method")
 
-    # ---------- DISABLE VERBOSE LOGGING FOR PERFORMANCE ----------
-    # print("PLANTATION DATE =", plantation_date)
-    # print("PLANTATION TYPE =", plantation_type)
-    # print("PLANTATION METHOD =", planting_method)
-
     if not plantation_date:
         return {"error": "Plantation date missing"}
 
+    start = time.perf_counter()
     crop_stage_info = calculate_crop_stage(plantation_date)
-
-    # print("KC_CALCULATED =", crop_stage_info["kc"])
-
+    print(f"⏱ Crop stage calculation: {time.perf_counter() - start:.3f}s")
+    
     location = selected_plot.get("location", {}).get("coordinates", [])
 
     lon = location[0] if len(location) >= 2 else None

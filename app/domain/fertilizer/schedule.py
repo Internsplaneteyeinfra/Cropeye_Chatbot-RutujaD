@@ -6,18 +6,11 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, Any
 
-# =====================================================
-# LOAD BUD DATA
-# =====================================================
-
 BUD_PATH = Path(__file__).parent / "bud.json"
 
 with open(BUD_PATH, "r", encoding="utf-8") as f:
     BUD_DATA = json.load(f)
 
-# =====================================================
-# CONSTANTS
-# =====================================================
 
 PLANTATION_TYPE_MONTHS = {
     "suru": 10,
@@ -25,10 +18,6 @@ PLANTATION_TYPE_MONTHS = {
     "preseasonal": 12,
     "ratoon": 9,
 }
-
-# =====================================================
-# SHARED VALIDATION HELPERS
-# =====================================================
 
 def _require_string(value: Any, name: str) -> str:
     if not value or not isinstance(value, str):
@@ -49,9 +38,6 @@ def _normalize(value: str) -> str:
     return value.lower().strip().replace("_", "-").replace(" ", "-")
 
 
-# =====================================================
-# DATE CALCULATIONS
-# =====================================================
 
 def calculate_days_since_plantation(plantation_date: str) -> int:
     plantation = _parse_iso_date(plantation_date)
@@ -69,11 +55,6 @@ def calculate_months_since_plantation(plantation_date: str) -> int:
         months -= 1
 
     return max(months, 0)
-
-
-# =====================================================
-# STAGE RESOLUTION
-# =====================================================
 
 def _get_stage_for_day(days: int, stages: list) -> Dict:
     for stage in stages:
@@ -101,10 +82,6 @@ def _get_schedule_by_method(method: str) -> Dict:
 
     return schedule
 
-
-# =====================================================
-# MAIN SCHEDULE GENERATOR
-# =====================================================
 
 def generate_7_day_schedule(
     plantation_date: str,

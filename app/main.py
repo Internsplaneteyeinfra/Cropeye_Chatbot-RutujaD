@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 from app.services.farm_context_service import get_farm_context
 from app.services.api_service import get_api_service
-
+import time
 from app.memory.redis_manager import redis_manager
 
 from app.services.voice_service import (
@@ -218,6 +218,7 @@ async def initialize_plot(plot_id: str):
 @app.post("/chat")
 async def chat(request: ChatRequest):
     auth_token = None
+    chat_start = time.perf_counter()
 
     user_id = request.user_id 
     plot_id = request.plot_id 
@@ -244,8 +245,7 @@ async def chat(request: ChatRequest):
         "context": {
             "plot_id": request.plot_id,
             "user_id": request.user_id,
-            "auth_token": auth_token
-            
+            "auth_token": auth_token,
         },
         "short_memory": short_memory,
         "analysis": None,
@@ -279,7 +279,10 @@ async def chat(request: ChatRequest):
                     "message": "Plot data still loading. Please wait..."
                 }
 
+            start = time.perf_counter()
             cached = redis_manager.get_plot(plot_id)
+            print(f"⏱ Plot cache fetch: {time.perf_counter() - start:.3f}s")
+
         except:
             cached = None
 
@@ -295,6 +298,8 @@ async def chat(request: ChatRequest):
     if result.get("final_response"):
         redis_manager.save_message(user_id, plot_id, "bot", result["final_response"])
 
+    print(f"⏱ TOTAL CHAT TIME: {time.perf_counter() - chat_start:.3f}s")
+    
     return {
         "language": result.get("user_language"),
         "intent": result.get("intent"),
@@ -364,8 +369,10 @@ async def voice_chat(request: VoiceChatRequest):
         "analysis": None,
         "final_response": None,
     }
-
+    start = time.perf_counter()
     cached = redis_manager.get_plot(plot_id)
+    print(f"⏱ plot cache fetch took {time.perf_counter()-start:.3f}s")
+
     if not cached:
         return {
             "error": "Plot not initialized. Please call /initialize-plot first."

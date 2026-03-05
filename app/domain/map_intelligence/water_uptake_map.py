@@ -17,7 +17,7 @@ class WaterUptakeMap:
             "classification": {
                 "deficient": pixel.get("deficient_pixel_percentage"),
                 "less": pixel.get("less_pixel_percentage"),
-                "Adequate": pixel.get("adequate_pixel_percentage"),
+                "Adequate": pixel.get("adequat_pixel_percentage"),
                 "excellent": pixel.get("excellent_pixel_percentage"),
                 "excess": pixel.get("excess_pixel_percentage"),
             },

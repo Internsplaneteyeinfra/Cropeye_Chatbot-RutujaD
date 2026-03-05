@@ -8,7 +8,7 @@ async def weather_agent(state: dict) -> dict:
 
     context = state.get("context", {})
     cached = context.get("cached_data", {})
-
+    intent = state.get("intent")
     analysis = {"weather": {}}
 
     def get_cached(key):
@@ -19,8 +19,15 @@ async def weather_agent(state: dict) -> dict:
             }
         return data
 
-    analysis["weather"]["current_weather"] = get_cached("current_weather")
-    analysis["weather"]["weather_forecast"] = get_cached("weather_forecast")
+    if intent == "weather_forecast":
+        analysis["weather"]["weather_forecast"] = get_cached("weather_forecast")
+
+    elif intent == "current_weather":
+        analysis["weather"]["current_weather"] = get_cached("current_weather")
+
+    
+    # analysis["weather"]["current_weather"] = get_cached("current_weather")
+    # analysis["weather"]["weather_forecast"] = get_cached("weather_forecast")
 
     state["analysis"] = analysis
 

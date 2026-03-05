@@ -24,14 +24,14 @@ async def irrigation_agent(state: dict) -> dict:
             analysis["irrigation"]["schedule_7_day"] = cached_schedule
 
         else:
-            schedule = IrrigationSchedule()   # ✅ no token
+            schedule = IrrigationSchedule()  
             result = await schedule.build(plot_id, lat, lon, cached)
 
             analysis["irrigation"]["schedule_7_day"] = result
 
     # ---------- STATUS ----------
     else:
-        status = IrrigationStatus()   # ✅ no token
+        status = IrrigationStatus()  
         result = await status.build(plot_id, cached)
 
         analysis["irrigation"]["status"] = result
