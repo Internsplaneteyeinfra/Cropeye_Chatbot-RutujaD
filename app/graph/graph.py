@@ -3,8 +3,7 @@ from langgraph.graph import StateGraph, END
 from app.graph.state import GraphState
 from app.graph.router import router
 
-# from app.agents.language_detector import language_detector
-from app.agents.intent_analyzer import intent_analyzer
+from app.agents.unified_agent import unified_agent
 
 from app.agents.soil_analysis_agent import soil_analysis_agent
 from app.agents.soil_moisture_agent import soil_moisture_agent
@@ -15,13 +14,11 @@ from app.agents.irrigation_agent import irrigation_agent
 from app.agents.fertilizer_agent import fertilizer_agent
 from app.agents.dashboard_agent import dashboard_agent
 
-from app.agents.response_generator import response_generator
-
 def build_graph():
     graph = StateGraph(GraphState)
 
-    # graph.add_node("language_detector", language_detector)
-    graph.add_node("intent_analyzer", intent_analyzer)
+    # Unified agent handles both intent detection and response generation
+    graph.add_node("unified_agent", unified_agent)
 
     graph.add_node("soil_analysis_agent", soil_analysis_agent)
     graph.add_node("soil_moisture_agent", soil_moisture_agent)
@@ -31,18 +28,21 @@ def build_graph():
     graph.add_node("irrigation_agent", irrigation_agent)
     graph.add_node("fertilizer_agent", fertilizer_agent)
     graph.add_node("dashboard_agent", dashboard_agent)
-    graph.add_node("response_generator", response_generator)
 
-
-    # Set entry point
-    # graph.set_entry_point("language_detector")
-
-    # graph.add_edge("language_detector", "intent_analyzer")
-    graph.set_entry_point("intent_analyzer")
+    # Set entry point to unified agent (intent detection mode)
+    graph.set_entry_point("unified_agent")
+    
+    # Route based on detected intent
+    # If final_response is already set (general_explanation case handled in unified_agent), go to END
+    # Otherwise, route to domain agents
+    def route_after_intent(state: dict) -> str:
+        if state.get("final_response"):
+            return END
+        return router(state)
     
     graph.add_conditional_edges(
-        "intent_analyzer",
-        router,
+        "unified_agent",
+        route_after_intent,
         {
             "soil_analysis_agent": "soil_analysis_agent",
             "soil_moisture_agent": "soil_moisture_agent",
@@ -52,18 +52,22 @@ def build_graph():
             "irrigation_agent": "irrigation_agent",
             "fertilizer_agent": "fertilizer_agent",
             "dashboard_agent": "dashboard_agent",
-            "response_generator": "response_generator"
+            "unified_agent": "unified_agent",  # For general_explanation (shouldn't happen, but safe fallback)
+            END: END
         }
     )
     
-    graph.add_edge("soil_analysis_agent", "response_generator")
-    graph.add_edge("soil_moisture_agent", "response_generator")
-    graph.add_edge("weather_agent", "response_generator")
-    graph.add_edge("map_agent", "response_generator")
-    graph.add_edge("pest_agent", "response_generator")
-    graph.add_edge("irrigation_agent", "response_generator")
-    graph.add_edge("fertilizer_agent", "response_generator")
-    graph.add_edge("dashboard_agent", "response_generator")
-    graph.add_edge("response_generator", END)
+    # All domain agents route back to unified agent (response generation mode)
+    graph.add_edge("soil_analysis_agent", "unified_agent")
+    graph.add_edge("soil_moisture_agent", "unified_agent")
+    graph.add_edge("weather_agent", "unified_agent")
+    graph.add_edge("map_agent", "unified_agent")
+    graph.add_edge("pest_agent", "unified_agent")
+    graph.add_edge("irrigation_agent", "unified_agent")
+    graph.add_edge("fertilizer_agent", "unified_agent")
+    graph.add_edge("dashboard_agent", "unified_agent")
+    
+    # Unified agent (response generation mode) always ends the graph
+    graph.add_edge("unified_agent", END)
 
     return graph.compile()

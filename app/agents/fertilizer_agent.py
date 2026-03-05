@@ -4,7 +4,6 @@ from app.services.api_service import get_api_service
 from app.services.farm_context_service import get_farm_context
 from app.domain.fertilizer.video_resource import get_fertilizer_videos
 
-
 from app.domain.fertilizer.schedule import (
     generate_7_day_schedule,
     calculate_months_since_plantation,
@@ -108,12 +107,6 @@ async def fertilizer_agent(state: dict) -> dict:
         }
         return state
 
-    # =====================================================
-    # NPK REQUIREMENTS
-    # =====================================================
-    # api = get_api_service(auth_token)
-    # npk = await api.get_npk_requirements(plot_id)
-    
     cached = context.get("cached_data", {})
     npk = get_cached_or_fail(cached, "npk_requirements")
     

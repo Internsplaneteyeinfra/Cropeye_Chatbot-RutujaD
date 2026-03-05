@@ -4,12 +4,14 @@
 Farm Context Service
 Extracts and manages farm context (plot, crop, plantation date, etc.)
 """
+import time
+import json
+from pathlib import Path
 
 from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
-from app.services.api_service import get_api_service
-import json
-from pathlib import Path
+from app.memory.redis_manager import redis_manager
+# from app.services.api_service import get_api_service
 
 BUD_PATH = Path("app/domain/irrigation/bud.json")
 
@@ -82,41 +84,22 @@ async def get_farm_context(
     auth_token: Optional[str] = None
 ) -> Dict[str, Any]:
 
+    start_total = time.perf_counter()
     if not plot_name:
         return {"error": "Plot name is required"}
 
-    # if not auth_token:
-    #     return {"error": "Authentication required"}
+    cache_key = f"farm_context:{plot_name}"
+    cached_context = redis_manager.get(cache_key)
+    
+    if cached_context and not cached_context.get("error"):
+        return cached_context
 
-    api_service = get_api_service(auth_token)
-    # profile_data = await api_service.get_farmer_profile(user_id)
-    profile_data = await api_service.get_public_plots()
+    start = time.perf_counter()
+    profile_data = redis_manager.get("public_plots")
+    print(f"⏱ Redis public_plots fetch: {time.perf_counter() - start:.3f}s")
 
-    if "error" in profile_data:
-        return {"error": profile_data["error"]}
-
-    # farms = profile_data.get("results", [])
-
-    # if not farms:
-    #     return {"error": "No farms found"}
-
-    # # print("\n===== FULL FARMS DATA =====")
-    # # print(farms)
-
-    # selected_farm = None
-
-    # for farm in farms:
-
-    #     plot = farm.get("plot", {})
-
-    #     plot_id = f"{plot.get('gat_number')}_{plot.get('plot_number')}"
-
-    #     if str(plot_id) == str(plot_name):
-    #         selected_farm = farm
-    #         break
-
-    # if not selected_farm:
-    #     return {"error": f"Plot {plot_name} not found"}
+    if not profile_data:
+        return {"error": "public_plots cache not found"}
 
     plots = profile_data.get("results", [])
 
@@ -128,17 +111,11 @@ async def get_farm_context(
         if str(pid) == str(plot_name):
             selected_plot = plot
             break
+    print(f"⏱ Plot search time: {time.perf_counter() - start:.3f}s")
+
 
     if not selected_plot:
         return {"error": f"Plot {plot_name} not found"}
-
-
-    # ✅ plantation date is directly here
-    # plantation_date = selected_farm.get("plantation_date")
-    # crop_data = selected_farm.get("crop_type", {})
-    # plantation_type = crop_data.get("plantation_type_display") or crop_data.get("plantation_type")
-    # planting_method = crop_data.get("planting_method_display") or crop_data.get("planting_method")
-
 
     farms = selected_plot.get("farms", [])
 
@@ -150,30 +127,19 @@ async def get_farm_context(
     plantation_type = farm.get("plantation_type")
     planting_method = farm.get("planting_method")
 
-
-    print("PLANTATION DATE =", plantation_date)
-    print("PLANTATION TYPE =", plantation_type)
-    print("PLANTATION METHOD =", planting_method)
-
-
     if not plantation_date:
         return {"error": "Plantation date missing"}
 
+    start = time.perf_counter()
     crop_stage_info = calculate_crop_stage(plantation_date)
-
-    print("KC_CALCULATED =", crop_stage_info["kc"])
-
-
-
-    # plot = selected_farm.get("plot", {})
-    # location = plot.get("location", {}).get("coordinates", [])
-
+    print(f"⏱ Crop stage calculation: {time.perf_counter() - start:.3f}s")
+    
     location = selected_plot.get("location", {}).get("coordinates", [])
 
     lon = location[0] if len(location) >= 2 else None
     lat = location[1] if len(location) >= 2 else None
 
-    return {
+    farm_context = {
         "plot_id": plot_name,
         "plantation_date": plantation_date,
         "crop_stage": crop_stage_info["stage"],
@@ -185,3 +151,8 @@ async def get_farm_context(
         "lon": lon,
         "error": None
     }
+    
+    # ---------- CACHE FARM CONTEXT FOR 24 HOURS ----------
+    redis_manager.set(cache_key, farm_context, ttl=86400)
+    
+    return farm_context

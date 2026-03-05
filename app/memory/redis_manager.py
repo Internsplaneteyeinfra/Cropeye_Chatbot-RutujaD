@@ -5,6 +5,7 @@ import os
 import logging
 from datetime import datetime
 from dotenv import load_dotenv
+from app.utils.timer import timer
 
 load_dotenv()
 
@@ -90,7 +91,8 @@ class RedisManager:
             if ttl:
                 self.client.setex(key, ttl, self._serialize(value))
             else:
-                self.client.set(key, self._serialize(value))            
+                self.client.set(key, self._serialize(value))
+            # ---------- DISABLE DEBUG LOGGING FOR PERFORMANCE ----------
             self._debug_log_cache(key, value, ttl)
 
         except Exception as e:
@@ -103,7 +105,7 @@ class RedisManager:
     #     except Exception as e:
     #         logger.warning(f"Redis GET failed: {e}")
     #         return None
-
+    
     def get(self, key):
         try:
             data = self.client.get(key)

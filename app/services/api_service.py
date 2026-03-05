@@ -4,7 +4,6 @@
 API Service Layer for CROPEYE Chatbot
 Handles all backend API calls with caching and error handling
 """
-
 import httpx
 import os
 from typing import Dict, Any, Optional, List
@@ -12,7 +11,6 @@ from datetime import datetime, timedelta
 from cachetools import TTLCache
 from dotenv import load_dotenv
 from app.memory.redis_manager import redis_manager
-
 
 load_dotenv()
 
@@ -24,18 +22,6 @@ EVENTS_API_URL = os.getenv("EVENTS_API_URL", "https://events-cropeye.up.railway.
 FIELD_API_URL = os.getenv("FIELD_API_URL", "https://sef-cropeye.up.railway.app")
 WEATHER_API_URL = os.getenv("WEATHER_API_URL", "https://weather-cropeye.up.railway.app")
 
-
-
-# # Cache configuration
-# map_cache = TTLCache(maxsize=300, ttl=43200)  # 12 hours
-# soil_cache = TTLCache(maxsize=1000, ttl=43200)  # 12 hours
-# weather_cache = TTLCache(maxsize=500, ttl=7200)  # 2 hours
-# irrigation_cache = TTLCache(maxsize=500, ttl=43200)  # 12 hour
-# farm_context_cache = TTLCache(maxsize=100, ttl=3600)  # 12 hour
-# pest_cache = TTLCache(maxsize=500, ttl=43200)  # 12 hours
-# yield_cache = TTLCache(maxsize=500, ttl=1800)  # 30 minutes
-
-
 class APIService:
     """Centralized API service for chatbot"""
     
@@ -44,59 +30,25 @@ class APIService:
         self.client = httpx.AsyncClient(
             timeout=30.0,
             follow_redirects=True)
-    
-    # def _get_headers(self) -> Dict[str, str]:
-    #     """Get headers with authentication if available"""
-    #     headers = {"Accept": "application/json", "Content-Type": "application/json"}
-    #     if self.auth_token:
-    #         headers["Authorization"] = f"Bearer {self.auth_token}"
-    #     return headers
-    
+   
     def _get_headers(self) -> Dict[str, str]:
         return {
             "Accept": "application/json",
             "Content-Type": "application/json"
         }
-    # ----------------------------------------------------------------
-
-    # async def get_farmer_profile(self, user_id: Optional[int] = None) -> Dict[str, Any]:
-    #     """
-    #     Get farmer profile with plots information
-    #     API: GET /farms/
-    #     """
-    #     cache_key = f"farmer_profile_{user_id or 'default'}"
-        
-    #     cached = redis_manager.get(cache_key)
-    #     if cached:
-    #         return cached
-            
-    #     try:
-    #         url = f"{BASE_URL}/farms/"
-    #         response = await self.client.get(url, headers=self._get_headers())
-    #         response.raise_for_status()
-    #         print("Backend authentication verified successfully via /farms API.")
-    #         data = response.json()
-    #         # # # data["_source"] = "api"
-    #         redis_manager.set(cache_key, data, ttl=3600)
-    #         return data
-    #     except httpx.HTTPError as e:
-    #         return {"error": f"Failed to fetch farmer profile: {str(e)}"}
-    
-
+  
     async def get_public_plots(self) -> Dict[str, Any]:
         """
         Get public plots (no auth required)
         API: GET /plots/public/
         """
         cache_key = "public_plots"
-
         cached = redis_manager.get(cache_key)
         if cached:
             return cached
-
         try:
             url = f"{BASE_URL}/plots/public/"
-            response = await self.client.get(url)  # ❌ no headers
+            response = await self.client.get(url) 
             response.raise_for_status()
             data = response.json()
 
@@ -111,9 +63,7 @@ class APIService:
     # ==================================================
 
     async def get_stress_events(self, plot_id: str) -> Dict[str, Any]:
-
         cache_key = f"stress_{plot_id}"
-
         cached = redis_manager.get(cache_key)
         if cached:
             return cached
@@ -125,7 +75,6 @@ class APIService:
                 params={"index_type": "NDRE", "threshold": 0.15},
                 headers=self._get_headers()
             )
-
             response.raise_for_status()
             data = response.json()
             # # # data["_source"] = "api"
@@ -135,18 +84,13 @@ class APIService:
         except httpx.HTTPError as e:
             return {"error": f"Stress fetch failed: {str(e)}"}
 
-
     # ----------------------------------------------------------------
 
     async def get_harvest_status(self, plot_id: str) -> Dict[str, Any]:
-
         cache_key = f"harvest_status_{plot_id}"
-
         cached = redis_manager.get(cache_key)
         if cached:
-
             return cached
-
         try:
             url = f"{EVENTS_API_URL}/sugarcane-harvest"
             response = await self.client.post(
@@ -156,7 +100,6 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-            # # # # data["_source"] = "api"
             redis_manager.set(cache_key, data, ttl=3600)
             return data
 
@@ -168,16 +111,12 @@ class APIService:
 
         if not end_date:
             end_date = datetime.now().strftime("%Y-%m-%d")
-
         cache_key = f"agro_stats_{plot_id}_{end_date}"
-
         cached = redis_manager.get(cache_key)
         if cached:
             return cached
-
         try:
             url = f"{EVENTS_API_URL}/plots/agroStats"
-
             response = await self.client.get(
                 url,
                 params={
@@ -188,8 +127,6 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-            # # # data["_source"] = "api"
-            # Filter only requested plot
             if plot_id in data:
                 data = data[plot_id]
             else:
@@ -201,6 +138,49 @@ class APIService:
         except httpx.HTTPError as e:
             return {"error": f"Agro stats fetch failed: {str(e)}"}
 
+    # ----------------------------------------------------------------
+    async def get_field_indices( self, plot_id: str, start_date: Optional[str] = None,end_date: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Fetch field indices time-series
+        API: GET /plots/{plot_id}/indices
+        """
+
+        if not end_date:
+            end_date = datetime.now().strftime("%Y-%m-%d")
+
+        cache_key = f"indices_{plot_id}_{start_date}_{end_date}"
+        cached = redis_manager.get(cache_key)
+        if cached:
+            return cached
+        try:
+            url = f"{EVENTS_API_URL}/plots/{plot_id}/indices"
+
+            params = {"end_date": end_date}
+            if start_date:
+                params["start_date"] = start_date
+
+            response = await self.client.get(
+                url,
+                params=params,
+                headers=self._get_headers()
+            )
+            response.raise_for_status()
+            data = response.json()
+            formatted = [
+                {
+                    "date": item.get("date"),
+                    "growth": item.get("NDVI"),
+                    "stress": item.get("NDMI"),
+                    "water": item.get("NDWI"),
+                    "moisture": item.get("NDRE"),
+                }
+                for item in data
+            ]
+            redis_manager.set(cache_key, formatted, ttl=43200)
+            return formatted
+
+        except httpx.HTTPError as e:
+            return {"error": f"Indices fetch failed: {str(e)}"}
 
     # ----------------------------------------------------------------
 
@@ -213,7 +193,6 @@ class APIService:
         """
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
-        
         cache_key = f"soil_analysis_{plot_name}_{date}"
         cached_data = redis_manager.get(cache_key)
 
@@ -224,7 +203,6 @@ class APIService:
             cached_data["_cache_key"] = cache_key
             print(f"[API SERVICE] Returning cached soil data for {plot_name} (cache_key: {cache_key})")
             return cached_data
-        
         try:
             url = f"{SOIL_API_URL}/analyze"
             params = {
@@ -236,13 +214,11 @@ class APIService:
             response = await self.client.post(url, params=params, headers=self._get_headers())
             response.raise_for_status()
             data = response.json()
-            
-            # Add metadata
+       
             data["_from_cache"] = False
             data["_api_called"] = True
             data["_cache_key"] = cache_key
             
-            # Store in cache (without metadata to keep cache clean)
             cache_data = {k: v for k, v in data.items() if not k.startswith("_")}
             redis_manager.set(cache_key, cache_data, ttl=43200)
             
@@ -289,14 +265,10 @@ class APIService:
         """
         if end_date is None:
             end_date = datetime.now().strftime("%Y-%m-%d")
-        
         cache_key = f"npk_requirements_{plot_name}_{end_date}"
-        
         cached = redis_manager.get(cache_key)
         if cached:
             return cached
-
-        
         try:
             url = f"{SOIL_API_URL}/required-n/{plot_name}"
             params = {"end_date": end_date}
@@ -304,20 +276,7 @@ class APIService:
 
             response.raise_for_status()
             data = response.json()
-            # # # data["_source"] = "api"
-        #     soil_cache[cache_key] = data
-        #     return data
-        # except httpx.HTTPStatusError as e:
-        #     return {"error": f"HTTP {e.response.status_code}: Failed to fetch NPK requirements"}
-        # except httpx.RequestError as e:
-        #     print(f"[API SERVICE] Request error for NPK requirements {plot_name}: {str(e)}")
-        #     return {"error": f"Request failed: {str(e)}"}
-        # except Exception as e:
-        #     print(f"[API SERVICE] Unexpected error for NPK requirements {plot_name}: {str(e)}")
-        #     import traceback
-        #     traceback.print_exc()
-        #     return {"error": f"Unexpected error: {str(e)}"}
-            
+           
             redis_manager.set(cache_key, data, ttl=43200)
             return data
 
@@ -337,14 +296,11 @@ class APIService:
         """
         if end_date is None:
             end_date = datetime.now().strftime("%Y-%m-%d")
-        
         cache_key = f"npk_analysis_{plot_name}_{end_date}_{days_back}"
         
         cached = redis_manager.get(cache_key)
         if cached:
             return cached
-
-        
         try:
             url = f"{SOIL_API_URL}/analyze-npk/{plot_name}"
             params = {
@@ -354,13 +310,11 @@ class APIService:
             response = await self.client.post(url, params=params, headers=self._get_headers())
             response.raise_for_status()
             data = response.json()
-            # # # data["_source"] = "api"
             redis_manager.set(cache_key, data, ttl=43200)
 
             return data
         except httpx.HTTPError as e:
             return {"error": f"Failed to fetch NPK analysis: {str(e)}"}
-    
 
     # ==================================================
     # MAP APIs (Spatial Intelligence)
@@ -372,17 +326,12 @@ class APIService:
         API: POST /SoilMoisture
         """
         end_date = end_date or datetime.now().strftime("%Y-%m-%d")
-        # if end_date is None:
-        #     end_date = datetime.now().strftime("%Y-%m-%d")
-
         cache_key = f"soil_moisture_map_{plot_name}_{end_date}"
-
         cached = redis_manager.get(cache_key)
         if cached:
             return cached
 
         print(f"[SOIL MAP] plot_name={plot_name}, end_date={end_date}")
-
         try:
             url = f"{PLOT_API_URL}/SoilMoisture"
             params = {
@@ -393,9 +342,6 @@ class APIService:
             response = await self.client.post(url, params=params, headers=self._get_headers())
             response.raise_for_status()
             data = response.json()
-
-            # # # data["_source"] = "api"
-
             redis_manager.set(cache_key, data, ttl=43200)
             return data
 
@@ -415,7 +361,6 @@ class APIService:
         cached = redis_manager.get(cache_key)
         if cached:
             return cached
-
         try:
             response = await self.client.post(
                 f"{PLOT_API_URL}/wateruptake",
@@ -424,7 +369,6 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-            # # # data["_source"] = "api"
             redis_manager.set(cache_key, data, ttl=43200)
             return data
 
@@ -444,7 +388,6 @@ class APIService:
         cached = redis_manager.get(cache_key)
         if cached:
             return cached
-
         try:
             response = await self.client.post(
                 f"{PLOT_API_URL}/pest-detection",
@@ -453,7 +396,6 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-            # # # data["_source"] = "api"
             redis_manager.set(cache_key, data, ttl=43200)
             return data
 
@@ -473,7 +415,6 @@ class APIService:
         cached = redis_manager.get(cache_key)
         if cached:
             return cached
-
         try:
             response = await self.client.post(
                 f"{PLOT_API_URL}/analyze_Growth",
@@ -485,7 +426,6 @@ class APIService:
             )
             response.raise_for_status()            
             data = response.json()
-            # # # data["_source"] = "api"
             redis_manager.set(cache_key, data, ttl=43200)
             return data
 
@@ -501,15 +441,12 @@ class APIService:
         """
         if end_date is None:
             end_date = datetime.now().strftime("%Y-%m-%d")
-        
+            
         cache_key = f"pest_detection_{plot_id}_{end_date}_{days_back}"
-        
         cached = redis_manager.get(cache_key)
         if cached:  
             return cached
-        
         try:
-            # Use PLOT_API_URL for pest detection (same as other map endpoints)
             url = f"{PLOT_API_URL}/pest-detection"
             params = {
                 "plot_name": plot_id,
@@ -524,7 +461,6 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-            # # # data["_source"] = "api"
             redis_manager.set(cache_key, data, ttl=43200)
             return data
             
@@ -552,13 +488,9 @@ class APIService:
             response = await self.client.post(url, headers=self._get_headers())
             response.raise_for_status()
             data = response.json()
-            # # # data["_source"] = "api"
-            #  ✅ cache ONLY success
             if isinstance(data, list):
                 redis_manager.set(cache_key, data, ttl=43200)
-
             return data
-
         except httpx.HTTPError as e:
             return {"error": f"Failed to fetch field soil moisture: {str(e)}"}
 
@@ -576,15 +508,7 @@ class APIService:
         cached = redis_manager.get(cache_key)
         if cached:
             return cached
-
         url = f"{FIELD_API_URL}/plots/{plot_id}/compute-et/"
-
-        # print("\n========== ET API REQUEST ==========")
-        # print("METHOD = POST")
-        # print("URL =", url)
-        # print("HEADERS =", self._get_headers())
-        # print("====================================")
-        
         try:
             url = f"{FIELD_API_URL}/plots/{plot_id}/compute-et/"
             body = {
@@ -599,8 +523,6 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-            # # # data["_source"] = "api"
-
             redis_manager.set(cache_key, data, ttl=43200)
             return data
 
@@ -615,12 +537,10 @@ class APIService:
         API: GET /current-weather?plot_id=
         """
         cache_key = f"current_weather_{plot_id}"
-
         cached = redis_manager.get(cache_key)
         if cached:
             print(f"[CURRENT WEATHER] Returning cached data for {plot_id}")
             return cached
-
         try:
             url = f"{WEATHER_API_URL}/current-weather"
             params = {
@@ -628,7 +548,6 @@ class APIService:
                 "lat": lat,
                 "lon": lon, 
             }
-
             response = await self.client.get(
                 url,
                 params=params,
@@ -636,7 +555,6 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-            # # # data["_source"] = "api"
             redis_manager.set(cache_key, data, ttl=7200)
             return data
 
@@ -650,11 +568,9 @@ class APIService:
         API: GET /forecast?plot_id=
         """
         cache_key = f"weather_forecast_{plot_id}"
-
         cached = redis_manager.get(cache_key)
         if cached:
             return cached
-
         try:
             url = f"{WEATHER_API_URL}/forecast"
             params = {
@@ -662,7 +578,6 @@ class APIService:
                 "lat": lat,
                 "lon": lon
             }
-
             response = await self.client.get(
                 url,
                 params=params,
@@ -670,20 +585,15 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-            # # # data["_source"] = "api"
             redis_manager.set(cache_key, data, ttl=7200)
             return data
-
         except httpx.HTTPError as e:
             return {"error": f"Failed to fetch weather forecast: {str(e)}"}
 
     # ----------------------------------------------------------------
-
     async def close(self):
         """Close the HTTP client"""
         await self.client.aclose()
-
-
 
 # Global API service instance (will be initialized with auth token when available)
 api_service: Optional[APIService] = None
@@ -693,7 +603,6 @@ def get_api_service(auth_token: Optional[str] = None) -> APIService:
     global api_service
     if api_service is None or (auth_token and api_service.auth_token != auth_token):
         if api_service:
-            # Close existing client
             import asyncio
             asyncio.create_task(api_service.close())
         api_service = APIService(auth_token=auth_token)

@@ -28,7 +28,8 @@ DASHBOARD_INTENTS = {
     "yield_info",
     "sugar_content_check",
     "stress_check",
-    "biomass_check"
+    "biomass_check",
+    "indices_check" 
 }
 
 def router(state: dict) -> str:
@@ -64,7 +65,7 @@ def router(state: dict) -> str:
     if intent in DASHBOARD_INTENTS:
         return "dashboard_agent"
 
-    return "response_generator"
+    return "unified_agent"
 
 
 # Just reminder: later i'll create a combined soil_agent for soil moisture AND soil analysis 
