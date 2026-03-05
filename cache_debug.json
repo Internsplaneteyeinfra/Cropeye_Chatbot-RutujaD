@@ -80458,7 +80458,7 @@
       ]
     },
     "ttl": 86400,
-    "time": "2026-03-05T15:53:39.461378"
+    "time": "2026-03-05T18:28:24.329938"
   },
   "plot_status:162_1": {
     "key": "plot_status:162_1",
@@ -83084,26 +83084,26 @@
     "value": [
       {
         "role": "bot",
-        "message": "Alright, for plot 162_1, the pest map shows about 9% chewing pests at this Maturity & Ripening stage. We're not detecting any sucking, fungi, or soil-borne pests. The map layer is ready for you to review."
+        "message": "I'm having trouble right now. Please try again."
       },
       {
         "role": "user",
-        "message": " water uptake map"
+        "message": "7 day irrigation schedule"
       },
       {
         "role": "bot",
-        "message": "Alright, for plot 162_1, your water uptake is looking very positive. The map shows 100% of the area has adequate water uptake, which is great for your crop at the Maturity & Ripening stage."
+        "message": "Alright, for your Plot 162_1, with your crop in Maturity & Ripening, here's the 7-day irrigation schedule.\nToday, March 5th, you'll need about 21,675 liters as ET is medium.\nExpect similar medium water needs tomorrow, then mostly low ET days for the rest of the week.\nNo rainfall is expected, so plan your irrigation accordingly."
       },
       {
         "role": "user",
-        "message": " water uptake map"
+        "message": "7 day irrigation schedule"
       },
       {
         "role": "bot",
-        "message": "Alright, for plot 162_1, your water uptake is looking very positive. The map shows 100% of the area has adequate water uptake, which is great for your crop at the Maturity & Ripening stage."
+        "message": "Alright, for your Plot 162_1, with your crop in Maturity & Ripening, here's the 7-day irrigation schedule.\nToday, March 5th, you'll need about 21,675 liters as ET is medium.\nExpect similar medium water needs tomorrow, then mostly low ET days for the rest of the week.\nNo rainfall is expected, so plan your irrigation accordingly."
       }
     ],
     "ttl": 900,
-    "time": "2026-03-05T16:01:56.793392"
+    "time": "2026-03-05T18:30:52.665773"
   }
 }
