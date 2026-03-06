@@ -1,7 +1,7 @@
 from typing import Dict
 
 from app.services.api_service import get_api_service
-from app.services.farm_context_service import get_farm_context
+# from app.services.farm_context_service import get_farm_context
 from app.domain.fertilizer.video_resource import get_fertilizer_videos
 
 from app.domain.fertilizer.schedule import (
@@ -37,10 +37,11 @@ async def fertilizer_agent(state: dict) -> dict:
     # =====================================================
     # FARM CONTEXT (single source of truth)
     # =====================================================
-    farm = await get_farm_context(
-        plot_name=plot_id,
-        auth_token=auth_token
-    )
+    # farm = await get_farm_context(
+    #     plot_name=plot_id,
+    #     auth_token=auth_token
+    # )
+    farm = state.get("context", {})
 
     if farm.get("error"):
         state["analysis"] = {"fertilizer": farm}

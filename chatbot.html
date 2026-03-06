@@ -39,11 +39,246 @@
             color: white;
             padding: 20px;
             text-align: center;
+            position: relative;
         }
 
         .header h1 {
             font-size: 24px;
             font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .language-selector-small {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .language-selector-small label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .language-selector-small select {
+            padding: 6px 10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+
+        .language-selector-small select:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .language-selector-small select:focus {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .language-selector-small select option {
+            background: #667eea;
+            color: white;
+        }
+
+        .report-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+
+        .report-button:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .report-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .report-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .report-modal.show {
+            display: flex;
+        }
+
+        .report-modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .report-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .report-modal-header h2 {
+            font-size: 24px;
+            color: #333;
+            margin: 0;
+        }
+
+        .report-close-button {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .report-close-button:hover {
+            background: #d32f2f;
+        }
+
+        .report-language-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            justify-content: center;
+        }
+
+        .report-language-selector label {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .report-language-selector select {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+            min-width: 150px;
+        }
+
+        .report-language-selector select:focus {
+            border-color: #667eea;
+        }
+
+        .report-export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .export-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .export-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .export-button.pdf {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        }
+
+        .export-button.doc {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+        }
+
+        .report-content {
+            line-height: 1.8;
+            color: #333;
+            font-size: 15px;
+            white-space: pre-wrap;
+        }
+
+        .report-content h3 {
+            color: #667eea;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+
+        .report-content p {
+            margin-bottom: 12px;
+        }
+
+        .report-loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .report-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #f5c6cb;
+            margin: 20px 0;
         }
 
         .test-section {
@@ -349,6 +584,19 @@
     <div class="container">
         <div class="header">
             <h1>CropEye Chatbot</h1>
+            <div class="header-actions">
+                <div class="language-selector-small">
+                    <label for="headerReportLanguage">🌐</label>
+                    <select id="headerReportLanguage" title="Select report language">
+                        <option value="en">English</option>
+                        <option value="hi">हिंदी</option>
+                        <option value="mr">मराठी</option>
+                    </select>
+                </div>
+                <button id="generateReportButton" class="report-button" title="Generate Yield Improvement Report">
+                    📊 Generate Report
+                </button>
+            </div>
         </div>
 
         <div class="test-section">
@@ -388,6 +636,32 @@
         </div>
     </div>
 
+    <!-- Report Modal -->
+    <div id="reportModal" class="report-modal">
+        <div class="report-modal-content">
+            <div class="report-modal-header">
+                <h2>Yield Improvement Report</h2>
+                <button class="report-close-button" id="closeReportModal">Close</button>
+            </div>
+            <div class="report-language-selector">
+                <label for="reportLanguage">🌐 Report Language:</label>
+                <select id="reportLanguage">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी (Hindi)</option>
+                    <option value="mr">मराठी (Marathi)</option>
+                </select>
+            </div>
+            <div class="report-export-buttons">
+                <button class="export-button pdf" id="exportPDF">📄 Export as PDF</button>
+                <button class="export-button doc" id="exportDOC">📝 Export as DOC</button>
+            </div>
+            <div id="reportContent" class="report-content"></div>
+        </div>
+    </div>
+
+    <!-- Include html2pdf library for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <script>
         // ==================== CONFIGURATION ====================
         const API_BASE_URL = 'http://localhost:8000'; // Update this to your FastAPI server URL
@@ -407,6 +681,14 @@
         const chatInput = document.getElementById('chatInput');
         const sendButton = document.getElementById('sendButton');
         const chatInputContainer = document.getElementById('chatInputContainer');
+        const generateReportButton = document.getElementById('generateReportButton');
+        const reportModal = document.getElementById('reportModal');
+        const reportContent = document.getElementById('reportContent');
+        const closeReportModal = document.getElementById('closeReportModal');
+        const exportPDF = document.getElementById('exportPDF');
+        const exportDOC = document.getElementById('exportDOC');
+        const reportLanguage = document.getElementById('reportLanguage');
+        const headerReportLanguage = document.getElementById('headerReportLanguage');
 
         // ==================== UTILITY FUNCTIONS ====================
         
@@ -567,6 +849,7 @@
 
                 showStatus('Plot initialized. You can now chat.', 'success');
                 enableChat();
+                generateReportButton.disabled = false;
                 return true;
 
             } catch (error) {
@@ -643,6 +926,241 @@
             }
         }
 
+        // ==================== REPORT GENERATION FUNCTIONS ====================
+
+        /**
+         * Generate yield improvement report
+         */
+        async function generateReport() {
+            const plotId = getPlotId();
+            // Get language from header selector (sync with modal selector)
+            const selectedLanguage = headerReportLanguage.value || reportLanguage.value || 'en';
+            
+            // Sync modal selector with header selector
+            reportLanguage.value = selectedLanguage;
+
+            if (!plotId) {
+                showStatus('Error: plot_id not found. Please set test plot_id or ensure plot_id is in localStorage', 'error');
+                console.error('[Report] plot_id missing');
+                return;
+            }
+
+            try {
+                generateReportButton.disabled = true;
+                generateReportButton.textContent = '⏳ Generating...';
+                
+                // Show modal with loading state
+                reportContent.innerHTML = `<div class="report-loading">⏳ Generating report in ${reportLanguage.options[reportLanguage.selectedIndex].text}... Please wait.</div>`;
+                reportModal.classList.add('show');
+
+                console.log('[API] Calling POST /generate-report with plot_id:', plotId, 'language:', selectedLanguage);
+
+                const response = await fetch(`${API_BASE_URL}/generate-report`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        plot_id: plotId,
+                        language: selectedLanguage
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('[API] POST /generate-report response:', data);
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Format and display the report
+                const formattedReport = formatReport(data.report);
+                reportContent.innerHTML = formattedReport;
+
+                // Store report data for export
+                reportContent.dataset.reportText = data.report;
+                reportContent.dataset.plotId = plotId;
+                reportContent.dataset.timestamp = data.timestamp;
+                reportContent.dataset.language = selectedLanguage;
+
+                showStatus(`Report generated successfully in ${reportLanguage.options[reportLanguage.selectedIndex].text}!`, 'success');
+
+            } catch (error) {
+                console.error('[API] POST /generate-report failed:', error);
+                reportContent.innerHTML = `<div class="report-error">Error generating report: ${error.message}</div>`;
+                showStatus(`Report generation failed: ${error.message}`, 'error');
+            } finally {
+                generateReportButton.disabled = false;
+                generateReportButton.textContent = '📊 Generate Report';
+            }
+        }
+
+        /**
+         * Format report text with HTML styling
+         */
+        function formatReport(reportText) {
+            if (!reportText) return '<p>No report content available.</p>';
+
+            // Split by common section headers
+            let formatted = reportText
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n\n+/g, '\n\n')
+                .split('\n\n');
+
+            let html = '';
+            
+            formatted.forEach(paragraph => {
+                paragraph = paragraph.trim();
+                if (!paragraph) return;
+
+                // Check if it's a section header (usually all caps or starts with specific patterns)
+                if (paragraph.match(/^[A-Z\s]{10,}$/) || 
+                    paragraph.match(/^(Current Farm|Key Issues|Recommended|Yield Projection|Final Advice)/i)) {
+                    html += `<h3>${paragraph}</h3>`;
+                } else if (paragraph.match(/^\d+\./)) {
+                    // Numbered list item
+                    html += `<p style="margin-left: 20px;">${paragraph}</p>`;
+                } else if (paragraph.startsWith('-') || paragraph.startsWith('•')) {
+                    // Bullet point
+                    html += `<p style="margin-left: 20px;">${paragraph}</p>`;
+                } else {
+                    html += `<p>${paragraph}</p>`;
+                }
+            });
+
+            return html || `<pre style="white-space: pre-wrap;">${reportText}</pre>`;
+        }
+
+        /**
+         * Export report as PDF
+         */
+        async function exportReportAsPDF() {
+            try {
+                const element = reportContent;
+                const plotId = reportContent.dataset.plotId || 'unknown';
+                const timestamp = reportContent.dataset.timestamp || new Date().toISOString().split('T')[0];
+                
+                const opt = {
+                    margin: [10, 10, 10, 10],
+                    filename: `CropEye_Yield_Report_${plotId}_${timestamp}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                exportPDF.disabled = true;
+                exportPDF.textContent = '⏳ Generating PDF...';
+
+                await html2pdf().set(opt).from(element).save();
+
+                exportPDF.textContent = '📄 Export as PDF';
+                showStatus('PDF exported successfully!', 'success');
+            } catch (error) {
+                console.error('[Export] PDF generation failed:', error);
+                showStatus(`PDF export failed: ${error.message}`, 'error');
+            } finally {
+                exportPDF.disabled = false;
+            }
+        }
+
+        /**
+         * Export report as DOC
+         */
+        function exportReportAsDOC() {
+            try {
+                const reportText = reportContent.dataset.reportText || reportContent.innerText;
+                const plotId = reportContent.dataset.plotId || 'unknown';
+                const timestamp = reportContent.dataset.timestamp || new Date().toISOString().split('T')[0];
+
+                // Create HTML content for DOC
+                const htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>CropEye Yield Improvement Report</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; }
+                            h1 { color: #667eea; border-bottom: 3px solid #667eea; padding-bottom: 10px; }
+                            h2 { color: #764ba2; margin-top: 25px; }
+                            h3 { color: #667eea; margin-top: 20px; }
+                            p { margin-bottom: 12px; }
+                            .header { text-align: center; margin-bottom: 30px; }
+                            .footer { margin-top: 30px; font-size: 12px; color: #666; text-align: center; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <h1>CropEye Agriculture AI</h1>
+                            <h2>Yield Improvement Report</h2>
+                            <p><strong>Plot ID:</strong> ${plotId}</p>
+                            <p><strong>Generated:</strong> ${new Date(timestamp).toLocaleString()}</p>
+                        </div>
+                        <div class="content">
+                            ${formatReportForDOC(reportText)}
+                        </div>
+                        <div class="footer">
+                            <p>Generated by CropEye Agriculture AI Platform</p>
+                            <p>If you follow these steps properly, you can achieve a yield close to 100T.</p>
+                        </div>
+                    </body>
+                    </html>
+                `;
+
+                // Create blob and download
+                const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `CropEye_Yield_Report_${plotId}_${timestamp}.doc`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                showStatus('DOC exported successfully!', 'success');
+            } catch (error) {
+                console.error('[Export] DOC generation failed:', error);
+                showStatus(`DOC export failed: ${error.message}`, 'error');
+            }
+        }
+
+        /**
+         * Format report text for DOC export
+         */
+        function formatReportForDOC(text) {
+            if (!text) return '<p>No report content available.</p>';
+
+            let formatted = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n\n+/g, '\n\n')
+                .split('\n\n');
+
+            let html = '';
+            
+            formatted.forEach(paragraph => {
+                paragraph = paragraph.trim();
+                if (!paragraph) return;
+
+                if (paragraph.match(/^[A-Z\s]{10,}$/) || 
+                    paragraph.match(/^(Current Farm|Key Issues|Recommended|Yield Projection|Final Advice)/i)) {
+                    html += `<h2>${paragraph}</h2>`;
+                } else if (paragraph.match(/^\d+\./)) {
+                    html += `<p style="margin-left: 20px;">${paragraph}</p>`;
+                } else if (paragraph.startsWith('-') || paragraph.startsWith('•')) {
+                    html += `<p style="margin-left: 20px;">${paragraph}</p>`;
+                } else {
+                    html += `<p>${paragraph}</p>`;
+                }
+            });
+
+            return html || `<pre style="white-space: pre-wrap;">${text}</pre>`;
+        }
+
         // ==================== EVENT HANDLERS ====================
 
         /**
@@ -701,6 +1219,54 @@
             }
         });
 
+        /**
+         * Handle Generate Report button click
+         */
+        generateReportButton.addEventListener('click', async () => {
+            await generateReport();
+        });
+
+        /**
+         * Handle Close Report Modal button click
+         */
+        closeReportModal.addEventListener('click', () => {
+            reportModal.classList.remove('show');
+        });
+
+        /**
+         * Close modal when clicking outside
+         */
+        reportModal.addEventListener('click', (e) => {
+            if (e.target === reportModal) {
+                reportModal.classList.remove('show');
+            }
+        });
+
+        /**
+         * Handle Export PDF button click
+         */
+        exportPDF.addEventListener('click', async () => {
+            await exportReportAsPDF();
+        });
+
+        /**
+         * Handle Export DOC button click
+         */
+        exportDOC.addEventListener('click', () => {
+            exportReportAsDOC();
+        });
+
+        /**
+         * Sync language selectors
+         */
+        headerReportLanguage.addEventListener('change', () => {
+            reportLanguage.value = headerReportLanguage.value;
+        });
+
+        reportLanguage.addEventListener('change', () => {
+            headerReportLanguage.value = reportLanguage.value;
+        });
+
         // ==================== INITIALIZATION ====================
 
         /**
@@ -719,6 +1285,9 @@
 
             // Chat is disabled by default
             disableChat();
+
+            // Enable report button only if plot is initialized
+            generateReportButton.disabled = !plotId;
 
             console.log('[Init] Initialization complete');
         }
