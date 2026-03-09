@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List, Optional, Literal, Tuple
 
 from app.services.api_service import get_api_service
-from app.services.farm_context_service import get_farm_context
+# from app.services.farm_context_service import get_farm_context
 
 # =====================================================
 # HELPERS

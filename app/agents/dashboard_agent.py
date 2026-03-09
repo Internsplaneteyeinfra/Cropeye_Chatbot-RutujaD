@@ -6,7 +6,7 @@ from app.domain.dashboard.stress import StressEvents
 from app.domain.dashboard.sugar_content import SugarContent
 
 from app.domain.dashboard.indices import FieldIndices
-# from app.domain.dashboard.recovery_rate import RecoveryRate
+from app.domain.dashboard.recovery_rate import RecoveryRate
 
 from app.utils.cache_helper import get_cached_or_fail
 
@@ -38,5 +38,8 @@ async def dashboard_agent(state: dict):
         period = entities.get("time_period", "weekly")
         analysis["dashboard"]["indices"] = await FieldIndices().fetch(cached, period)
 
+    elif dashboard_type == "recovery_rate_check":
+        analysis["dashboard"]["recovery_rate"] = await RecoveryRate().fetch(cached)
+        
     state["analysis"] = analysis
     return state

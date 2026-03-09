@@ -152,37 +152,6 @@ async def run_initialization(plot_id, token):
         "indices": lambda: api.get_field_indices(plot_id),
     }
 
-        # -------------------------------
-        # RETRY LOGIC
-        # -------------------------------
-        # for name, task in tasks.items():
-
-        #     for attempt in range(3):
-        #         try:
-        #             start = datetime.now()
-        #             # data = await task
-        #             # results[name] = data
-        #             data = await task()
-
-        #             # treat API error response as failure
-        #             if isinstance(data, dict) and data.get("error"):
-        #                 raise Exception(data["error"])
-
-        #             results[name] = data
-        #             break
-                    
-        #             end = datetime.now()
-        #             duration = (end - start).total_seconds()
-
-        #             print(f"✅ {name} completed in {duration:.2f}s at {end.strftime('%H:%M:%S')}")
-        #             break
-        #         except Exception as e:
-
-        #             if attempt == 2:
-        #                 results[name] = {"error": str(e)}
-
-        #             await asyncio.sleep(2)
-
         coroutines = [
             call_with_retry(name, task)
             for name, task in tasks.items()
