@@ -12,7 +12,7 @@ from app.services.farm_context_service import get_farm_context
 from app.services.api_service import get_api_service
 import time
 from app.memory.redis_manager import redis_manager
-
+from app.utils.timer import Timer
 from app.services.voice_service import (
     transcribe_audio_base64,
     text_to_speech,
@@ -25,6 +25,7 @@ from app.utils.lang_detect import detect_lang
 from datetime import datetime
 import asyncio
 import json
+from app.services.farm_context_service import get_farm_context
 
 # ---------------- LOGGING CONFIG ----------------
 logging.basicConfig(
@@ -163,7 +164,17 @@ async def run_initialization(plot_id, token):
             name, result = await coro
             results[name] = result
 
-        redis_manager.set_plot(plot_id, results)
+        # redis_manager.set_plot(plot_id, results)
+        for section, data in results.items():
+            redis_manager.set_plot_section(plot_id, section, data)
+
+        # ---------- PRECOMPUTE FARM CONTEXT ----------
+        farm_context = await get_farm_context(
+            plot_name=plot_id,
+            user_id=None,
+            auth_token=None
+        )
+        redis_manager.set_farm_context(plot_id, farm_context)
         print(f"\n🎉 ALL API DATA FETCHED FOR PLOT {plot_id} AT {datetime.now().strftime('%H:%M:%S')}\n")
         redis_manager.set_plot_status(plot_id, "ready")
 
@@ -203,14 +214,15 @@ async def initialize_plot(request: InitializePlotRequest):
 @app.post("/chat")
 async def chat(request: ChatRequest):
     auth_token = None
-    chat_start = time.perf_counter()
+    # chat_start = time.perf_counter()
+    timer = Timer()
 
     user_id = request.user_id 
     plot_id = request.plot_id 
     plot_id = str(plot_id)
 
     short_memory = redis_manager.get_memory(user_id, plot_id)
-
+    timer.step("memory fetch")
     # ---------- FAST GREETING DETECTION (skip farm context for simple greetings) ----------
     message_lower = request.message.lower().strip()
     simple_greetings = {
@@ -237,53 +249,44 @@ async def chat(request: ChatRequest):
         "final_response": None
     }
 
-    # ---------- SKIP FARM CONTEXT FOR SIMPLE GREETINGS ----------
-    if not is_simple_greeting:
-        # ---------- ENRICH CONTEXT WITH FARM DATA ----------
-        farm_context = await get_farm_context(
-            plot_name=state["context"]["plot_id"],
-            user_id=state["context"]["user_id"],
-            auth_token=state["context"]["auth_token"]
-        )
+    farm_context = redis_manager.get_farm_context(plot_id)
+    timer.step("farm context fetch")
+    if not farm_context:
+        return {"error": "Farm context not initialized. Please run /initialize-plot first."}
 
-        state["context"].update(farm_context)
+    state["context"].update(farm_context)
 
-        logger.info(f"PLOT DEBUG → plot_id={state['context'].get('plot_id')} "
+    logger.info(f"PLOT DEBUG → plot_id={state['context'].get('plot_id')} "
                 f"lat={state['context'].get('lat')} "
                 f"lon={state['context'].get('lon')}")
 
-        if state["context"].get("lat") is None:
-            return {"error": "Plot location missing"}
-
-        try:
-            status = redis_manager.get_plot_status(plot_id)
-
-            if status != "ready":
-                return {
-                    "status": status,
-                    "message": "Plot data still loading. Please wait..."
-                }
-
-            start = time.perf_counter()
-            cached = redis_manager.get_plot(plot_id)
-            print(f"⏱ Plot cache fetch: {time.perf_counter() - start:.3f}s")
-
-        except:
-            cached = None
-
-        if not cached:
-            return {
-                "error": "Plot not initialized. Please call /initialize-plot first."
-            }
-        state["context"]["cached_data"] = cached
+    if state["context"].get("lat") is None:
+        return {"error": "Plot location missing"}
+      
+    status = redis_manager.get_plot_status(plot_id)
+    timer.step("plot status fetch")
+    if status != "ready":
+        return {
+                "status": status,
+                "message": "Plot data still loading. Please wait..."
+        }
+    cached = redis_manager.get_all_plot_sections(plot_id)
+    timer.step("redis sections fetch")
+    state["context"]["cached_data"] = cached
 
     result = await graph.ainvoke(state)
+    timer.step("langgraph execution")
 
     redis_manager.save_message(user_id, plot_id, "user", request.message)
+    timer.step("save user message")
+
     if result.get("final_response"):
         redis_manager.save_message(user_id, plot_id, "bot", result["final_response"])
+        
+    timer.step("save bot message")
 
-    print(f"⏱ TOTAL CHAT TIME: {time.perf_counter() - chat_start:.3f}s")
+    timer.total()
+    # print(f"⏱ TOTAL CHAT TIME: {time.perf_counter() - chat_start:.3f}s")
     
     return {
         "language": result.get("user_language"),
@@ -354,15 +357,21 @@ async def voice_chat(request: VoiceChatRequest):
         "analysis": None,
         "final_response": None,
     }
-    start = time.perf_counter()
-    cached = redis_manager.get_plot(plot_id)
-    print(f"⏱ plot cache fetch took {time.perf_counter()-start:.3f}s")
+    # start = time.perf_counter()
+    # cached = redis_manager.get_plot(plot_id)
+    # print(f"⏱ plot cache fetch took {time.perf_counter()-start:.3f}s")
 
-    if not cached:
+    # if not cached:
+    #     return {
+    #         "error": "Plot not initialized. Please call /initialize-plot first."
+    #     }
+    # state["context"]["cached_data"] = cached
+
+    status = redis_manager.get_plot_status(plot_id)
+    if status != "ready":
         return {
-            "error": "Plot not initialized. Please call /initialize-plot first."
+            "error": "Plot data still loading. Please wait..."
         }
-    state["context"]["cached_data"] = cached
 
     try:
         result = await graph.ainvoke(state)

@@ -4,20 +4,33 @@ from app.domain.dashboard.biomass import Biomass
 from app.domain.dashboard.yield_projection import YieldProjection
 from app.domain.dashboard.stress import StressEvents
 from app.domain.dashboard.sugar_content import SugarContent
-
 from app.domain.dashboard.indices import FieldIndices
 from app.domain.dashboard.recovery_rate import RecoveryRate
 
 from app.utils.cache_helper import get_cached_or_fail
+from app.memory.redis_manager import redis_manager
 
 async def dashboard_agent(state: dict):
 
+    # plot_id = context.get("plot_id")
     context = state.get("context", {})
-    cached = context.get("cached_data", {})
-    entities = state.get("entities", {})
+    cached_data = context.get("cached_data", {})
 
+    entities = state.get("entities", {})
     dashboard_type = entities.get("query_type")
+
     analysis = {"dashboard": {}}
+
+    cached = {
+        "agro": cached_data.get("agro"),
+        "harvest": cached_data.get("harvest"),
+        "stress": cached_data.get("stress"),
+        "indices": cached_data.get("indices")
+    }
+
+    if not cached:
+        state["analysis"] = {"error": "Dashboard data not available"}
+        return state
 
     if dashboard_type == "crop_status_check":
         analysis["dashboard"]["crop"] = await CropStatus().fetch(cached)
