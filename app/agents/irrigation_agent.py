@@ -25,7 +25,7 @@ async def irrigation_agent(state: dict) -> dict:
 
         else:
             schedule = IrrigationSchedule()  
-            result = await schedule.build(plot_id, lat, lon, cached)
+            result = await schedule.build(plot_id, lat, lon, cached, context)
 
             analysis["irrigation"]["schedule_7_day"] = result
 

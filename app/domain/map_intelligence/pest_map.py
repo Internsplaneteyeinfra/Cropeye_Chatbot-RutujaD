@@ -1,13 +1,16 @@
 #domain/map_intelligence/pest_map.py
 
-from app.services.api_service import get_api_service
+# from app.services.api_service import get_api_service
 
 class PestMap:
-    def __init__(self, auth_token=None):
-        self.api = get_api_service(auth_token)
+    # def __init__(self, auth_token=None):
+    #     self.api = get_api_service(auth_token)
 
-    async def fetch(self, plot_id: str) -> dict:
-        data = await self.api.get_pest_map(plot_id)
+    async def fetch(self, cached_data: dict) -> dict:
+        data = cached_data.get("pest_map")
+        print("PEST MAP CACHE:", data)
+        if not data or "error" in data:
+            return {}
 
         pixel = data.get("pixel_summary", {})
         feature = data.get("features", [{}])[0]

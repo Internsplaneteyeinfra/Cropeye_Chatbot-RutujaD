@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List, Optional, Literal, Tuple
 
 from app.services.api_service import get_api_service
-from app.services.farm_context_service import get_farm_context
+# from app.services.farm_context_service import get_farm_context
 
 # =====================================================
 # HELPERS
@@ -144,46 +144,38 @@ class IrrigationSchedule:
     # BUILD SCHEDULE
     # =====================================================
 
-    async def build(self, plot_id: str, lat, lon, cached):
+    async def build(self, plot_id: str, lat, lon, cached, context):
 
-        # ✅ SINGLE SOURCE OF TRUTH FOR KC
-        farm_context = await get_farm_context(
-            plot_name=plot_id,
-            auth_token=self.auth_token
-        )
+        # farm_context = await get_farm_context(
+        #     plot_name=plot_id,
+        #     auth_token=self.auth_token
+        # )
 
         # if kc is missing, raise error
-        if farm_context.get("error"):
-            print("[FARM CONTEXT ERROR] =", farm_context["error"])
+        # if farm_context.get("error"):
+        #     print("[FARM CONTEXT ERROR] =", farm_context["error"])
 
-        kc = farm_context.get("kc")
+        # kc = farm_context.get("kc")
 
-        if kc is None:
-            print("[FARM CONTEXT ERROR] KC value missing from farm context")
+        kc = context.get("kc")
+        crop_stage = context.get("crop_stage")
+        plantation_date = context.get("plantation_date")
 
-        print("\n[FARM CONTEXT]")
+        # if kc is None:
+        #     print("[FARM CONTEXT ERROR] KC value missing from farm context")
+
+        # print("\n[FARM CONTEXT]")
         print("KC =", kc)
-        print("Stage =", farm_context.get("crop_stage"))
-        print("Plantation =", farm_context.get("plantation_date"))
-
-        # ------------------------------------------------
-
-        # weather_today = await self.api.get_current_weather(plot_id, lat, lon)
-        # forecast = await self.api.get_weather_forecast(plot_id, lat, lon)
-        # et_data = await self.api.get_evapotranspiration(plot_id)
+        print("Crop stage =", crop_stage)
+        print("Plantation date =", plantation_date)
+        # print("Stage =", farm_context.get("crop_stage"))
+        # print("Plantation =", farm_context.get("plantation_date"))
 
         weather_today = cached.get("current_weather", {})
         forecast = cached.get("weather_forecast", {})
         et_data = cached.get("et", {})
 
-        # print("\n========== ET API DEBUG ==========")
-        # print("Plot ID =", plot_id)
-        # # print("Raw ET response =", et_data)
-        # print("Type =", type(et_data))
-        # print("==================================")
-
         print("\n[IRRIGATION DEBUG]")
-        # print("Area hectares =", area_hectares)
 
         base_et = (
             et_data.get("et_24hr")

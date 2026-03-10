@@ -1,19 +1,12 @@
 # domain/map_intelligence/growth_map.py
 
-from app.services.api_service import get_api_service
-
-
 class GrowthMap:
     """
     Handles satellite-based crop growth map
     """
+    async def fetch(self, cached_data) -> dict:
 
-    def __init__(self, auth_token=None):
-        self.api = get_api_service(auth_token)
-
-    async def fetch(self, plot_id: str) -> dict:
-        data = await self.api.get_growth_map(plot_id)
-
+        data = cached_data.get("growth_map")
         if not data or "error" in data:
             return {}
 
@@ -29,7 +22,7 @@ class GrowthMap:
 
         return {
             "classification": {
-                "week": pixel.get("weak_pixel_percentage"),
+                "weak": pixel.get("weak_pixel_percentage"),
                 "stress": pixel.get("stress_pixel_percentage"),
                 "moderate": pixel.get("moderate_pixel_percentage"),
                 "healthy": pixel.get("healthy_pixel_percentage"),

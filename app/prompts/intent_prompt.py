@@ -361,6 +361,7 @@ sugar_content_check
 stress_check
 biomass_check
 indices_check
+recovery_rate_check
 
 map_view →
 soil_moisture_map
