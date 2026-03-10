@@ -189,14 +189,7 @@ class RedisManager:
                 "ttl": ttl,
                 "value": value
             }
-            # file_path = "redis_debug.log"
-            # if os.path.exists(file_path):
-            #     with open(file_path, "r") as f:
-            #         data = orjson.loads(f.read())
-            # else:
-            #     data = {}
-            # data[key] = record
-
+         
             with open("redis_debug.log", "ab") as f:
                 # f.write(orjson.dumps(data, option=orjson.OPT_INDENT_2))
                 f.write(orjson.dumps(record))
@@ -204,9 +197,6 @@ class RedisManager:
         except Exception as e:
             logger.warning(f"Redis debug log failed: {e}")
 
-    # -------------------------------
-    # Generic cache
-    # -------------------------------
 
     def set(self, key, value, ttl=None):
         try:
@@ -233,10 +223,6 @@ class RedisManager:
             logger.warning(f"Redis GET failed: {e}")
             return None
 
-    # -------------------------------
-    # Plot data (split cache)
-    # -------------------------------
-
     def set_plot_section(self, plot_id, section, data, ttl=86400):
         key = f"plot:{plot_id}:{section}"
         self.set(key, data, ttl)
@@ -245,19 +231,11 @@ class RedisManager:
         key = f"plot:{plot_id}:{section}"
         return self.get(key)
 
-    # -------------------------------
-    # Farm context
-    # -------------------------------
-
     def set_farm_context(self, plot_id, context):
         self.set(f"farm_context:{plot_id}", context, ttl=86400)
 
     def get_farm_context(self, plot_id):
         return self.get(f"farm_context:{plot_id}")
-
-    # -------------------------------
-    # Plot status
-    # -------------------------------
 
     def set_plot_status(self, plot_id, status):
         self.client.set(f"plot_status:{plot_id}", status)
@@ -280,11 +258,7 @@ class RedisManager:
                 data[section] = self._deserialize(value)
 
         return data
-        
-    # -------------------------------
-    # Chat memory (LIST)
-    # -------------------------------
-
+   
     def chat_key(self, user_id, plot_id):
         return f"chat:{user_id}:{plot_id}"
 

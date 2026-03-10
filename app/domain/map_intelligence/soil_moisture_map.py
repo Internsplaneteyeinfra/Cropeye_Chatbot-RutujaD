@@ -1,14 +1,9 @@
 #domain/map_intelligence/soil_moisture_map.py
 
-# from app.services.api_service import get_api_service
-
 class SoilMoistureMap:
     """
     Handles homepage vertical soil moisture map (satellite-based)
     """
-
-    # def __init__(self, auth_token=None):
-    #     # self.api = get_api_service(auth_token)
 
     async def fetch(self, cached_data) -> dict:
         data = cached_data.get("soil_moisture_map")

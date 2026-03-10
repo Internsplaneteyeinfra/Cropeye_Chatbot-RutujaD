@@ -665,10 +665,7 @@ class APIService:
         API: GET /current-weather?plot_id=
         """
         cache_key = f"current_weather_{plot_id}"
-        # cached = redis_manager.get(cache_key)
-        # if cached:
-        #     print(f"[CURRENT WEATHER] Returning cached data for {plot_id}")
-        #     return cached
+
         try:
             url = f"{WEATHER_API_URL}/current-weather"
             params = {

@@ -223,7 +223,6 @@ async def chat(request: ChatRequest):
 
     short_memory = redis_manager.get_memory(user_id, plot_id)
     timer.step("memory fetch")
-    # ---------- FAST GREETING DETECTION (skip farm context for simple greetings) ----------
     message_lower = request.message.lower().strip()
     simple_greetings = {
         "hi", "hello", "hey", "namaste", "नमस्ते", "thanks", "thank you", "bye", 
@@ -233,7 +232,6 @@ async def chat(request: ChatRequest):
         len(message_lower.split()) <= 2 and any(word in message_lower for word in ["hi", "hello", "hey", "thanks", "bye", "how are you", "how are you doing"])
     )
 
-    # ---------- INITIAL GRAPH STATE ----------
     state = {
         "user_message": request.message,
         "user_language": None,
@@ -320,10 +318,7 @@ async def voice_chat(request: VoiceChatRequest):
         transcribed, _detected_lang = transcribe_audio_base64(
             request.audio_base64, request.content_type
         )
-        # ---------- DISABLE VERBOSE LOGGING FOR PERFORMANCE ----------
-        # print("🎤 RAW TRANSCRIBED TEXT:", transcribed)
-        # print("🌐 DETECTED LANGUAGE:", _detected_lang)
-        
+ 
         user_message = (transcribed or "").strip()
 
     if not user_message:
@@ -357,15 +352,6 @@ async def voice_chat(request: VoiceChatRequest):
         "analysis": None,
         "final_response": None,
     }
-    # start = time.perf_counter()
-    # cached = redis_manager.get_plot(plot_id)
-    # print(f"⏱ plot cache fetch took {time.perf_counter()-start:.3f}s")
-
-    # if not cached:
-    #     return {
-    #         "error": "Plot not initialized. Please call /initialize-plot first."
-    #     }
-    # state["context"]["cached_data"] = cached
 
     status = redis_manager.get_plot_status(plot_id)
     if status != "ready":
@@ -460,15 +446,10 @@ async def generate_report(request: GenerateReportRequest):
     except Exception as e:
         logger.exception("Error fetching report data")
         return {"error": f"Failed to fetch report data: {str(e)}"}
-    
-    # Step 3: Detect language if not provided
+ 
     if not language:
-        # Use a default message to detect language preference
-        # In production, you might want to use user preferences or previous chat history
-        language = "en"  # Default to English
-    
-    # Step 4: Summarize data for LLM (reduce token usage)
-    # Extract key metrics only
+        language = "en"  
+ 
     summary = {
         "farm_context": {
             "crop_stage": report_data.get("farm_context", {}).get("crop_stage"),
