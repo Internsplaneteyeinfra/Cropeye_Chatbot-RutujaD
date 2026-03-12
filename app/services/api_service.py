@@ -615,8 +615,9 @@ class APIService:
                     "soil_moisture": d.get("soil_moisture")
                 }
                 for d in data
-            ]
-        }
+                ]
+            }
+            return filtered 
         except httpx.HTTPError as e:
             return {"error": f"Failed to fetch field soil moisture: {str(e)}"}
 

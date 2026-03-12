@@ -259,38 +259,39 @@ class RedisManager:
 
         return data
    
-    def chat_key(self, user_id, plot_id):
-        return f"chat:{user_id}:{plot_id}"
+    # def chat_key(self, user_id, plot_id):
+    #     return f"chat:{user_id}:{plot_id}"
 
-    def save_message(self, user_id, plot_id, role, message):
+    # def save_message(self, user_id, plot_id, role, message, intent=None):
 
-        key = self.chat_key(user_id, plot_id)
+    #     key = self.chat_key(user_id, plot_id)
 
-        entry = orjson.dumps({
-            "role": role,
-            "message": message
-        })
+    #     entry = orjson.dumps({
+    #         "role": role,
+    #         "message": message,
+    #         "intent": intent
+    #     })
 
-        self.client.lpush(key, entry)
+    #     self.client.lpush(key, entry)
 
-        # keep only last 5 messages
-        self.client.ltrim(key, 0, 4)
+    #     # keep only last 5 messages
+    #     self.client.ltrim(key, 0, 4)
 
-        # expire memory
-        self.client.expire(key, 900)
+    #     # expire memory
+    #     self.client.expire(key, 900)
 
-    def get_memory(self, user_id, plot_id):
+    # def get_memory(self, user_id, plot_id):
 
-        key = self.chat_key(user_id, plot_id)
+    #     key = self.chat_key(user_id, plot_id)
 
-        items = self.client.lrange(key, 0, 4)
+    #     items = self.client.lrange(key, 0, 4)
 
-        memory = []
+    #     memory = []
 
-        for item in items:
-            memory.append(orjson.loads(item))
+    #     for item in items:
+    #         memory.append(orjson.loads(item))
 
-        return memory
+    #     return memory
 
 
 redis_manager = RedisManager()

@@ -1,6 +1,6 @@
 
 # app/main.py
-
+from langchain_core.messages import HumanMessage
 import base64
 from fastapi import FastAPI, Header, Depends
 from pydantic import BaseModel
@@ -221,8 +221,8 @@ async def chat(request: ChatRequest):
     plot_id = request.plot_id 
     plot_id = str(plot_id)
 
-    short_memory = redis_manager.get_memory(user_id, plot_id)
-    timer.step("memory fetch")
+    # short_memory = redis_manager.get_memory(user_id, plot_id)
+    # timer.step("memory fetch")
     message_lower = request.message.lower().strip()
     simple_greetings = {
         "hi", "hello", "hey", "namaste", "नमस्ते", "thanks", "thank you", "bye", 
@@ -232,17 +232,33 @@ async def chat(request: ChatRequest):
         len(message_lower.split()) <= 2 and any(word in message_lower for word in ["hi", "hello", "hey", "thanks", "bye", "how are you", "how are you doing"])
     )
 
+    thread_id = f"{user_id}_{plot_id}"
+    config = {
+        "configurable": {
+            "thread_id": thread_id
+        }
+    }
+    # Load previous state from LangGraph memory
+    snapshot = graph.get_state(config)
+    if snapshot and snapshot.values.get("messages"):
+        messages = snapshot.values["messages"]
+    else:
+        messages = []
+
+    messages.append(HumanMessage(content=request.message))
+
     state = {
-        "user_message": request.message,
+        "messages": messages,
         "user_language": None,
         "intent": None,
         "entities": {},
+        "conversation_state": None,
         "context": {
             "plot_id": request.plot_id,
             "user_id": request.user_id,
             "auth_token": auth_token,
         },
-        "short_memory": short_memory,
+        # "short_memory": short_memory,
         "analysis": None,
         "final_response": None
     }
@@ -272,16 +288,29 @@ async def chat(request: ChatRequest):
     timer.step("redis sections fetch")
     state["context"]["cached_data"] = cached
 
-    result = await graph.ainvoke(state)
+    # result = await graph.ainvoke(state)
+    thread_id = f"{user_id}_{plot_id}"
+    config = {
+        "configurable": {
+            "thread_id": thread_id
+        }
+    }
+    result = await graph.ainvoke(state, config)
     timer.step("langgraph execution")
 
-    redis_manager.save_message(user_id, plot_id, "user", request.message)
-    timer.step("save user message")
+    # redis_manager.save_message(user_id, plot_id, "user", request.message, result.get("intent"))
+    # redis_manager.save_message(
+    #     user_id, plot_id, "user", request.message, result.get("intent")
+    # )
+    # timer.step("save user message")
 
-    if result.get("final_response"):
-        redis_manager.save_message(user_id, plot_id, "bot", result["final_response"])
+    # if result.get("final_response"):
+    #     # redis_manager.save_message(user_id, plot_id, "bot", result["final_response"])
+    #     redis_manager.save_message(
+    #         user_id, plot_id, "bot", result["final_response"], result.get("intent")
+    #     )
         
-    timer.step("save bot message")
+    # timer.step("save bot message")
 
     timer.total()
     # print(f"⏱ TOTAL CHAT TIME: {time.perf_counter() - chat_start:.3f}s")
@@ -337,9 +366,10 @@ async def voice_chat(request: VoiceChatRequest):
             "error": "voice_input_failed",
         }
 
-    short_memory = redis_manager.get_memory(user_id, plot_id)
+    # short_memory = redis_manager.get_memory(user_id, plot_id)
     state = {
-        "user_message": user_message,
+        # "user_message": user_message,
+        "messages": [HumanMessage(content=user_message)],
         "user_language": None,
         "intent": None,
         "entities": {},
@@ -348,7 +378,7 @@ async def voice_chat(request: VoiceChatRequest):
             "user_id": request.user_id,
             "auth_token": auth_token,
         },
-        "short_memory": short_memory,
+        # "short_memory": short_memory,
         "analysis": None,
         "final_response": None,
     }
@@ -360,7 +390,15 @@ async def voice_chat(request: VoiceChatRequest):
         }
 
     try:
-        result = await graph.ainvoke(state)
+        # result = await graph.ainvoke(state)
+        thread_id = f"{user_id}_{plot_id}"
+        config = {
+            "configurable": {
+                "thread_id": thread_id
+            }
+        }
+        result = await graph.ainvoke(state, config)
+        
     except Exception:
         speak_text = VOICE_ERROR_CHATBOT
         tts_lang = "en"
@@ -377,7 +415,7 @@ async def voice_chat(request: VoiceChatRequest):
             "error": "chatbot_error",
         }
 
-    redis_manager.save_message(user_id, plot_id, "user", user_message)
+    redis_manager.save_message(user_id, plot_id, "user", user_message, result.get("intent"))
     if result.get("final_response"):
         redis_manager.save_message(user_id, plot_id, "bot", result["final_response"])
 
@@ -407,126 +445,126 @@ async def voice_chat(request: VoiceChatRequest):
 async def refresh_plot(request: InitializePlotRequest):
     return await initialize_plot(request)
 
-@app.post("/generate-report")
-async def generate_report(request: GenerateReportRequest):
-    """
-    Generate a comprehensive yield improvement report for a plot.
-    Uses cached farm data and domain logic to provide actionable recommendations.
-    """
-    plot_id = str(request.plot_id)
-    user_id = request.user_id
-    language = request.language
+# @app.post("/generate-report")
+# async def generate_report(request: GenerateReportRequest):
+#     """
+#     Generate a comprehensive yield improvement report for a plot.
+#     Uses cached farm data and domain logic to provide actionable recommendations.
+#     """
+#     plot_id = str(request.plot_id)
+#     user_id = request.user_id
+#     language = request.language
     
-    start_time = time.perf_counter()
+#     start_time = time.perf_counter()
     
-    # Step 1: Check if plot is initialized
-    try:
-        status = redis_manager.get_plot_status(plot_id)
-        if status != "ready":
-            return {
-                "error": "Plot not ready",
-                "status": status,
-                "message": "Plot data still loading. Please wait..."
-            }
-    except Exception as e:
-        logger.error(f"Error checking plot status: {e}")
-        return {"error": "Failed to check plot status"}
+#     # Step 1: Check if plot is initialized
+#     try:
+#         status = redis_manager.get_plot_status(plot_id)
+#         if status != "ready":
+#             return {
+#                 "error": "Plot not ready",
+#                 "status": status,
+#                 "message": "Plot data still loading. Please wait..."
+#             }
+#     except Exception as e:
+#         logger.error(f"Error checking plot status: {e}")
+#         return {"error": "Failed to check plot status"}
     
-    # Step 2: Fetch cached farm data and process through domain logic
-    try:
-        report_data = await get_report_data(
-            plot_id=plot_id,
-            user_id=user_id,
-            auth_token=None
-        )
+#     # Step 2: Fetch cached farm data and process through domain logic
+#     try:
+#         report_data = await get_report_data(
+#             plot_id=plot_id,
+#             user_id=user_id,
+#             auth_token=None
+#         )
         
-        if report_data.get("error"):
-            return {"error": report_data.get("error")}
+#         if report_data.get("error"):
+#             return {"error": report_data.get("error")}
             
-    except Exception as e:
-        logger.exception("Error fetching report data")
-        return {"error": f"Failed to fetch report data: {str(e)}"}
+#     except Exception as e:
+#         logger.exception("Error fetching report data")
+#         return {"error": f"Failed to fetch report data: {str(e)}"}
  
-    if not language:
-        language = "en"  
+#     if not language:
+#         language = "en"  
  
-    summary = {
-        "farm_context": {
-            "crop_stage": report_data.get("farm_context", {}).get("crop_stage"),
-            "days_since_plantation": report_data.get("farm_context", {}).get("days_since_plantation"),
-            "kc": report_data.get("farm_context", {}).get("kc"),
-            "plantation_date": report_data.get("farm_context", {}).get("plantation_date"),
-        },
-        "yield": report_data.get("yield", {}),
-        "biomass": report_data.get("biomass", {}),
-        "crop_status": report_data.get("crop_status", {}),
-        "soil": report_data.get("soil", {}),
-        "npk_requirements": report_data.get("npk_requirements", {}),
-        "irrigation": report_data.get("irrigation", {}),
-        "pest_risk": report_data.get("pest_risk", {}),
-        "weather": {
-            "current": {
-                "temperature_c": report_data.get("weather", {}).get("current", {}).get("temperature_c"),
-                "humidity": report_data.get("weather", {}).get("current", {}).get("humidity"),
-                "precip_mm": report_data.get("weather", {}).get("current", {}).get("precip_mm"),
-            }
-        },
-        "indices": {
-            "latest": report_data.get("indices", {}).get("series", [])[-1] if report_data.get("indices", {}).get("series") else {},
-            "critical_events": report_data.get("indices", {}).get("critical_events", []),
-        },
-        "stress": report_data.get("stress", {}),
-        "sugar_content": report_data.get("sugar_content", {}),
-        "evapotranspiration": {
-            "ET_mean_mm_per_day": report_data.get("evapotranspiration", {}).get("ET_mean_mm_per_day"),
-        },
-    }
+#     summary = {
+#         "farm_context": {
+#             "crop_stage": report_data.get("farm_context", {}).get("crop_stage"),
+#             "days_since_plantation": report_data.get("farm_context", {}).get("days_since_plantation"),
+#             "kc": report_data.get("farm_context", {}).get("kc"),
+#             "plantation_date": report_data.get("farm_context", {}).get("plantation_date"),
+#         },
+#         "yield": report_data.get("yield", {}),
+#         "biomass": report_data.get("biomass", {}),
+#         "crop_status": report_data.get("crop_status", {}),
+#         "soil": report_data.get("soil", {}),
+#         "npk_requirements": report_data.get("npk_requirements", {}),
+#         "irrigation": report_data.get("irrigation", {}),
+#         "pest_risk": report_data.get("pest_risk", {}),
+#         "weather": {
+#             "current": {
+#                 "temperature_c": report_data.get("weather", {}).get("current", {}).get("temperature_c"),
+#                 "humidity": report_data.get("weather", {}).get("current", {}).get("humidity"),
+#                 "precip_mm": report_data.get("weather", {}).get("current", {}).get("precip_mm"),
+#             }
+#         },
+#         "indices": {
+#             "latest": report_data.get("indices", {}).get("series", [])[-1] if report_data.get("indices", {}).get("series") else {},
+#             "critical_events": report_data.get("indices", {}).get("critical_events", []),
+#         },
+#         "stress": report_data.get("stress", {}),
+#         "sugar_content": report_data.get("sugar_content", {}),
+#         "evapotranspiration": {
+#             "ET_mean_mm_per_day": report_data.get("evapotranspiration", {}).get("ET_mean_mm_per_day"),
+#         },
+#     }
     
-    # Step 5: Generate report using LLM
-    try:
-        prompt = YIELD_IMPROVEMENT_PROMPT.format(
-            language=language,
-            context=json.dumps(report_data.get("farm_context", {}), indent=2),
-            analysis=json.dumps(summary, indent=2),
-            user_message="Generate a comprehensive yield improvement report to help reach 100T yield target."
-        )
+#     # Step 5: Generate report using LLM
+#     try:
+#         prompt = YIELD_IMPROVEMENT_PROMPT.format(
+#             language=language,
+#             context=json.dumps(report_data.get("farm_context", {}), indent=2),
+#             analysis=json.dumps(summary, indent=2),
+#             user_message="Generate a comprehensive yield improvement report to help reach 100T yield target."
+#         )
         
-        logger.info(f"Generating yield improvement report for plot {plot_id}")
-        llm_start = time.perf_counter()
-        response = llm.invoke(prompt)
-        logger.info(f"⏱ LLM call took {time.perf_counter() - llm_start:.3f}s")
+#         logger.info(f"Generating yield improvement report for plot {plot_id}")
+#         llm_start = time.perf_counter()
+#         response = llm.invoke(prompt)
+#         logger.info(f"⏱ LLM call took {time.perf_counter() - llm_start:.3f}s")
         
-        # Extract content from response
-        if hasattr(response, 'content'):
-            report_text = response.content
-        elif hasattr(response, 'text'):
-            report_text = response.text
-        elif isinstance(response, str):
-            report_text = response
-        else:
-            report_text = str(response)
+#         # Extract content from response
+#         if hasattr(response, 'content'):
+#             report_text = response.content
+#         elif hasattr(response, 'text'):
+#             report_text = response.text
+#         elif isinstance(response, str):
+#             report_text = response
+#         else:
+#             report_text = str(response)
         
-        # Clean up the response
-        report_text = report_text.strip()
-        if report_text.startswith("```"):
-            # Remove markdown code blocks if present
-            lines = report_text.split("\n")
-            report_text = "\n".join([l for l in lines if not l.strip().startswith("```")])
+#         # Clean up the response
+#         report_text = report_text.strip()
+#         if report_text.startswith("```"):
+#             # Remove markdown code blocks if present
+#             lines = report_text.split("\n")
+#             report_text = "\n".join([l for l in lines if not l.strip().startswith("```")])
         
-    except Exception as e:
-        logger.exception("Error generating report with LLM")
-        return {"error": f"Failed to generate report: {str(e)}"}
+#     except Exception as e:
+#         logger.exception("Error generating report with LLM")
+#         return {"error": f"Failed to generate report: {str(e)}"}
     
-    total_time = time.perf_counter() - start_time
-    logger.info(f"⏱ Total report generation time: {total_time:.3f}s")
+#     total_time = time.perf_counter() - start_time
+#     logger.info(f"⏱ Total report generation time: {total_time:.3f}s")
     
-    return {
-        "plot_id": plot_id,
-        "language": language,
-        "report": report_text,
-        "timestamp": datetime.now().isoformat(),
-        "processing_time_seconds": round(total_time, 3)
-    }
+#     return {
+#         "plot_id": plot_id,
+#         "language": language,
+#         "report": report_text,
+#         "timestamp": datetime.now().isoformat(),
+#         "processing_time_seconds": round(total_time, 3)
+#     }
 
 
 @app.get("/health")

@@ -2,6 +2,7 @@
 from langgraph.graph import StateGraph, END
 from app.graph.state import GraphState
 from app.graph.router import router
+from langgraph.checkpoint.memory import MemorySaver
 
 from app.agents.unified_agent import unified_agent
 
@@ -17,7 +18,6 @@ from app.agents.dashboard_agent import dashboard_agent
 def build_graph():
     graph = StateGraph(GraphState)
 
-    # Unified agent handles both intent detection and response generation
     graph.add_node("unified_agent", unified_agent)
 
     graph.add_node("soil_analysis_agent", soil_analysis_agent)
@@ -29,12 +29,8 @@ def build_graph():
     graph.add_node("fertilizer_agent", fertilizer_agent)
     graph.add_node("dashboard_agent", dashboard_agent)
 
-    # Set entry point to unified agent (intent detection mode)
     graph.set_entry_point("unified_agent")
     
-    # Route based on detected intent
-    # If final_response is already set (general_explanation case handled in unified_agent), go to END
-    # Otherwise, route to domain agents
     def route_after_intent(state: dict) -> str:
         if state.get("final_response"):
             return END
@@ -52,12 +48,11 @@ def build_graph():
             "irrigation_agent": "irrigation_agent",
             "fertilizer_agent": "fertilizer_agent",
             "dashboard_agent": "dashboard_agent",
-            "unified_agent": "unified_agent",  # For general_explanation (shouldn't happen, but safe fallback)
+            "unified_agent": "unified_agent",  
             END: END
         }
     )
-    
-    # All domain agents route back to unified agent (response generation mode)
+
     graph.add_edge("soil_analysis_agent", "unified_agent")
     graph.add_edge("soil_moisture_agent", "unified_agent")
     graph.add_edge("weather_agent", "unified_agent")
@@ -67,7 +62,9 @@ def build_graph():
     graph.add_edge("fertilizer_agent", "unified_agent")
     graph.add_edge("dashboard_agent", "unified_agent")
     
-    # Unified agent (response generation mode) always ends the graph
     graph.add_edge("unified_agent", END)
 
-    return graph.compile()
+    # return graph.compile()
+    memory = MemorySaver()
+
+    return graph.compile(checkpointer=memory)

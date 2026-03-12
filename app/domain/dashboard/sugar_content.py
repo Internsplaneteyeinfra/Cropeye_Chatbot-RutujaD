@@ -1,6 +1,22 @@
 from app.services.api_service import get_api_service
 
 
+class SugarContent:
+
+    async def fetch(self, cached):
+
+        agro = cached.get("agro")
+        if not agro:
+            return {}
+
+        brix = agro.get("brix_sugar", {}).get("brix", {})
+
+        return {
+            "mean": brix.get("mean"),
+            "min": brix.get("min"),
+            "max": brix.get("max")
+
+
 # class SugarContent:
 
 #     def __init__(self, auth_token):
@@ -21,20 +37,4 @@ from app.services.api_service import get_api_service
 #             "max": brix.get("max")
 #         }
 
-
-
-class SugarContent:
-
-    async def fetch(self, cached):
-
-        agro = cached.get("agro")
-        if not agro:
-            return {}
-
-        brix = agro.get("brix_sugar", {}).get("brix", {})
-
-        return {
-            "mean": brix.get("mean"),
-            "min": brix.get("min"),
-            "max": brix.get("max")
         }

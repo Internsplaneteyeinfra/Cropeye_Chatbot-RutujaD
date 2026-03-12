@@ -10,14 +10,23 @@ from app.utils.cache_filter import filter_cache_by_intent
 from app.utils.analysis_compressor import compress_analysis
 import time
 
+from langchain_core.messages import AIMessage
+
 def unified_agent(state: dict) -> dict:
     """
     Unified agent that handles both intent detection and response generation.
     - If intent is not set: performs intent detection and entity extraction
     - If intent is already set: generates final response
     """
-    
-    user_message = state.get("user_message", "")
+    messages = state["messages"]
+    history_text = ""
+    for m in messages[:-1]:  # exclude latest message
+        role = "Farmer" if m.__class__.__name__ == "HumanMessage" else "Assistant"
+        history_text += f"{role}: {m.content}\n"
+
+    user_message = messages[-1].content
+
+    # user_message = state.get("user_message", "")
     existing_intent = state.get("intent")
     language = state.get("user_language")
     analysis = state.get("analysis", {})
@@ -25,21 +34,25 @@ def unified_agent(state: dict) -> dict:
     print(json.dumps(analysis, indent=2, ensure_ascii=False))
     print("=========================\n")
     context = state.get("context", {})
-    
-    history = state.get("short_memory", []) or []
-    
-    # Detect language if not set
+
+    # ---------- LOAD CONVERSATION STATE ----------
+    # conv_state = state.get("conversation_state")
+    # if conv_state and existing_intent is None:
+    #     state["intent"] = conv_state.get("intent")
+    #     state["entities"] = conv_state.get("entities", {})
+    #     existing_intent = state["intent"]
+  
     if not language:
         language = detect_lang(user_message)
         state["user_language"] = language
     
     # Build conversation history
-    history_text = ""
-    last_intent = None
-    for h in history:
-        history_text += f"{h.get('role', '')}: {h.get('message', '')}\n"
-        if h.get("intent"):
-            last_intent = h["intent"]
+    # history_text = ""
+    # last_intent = None
+    # for h in history:
+    #     history_text += f"{h.get('role', '')}: {h.get('message', '')}\n"
+    #     if h.get("intent"):
+    #         last_intent = h["intent"]
     
     # ---------- FAST GREETING SHORT-CIRCUIT (before any LLM calls) ----------
     if not existing_intent:
@@ -81,6 +94,7 @@ def unified_agent(state: dict) -> dict:
     if not existing_intent:
         # Build intent detection prompt
         intent_prompt = f"""{INTENT_SYSTEM_PROMPT}
+            Conversation history: {history_text}
             Farmer message: "{user_message}"
             """
         
@@ -104,14 +118,54 @@ def unified_agent(state: dict) -> dict:
             # print("RAW LLM RESPONSE (INTENT):", content)
             
             result = safe_json(content)
+            
             intent = result.get("intent")
             entities = result.get("entities")
             
             if not intent:
-                intent = last_intent if last_intent else "general_explanation"
+                # intent = last_intent if last_intent else "general_explanation"
+                intent = intent or "general_explanation"
             
             state["intent"] = intent
-            state["entities"] = entities if isinstance(entities, dict) else {}
+
+            # new_entities = entities if isinstance(entities, dict) else {}
+
+            # conv_state = state.get("conversation_state")
+
+            # # restore previous entities if new ones missing
+            # if conv_state:
+            #     prev_entities = conv_state.get("entities", {})
+
+            #     for k, v in prev_entities.items():
+            #         if not new_entities.get(k):
+            #             new_entities[k] = v
+
+            # state["entities"] = new_entities
+            # # ---------- UPDATE CONVERSATION STATE ----------
+            # # conv_state = state.get("conversation_state") or {}
+            # conv_state["intent"] = state["intent"]
+            # conv_state["entities"] = state["entities"]
+            # state["conversation_state"] = conv_state
+            
+            new_entities = entities if isinstance(entities, dict) else {}
+
+            # Get previous conversation state safely
+            conv_state = state.get("conversation_state") or {}
+
+            # Restore missing entities from previous turn
+            prev_entities = conv_state.get("entities", {})
+
+            for k, v in prev_entities.items():
+                if not new_entities.get(k):
+                    new_entities[k] = v
+
+            state["entities"] = new_entities
+
+            # ---------- UPDATE CONVERSATION STATE ----------
+            conv_state["intent"] = state["intent"]
+            conv_state["entities"] = state["entities"]
+
+            state["conversation_state"] = conv_state
             
             # If intent is general_explanation, generate response immediately
             if intent == "general_explanation":
@@ -122,7 +176,8 @@ def unified_agent(state: dict) -> dict:
             
         except Exception as e:
             print(f"UNIFIED_AGENT_ERROR (INTENT): {str(e)}")
-            state["intent"] = last_intent if last_intent else "general_explanation"
+            # state["intent"] = last_intent if last_intent else "general_explanation"
+            state["intent"] = "general_explanation"
             state["entities"] = {}
             
             # If it's general_explanation, generate response immediately
@@ -180,7 +235,7 @@ def unified_agent(state: dict) -> dict:
                 }
                 context.pop("cached_data", None)
               
-                pass
+                # pass
                 context_str = json.dumps(minimal_context, indent=2, ensure_ascii=False)
                 print(f"FARM CONTEXT SENT TO LLM: {context_str}")
 
@@ -217,6 +272,9 @@ def unified_agent(state: dict) -> dict:
             content = "\n".join([l for l in lines if not l.strip().startswith("```")])
         
         state["final_response"] = content.strip()
+        state["messages"].append(
+            AIMessage(content=content.strip())
+        )
         
     except Exception as e:
         print(f"UNIFIED_AGENT_ERROR (RESPONSE): {str(e)}")
