@@ -92,11 +92,50 @@ def unified_agent(state: dict) -> dict:
 
     # MODE 1: Intent Detection (when intent is not set)
     if not existing_intent:
-        # Build intent detection prompt
+        # Get previous conversation context for better intent detection
+        conv_state = state.get("conversation_state") or {}
+        previous_intent = conv_state.get("intent")
+        previous_entities = conv_state.get("entities", {})
+        
+        # ========== DEBUG: Intent Detection Context ==========
+        print("\n" + "="*80)
+        print("🔍 [DEBUG] INTENT DETECTION - CONTEXT ANALYSIS")
+        print("="*80)
+        print(f"💬 Current user message: {user_message}")
+        print(f"📜 Conversation history length: {len(history_text)} characters")
+        print(f"🎯 Previous intent from conversation_state: {previous_intent or 'None (first message)'}")
+        print(f"🏷️  Previous entities: {json.dumps(previous_entities, ensure_ascii=False)}")
+        if history_text:
+            print(f"\n📜 Conversation history preview:")
+            print(history_text[:300] + "..." if len(history_text) > 300 else history_text)
+        print("="*80 + "\n")
+        # ====================================================
+        
+        # Build context-aware intent detection prompt (concise)
+        context_info = ""
+        if previous_intent:
+            context_info = f"""
+PREVIOUS: intent={previous_intent}, entities={json.dumps(previous_entities, ensure_ascii=False)}
+- Short/ambiguous messages → likely same intent
+- New concept mentioned → choose matching intent
+"""
+
+        # Build intent detection prompt (concise)
         intent_prompt = f"""{INTENT_SYSTEM_PROMPT}
-            Conversation history: {history_text}
-            Farmer message: "{user_message}"
-            """
+{context_info}
+HISTORY:
+{history_text}
+
+MESSAGE: "{user_message}"
+"""
+        
+        # ========== DEBUG: Show Prompt Sent to LLM ==========
+        print("\n" + "="*80)
+        print("🔍 [DEBUG] INTENT DETECTION PROMPT SENT TO LLM")
+        print("="*80)
+        print(intent_prompt)
+        print("="*80 + "\n")
+        # =====================================================
         
         try:
             start = time.perf_counter()
@@ -113,9 +152,14 @@ def unified_agent(state: dict) -> dict:
                 content = response
             else:
                 content = str(response)
-                
-            # ---------- DISABLE VERBOSE LOGGING FOR PERFORMANCE ----------
-            # print("RAW LLM RESPONSE (INTENT):", content)
+            
+            # ========== DEBUG: LLM Raw Response ==========
+            print("\n" + "="*80)
+            print("🔍 [DEBUG] LLM RAW RESPONSE (INTENT DETECTION)")
+            print("="*80)
+            print(content)
+            print("="*80 + "\n")
+            # ============================================
             
             result = safe_json(content)
             
@@ -125,6 +169,23 @@ def unified_agent(state: dict) -> dict:
             if not intent:
                 # intent = last_intent if last_intent else "general_explanation"
                 intent = intent or "general_explanation"
+            
+            # ========== DEBUG: Intent Detection Result ==========
+            print("\n" + "="*80)
+            print("🔍 [DEBUG] INTENT DETECTION RESULT")
+            print("="*80)
+            print(f"✅ Detected intent: {intent}")
+            print(f"🏷️  Detected entities: {json.dumps(entities, ensure_ascii=False)}")
+            if previous_intent:
+                if intent == previous_intent:
+                    print(f"✅ Intent MATCHED previous intent: {previous_intent}")
+                else:
+                    print(f"⚠️  Intent CHANGED from '{previous_intent}' → '{intent}'")
+                    print(f"   Reason: LLM decided to change intent based on current message")
+            else:
+                print(f"ℹ️  First message - no previous intent to compare")
+            print("="*80 + "\n")
+            # ===================================================
             
             state["intent"] = intent
 
@@ -167,6 +228,16 @@ def unified_agent(state: dict) -> dict:
 
             state["conversation_state"] = conv_state
             
+            # ========== DEBUG: Updated Conversation State ==========
+            print("\n" + "="*80)
+            print("🔍 [DEBUG] UPDATED CONVERSATION STATE (SAVED TO MEMORY)")
+            print("="*80)
+            print(f"💾 Intent saved: {conv_state.get('intent')}")
+            print(f"💾 Entities saved: {json.dumps(conv_state.get('entities', {}), ensure_ascii=False)}")
+            print(f"   (This will be available for the next user message)")
+            print("="*80 + "\n")
+            # ======================================================
+            
             # If intent is general_explanation, generate response immediately
             if intent == "general_explanation":
                 # Continue to response generation below
@@ -187,6 +258,16 @@ def unified_agent(state: dict) -> dict:
                 return state
     
     response_intent = existing_intent or state.get("intent", "general_explanation")
+    
+    # ========== DEBUG: Response Generation Phase ==========
+    print("\n" + "="*80)
+    print("🔍 [DEBUG] RESPONSE GENERATION PHASE")
+    print("="*80)
+    print(f"🎯 Intent for response: {response_intent}")
+    print(f"💬 User message: {user_message}")
+    print(f"📜 Conversation history length: {len(history_text)} characters")
+    print("="*80 + "\n")
+    # ====================================================
 
     # -------- FILTER CACHE BASED ON INTENT --------
     cached_data = context.get("cached_data")

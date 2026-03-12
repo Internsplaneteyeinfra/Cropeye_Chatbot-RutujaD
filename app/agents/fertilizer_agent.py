@@ -1,7 +1,5 @@
 from typing import Dict
 
-# from app.services.api_service import get_api_service
-# from app.services.farm_context_service import get_farm_context
 from app.domain.fertilizer.video_resource import get_fertilizer_videos
 
 from app.domain.fertilizer.schedule import (

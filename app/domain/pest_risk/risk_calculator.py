@@ -106,7 +106,11 @@ def _assess_pest_risk(
     stage_match = True
     if pest.get("stage"):
         s = pest["stage"]
-        stage_match = s["minDays"] <= days_since_plantation <= s["maxDays"]
+        # Special handling: if days > 365 and pest maxDays is 365, still match for maturity stage
+        if days_since_plantation > 365 and s["maxDays"] == 365:
+            stage_match = days_since_plantation >= s["minDays"]
+        else:
+            stage_match = s["minDays"] <= days_since_plantation <= s["maxDays"]
 
     current_month_norm = _normalize_month(current_month)
     pest_months_norm = [_normalize_month(m) for m in pest.get("months") or []]
@@ -136,7 +140,11 @@ def _assess_disease_risk(
     stage_match = True
     if disease.get("stage"):
         s = disease["stage"]
-        stage_match = s["minDays"] <= days_since_plantation <= s["maxDays"]
+        # Special handling: if days > 365 and disease maxDays is 365, still match for maturity stage
+        if days_since_plantation > 365 and s["maxDays"] == 365:
+            stage_match = days_since_plantation >= s["minDays"]
+        else:
+            stage_match = s["minDays"] <= days_since_plantation <= s["maxDays"]
 
     current_month_norm = _normalize_month(current_month)
     disease_months_norm = [_normalize_month(m) for m in disease.get("months") or []]
@@ -224,6 +232,7 @@ def generate_risk_assessment(
     if (pest_detection_data.get("SoilBorn_affected_pixel_percentage") or 0) > 0:
         active_categories.append("soil_borne")
 
+    # Process pests for High risk (API percentage > 0 AND stage matches AND month matches)
     for pest in PESTS_DATA:
         if not pest.get("category") or pest["category"] not in active_categories:
             continue
@@ -231,12 +240,85 @@ def generate_risk_assessment(
         if level == "High":
             result["pests"]["High"].append(pest["name"])
 
+    # Process pests for Low risk (stage matches AND month matches BUT API percentage = 0)
+    # This matches frontend behavior where Low risk pests are shown based on month/stage matching
+    for pest in PESTS_DATA:
+        if not pest.get("category"):
+            continue
+        
+        # Get API percentage for this pest category
+        api_percentage = 0.0
+        if pest["category"] == "chewing":
+            api_percentage = pest_detection_data.get("chewing_affected_pixel_percentage") or 0
+        elif pest["category"] == "sucking":
+            api_percentage = pest_detection_data.get("sucking_affected_pixel_percentage") or 0
+        elif pest["category"] == "soil_borne":
+            api_percentage = pest_detection_data.get("SoilBorn_affected_pixel_percentage") or 0
+        
+        # Only consider for Low risk if API percentage is 0
+        if api_percentage > 0:
+            continue  # Already processed for High risk above
+        
+        # Check if stage matches
+        # For Low risk, be more lenient: if month matches and days >= minDays, show it
+        # (even if days > maxDays, as Low risk indicates potential seasonal risk)
+        stage_match = True
+        if pest.get("stage"):
+            s = pest["stage"]
+            # For Low risk: match if days >= minDays (ignore maxDays check for Low risk)
+            # This matches frontend behavior where Low risk pests are shown based on month matching
+            stage_match = days_since_plantation >= s["minDays"]
+        
+        # Check if month matches
+        current_month_norm = _normalize_month(month)
+        pest_months_norm = [_normalize_month(m) for m in pest.get("months") or []]
+        month_match = current_month_norm in pest_months_norm
+        
+        # Add to Low risk if stage and month match (but API percentage is 0)
+        # Also check it's not already in High risk
+        if stage_match and month_match and pest["name"] not in result["pests"]["High"]:
+            result["pests"]["Low"].append(pest["name"])
+
     has_fungi = (pest_detection_data.get("fungi_affected_pixel_percentage") or 0) > 0
     if has_fungi:
         for disease in DISEASES_DATA:
             level = _assess_disease_risk(disease, days_since_plantation, month, pest_detection_data)
             if level == "High":
                 result["diseases"]["High"].append(disease["name"])
+
+    # Process diseases for Low risk (stage matches AND month matches)
+    # For fungal diseases (Red Rot, Rust): only show if fungi percentage = 0 but stage/month match
+    # For non-fungal diseases: show if stage and month match
+    for disease in DISEASES_DATA:
+        # Skip if already in High risk
+        if disease["name"] in result["diseases"]["High"]:
+            continue
+        
+        # Check if stage matches
+        # For Low risk, be more lenient: if month matches and days >= minDays, show it
+        # (even if days > maxDays, as Low risk indicates potential seasonal risk)
+        stage_match = True
+        if disease.get("stage"):
+            s = disease["stage"]
+            # For Low risk: match if days >= minDays (ignore maxDays check for Low risk)
+            # This matches frontend behavior where Low risk diseases are shown based on month matching
+            stage_match = days_since_plantation >= s["minDays"]
+        
+        # Check if month matches
+        current_month_norm = _normalize_month(month)
+        disease_months_norm = [_normalize_month(m) for m in disease.get("months") or []]
+        month_match = current_month_norm in disease_months_norm
+        
+        # For fungal diseases (Red Rot, Rust), only show if fungi percentage = 0 and stage/month match
+        is_fungal = disease.get("name") in ("Red Rot", "Rust")
+        if is_fungal:
+            # Only add to Low if fungi percentage is 0 and stage/month match
+            if not has_fungi and stage_match and month_match:
+                result["diseases"]["Low"].append(disease["name"])
+        else:
+            # For non-fungal diseases, show as Low risk if stage and month match
+            if stage_match and month_match:
+                result["diseases"]["Low"].append(disease["name"])
 
     current_month_lower = _normalize_month(month)
     weed_buckets = categorize_weeds_by_season(WEEDS_DATA, current_month_lower)

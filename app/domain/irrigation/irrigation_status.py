@@ -1,9 +1,6 @@
 # app/domain/irrigation/irrigation_status.py
 
-from app.services.api_service import get_api_service
 from typing import Optional, Dict, Any
-
-
 
 from typing import Optional, Dict, Any
 
@@ -19,8 +16,8 @@ class IrrigationStatus:
     - Plant Water Uptake (calculated placeholder)
     """
 
-    def __init__(self, auth_token: Optional[str] = None):
-        self.auth_token = auth_token
+    # def __init__(self, auth_token: Optional[str] = None):
+    #     self.auth_token = auth_token
 
     async def build(self, plot_id: str, cached: dict) -> Dict[str, Any]:
         # -----------------------------

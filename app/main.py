@@ -240,19 +240,61 @@ async def chat(request: ChatRequest):
     }
     # Load previous state from LangGraph memory
     snapshot = graph.get_state(config)
-    if snapshot and snapshot.values.get("messages"):
-        messages = snapshot.values["messages"]
+    previous_values = snapshot.values if snapshot else {}
+    
+    # ========== DEBUG: State Restoration ==========
+    print("\n" + "="*80)
+    print("🔍 [DEBUG] STATE RESTORATION FROM LANGGRAPH MEMORY")
+    print("="*80)
+    print(f"📨 Current user message: {request.message}")
+    print(f"🔑 Thread ID: {thread_id}")
+    print(f"📦 Snapshot exists: {snapshot is not None}")
+    
+    if previous_values:
+        print(f"\n📝 Previous state found:")
+        print(f"   - Messages count: {len(previous_values.get('messages', []))}")
+        print(f"   - Previous intent: {previous_values.get('intent', 'None')}")
+        print(f"   - Previous entities: {json.dumps(previous_values.get('entities', {}), ensure_ascii=False)}")
+        print(f"   - Previous language: {previous_values.get('user_language', 'None')}")
+        
+        conv_state = previous_values.get('conversation_state')
+        if conv_state:
+            print(f"   - Conversation state intent: {conv_state.get('intent', 'None')}")
+            print(f"   - Conversation state entities: {json.dumps(conv_state.get('entities', {}), ensure_ascii=False)}")
+        else:
+            print(f"   - Conversation state: None (first message)")
+        
+        if previous_values.get("messages"):
+            print(f"\n📜 Conversation history (last 3 messages):")
+            for i, msg in enumerate(previous_values["messages"][-6:], 1):
+                role = "Farmer" if msg.__class__.__name__ == "HumanMessage" else "Assistant"
+                content_preview = msg.content[:150] + "..." if len(msg.content) > 150 else msg.content
+                print(f"   {i}. {role}: {content_preview}")
+    else:
+        print("⚠️  No previous state - this is the FIRST message in conversation")
+    print("="*80 + "\n")
+    # ==============================================
+    
+    # Restore messages from previous state
+    if previous_values.get("messages"):
+        messages = previous_values["messages"]
     else:
         messages = []
 
     messages.append(HumanMessage(content=request.message))
 
+    # Restore previous conversation state for context continuity
+    previous_intent = previous_values.get("intent")
+    previous_entities = previous_values.get("entities", {})
+    previous_conversation_state = previous_values.get("conversation_state")
+    previous_language = previous_values.get("user_language")
+
     state = {
         "messages": messages,
-        "user_language": None,
-        "intent": None,
+        "user_language": previous_language,  # Restore previous language
+        "intent": None,  # Will be detected fresh, but previous intent available in conversation_state
         "entities": {},
-        "conversation_state": None,
+        "conversation_state": previous_conversation_state,  # Restore previous conversation state
         "context": {
             "plot_id": request.plot_id,
             "user_id": request.user_id,
@@ -297,6 +339,19 @@ async def chat(request: ChatRequest):
     }
     result = await graph.ainvoke(state, config)
     timer.step("langgraph execution")
+    
+    # ========== DEBUG: Final Result ==========
+    print("\n" + "="*80)
+    print("🔍 [DEBUG] FINAL RESULT AFTER GRAPH EXECUTION")
+    print("="*80)
+    print(f"🎯 Final intent: {result.get('intent', 'None')}")
+    print(f"🏷️  Final entities: {json.dumps(result.get('entities', {}), ensure_ascii=False)}")
+    print(f"💬 Final conversation_state: {json.dumps(result.get('conversation_state', {}), ensure_ascii=False)}")
+    print(f"🌐 Final language: {result.get('user_language', 'None')}")
+    response_preview = result.get('final_response', '')[:200] + "..." if len(result.get('final_response', '')) > 200 else result.get('final_response', '')
+    print(f"📝 Response preview: {response_preview}")
+    print("="*80 + "\n")
+    # ==========================================
 
     # redis_manager.save_message(user_id, plot_id, "user", request.message, result.get("intent"))
     # redis_manager.save_message(
@@ -366,19 +421,41 @@ async def voice_chat(request: VoiceChatRequest):
             "error": "voice_input_failed",
         }
 
-    # short_memory = redis_manager.get_memory(user_id, plot_id)
+    # Load previous state from LangGraph memory for voice chat
+    thread_id = f"{user_id}_{plot_id}"
+    config = {
+        "configurable": {
+            "thread_id": thread_id
+        }
+    }
+    snapshot = graph.get_state(config)
+    previous_values = snapshot.values if snapshot else {}
+    
+    # Restore messages from previous state
+    if previous_values.get("messages"):
+        messages = previous_values["messages"]
+    else:
+        messages = []
+
+    messages.append(HumanMessage(content=user_message))
+
+    # Restore previous conversation state for context continuity
+    previous_intent = previous_values.get("intent")
+    previous_entities = previous_values.get("entities", {})
+    previous_conversation_state = previous_values.get("conversation_state")
+    previous_language = previous_values.get("user_language")
+
     state = {
-        # "user_message": user_message,
-        "messages": [HumanMessage(content=user_message)],
-        "user_language": None,
-        "intent": None,
+        "messages": messages,
+        "user_language": previous_language,  # Restore previous language
+        "intent": None,  # Will be detected fresh, but previous intent available in conversation_state
         "entities": {},
+        "conversation_state": previous_conversation_state,  # Restore previous conversation state
         "context": {
             "plot_id": request.plot_id,
             "user_id": request.user_id,
             "auth_token": auth_token,
         },
-        # "short_memory": short_memory,
         "analysis": None,
         "final_response": None,
     }
@@ -390,13 +467,6 @@ async def voice_chat(request: VoiceChatRequest):
         }
 
     try:
-        # result = await graph.ainvoke(state)
-        thread_id = f"{user_id}_{plot_id}"
-        config = {
-            "configurable": {
-                "thread_id": thread_id
-            }
-        }
         result = await graph.ainvoke(state, config)
         
     except Exception:

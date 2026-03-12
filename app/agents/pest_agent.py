@@ -168,14 +168,16 @@ async def pest_agent(state: dict) -> dict:
         current_conditions=current_conditions,
         pest_detection_data=pest_detection_data,
     )
-
+    # Remove weather fields (not needed for chatbot response)
+    result.pop("current_conditions", None)
+    
     analysis = {
         "agent": "pest_risk",
         "plot_id": plot_id,
         "risk_assessment": result,
-        "high_risk_weeds": result.get("weeds", {}).get("high", []),
-        "moderate_risk_weeds": result.get("weeds", {}).get("moderate", []),
-        "low_risk_weeds": result.get("weeds", {}).get("low", []),
+        # "high_risk_weeds": result.get("weeds", {}).get("high", []),
+        # "moderate_risk_weeds": result.get("weeds", {}).get("moderate", []),
+        # "low_risk_weeds": result.get("weeds", {}).get("low", []),
     }
 
     state["analysis"] = analysis

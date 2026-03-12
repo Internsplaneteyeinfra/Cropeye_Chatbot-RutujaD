@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
 from app.memory.redis_manager import redis_manager
-# from app.services.api_service import get_api_service
 
 BUD_PATH = Path("app/domain/irrigation/bud.json")
 

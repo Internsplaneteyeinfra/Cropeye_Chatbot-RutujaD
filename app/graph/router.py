@@ -7,6 +7,7 @@ SOIL_MOISTURE_INTENTS = {
      "soil_moisture", 
 }
 WEATHER_INTENTS = {
+    "current_weather",
     "weather_forecast",
 }
 IRRIGATION_INTENTS = {
@@ -14,12 +15,16 @@ IRRIGATION_INTENTS = {
     "irrigation_schedule",
 }
 MAP_INTENTS = {
-     "map_view",
+     "growth_map",
+     "soil_moisture_map",
+     "water_uptake_map",
+     "pest_map",
 }
 PEST_INTENTS = {
     "pest_risk",
 }
 FERTILIZER_INTENTS = {
+    "fertilizer_schedule",
     "fertilizer_advice",
 }
 DASHBOARD_INTENTS = {

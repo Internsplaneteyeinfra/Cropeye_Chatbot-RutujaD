@@ -6,9 +6,6 @@ from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List, Optional, Literal, Tuple
 
-from app.services.api_service import get_api_service
-# from app.services.farm_context_service import get_farm_context
-
 # =====================================================
 # HELPERS
 # =====================================================
@@ -33,10 +30,6 @@ class IrrigationSchedule:
 
     EFFICIENCY = 0.94
     # ACRE_TO_SQM = 4046.86
-
-    def __init__(self, auth_token=None):
-        self.api = get_api_service(auth_token)
-        self.auth_token = auth_token
 
     # -----------------------------
     # ET range
