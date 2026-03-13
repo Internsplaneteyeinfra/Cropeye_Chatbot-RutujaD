@@ -15,7 +15,7 @@ from app.memory.redis_manager import redis_manager
 load_dotenv()
 
 # Base URLs
-BASE_URL = os.getenv("BASE_URL", "https://cropeye-server-flyio.onrender.com/api")
+BASE_URL = os.getenv("BASE_URL", "https://cropeye-backend.up.railway.app/api")
 SOIL_API_URL = os.getenv("SOIL_API_URL", "https://main-cropeye.up.railway.app")
 PLOT_API_URL = os.getenv("PLOT_API_URL", "https://admin-cropeye.up.railway.app")
 EVENTS_API_URL = os.getenv("EVENTS_API_URL", "https://events-cropeye.up.railway.app")
@@ -327,10 +327,7 @@ class APIService:
         """
         end_date = end_date or datetime.now().strftime("%Y-%m-%d")
         cache_key = f"soil_moisture_map_{plot_name}_{end_date}"
-        cached = redis_manager.get(cache_key)
-        if cached:
-            return cached
-
+    
         print(f"[SOIL MAP] plot_name={plot_name}, end_date={end_date}")
         try:
             url = f"{PLOT_API_URL}/SoilMoisture"
@@ -341,10 +338,29 @@ class APIService:
             print("API data")
             response = await self.client.post(url, params=params, headers=self._get_headers())
             response.raise_for_status()
-            data = response.json()
-            redis_manager.set(cache_key, data, ttl=43200)
-            return data
 
+            data = response.json()
+            pixel = data.get("pixel_summary", {})
+            feature = data.get("features", [{}])[0]
+            properties = feature.get("properties", {})
+
+            filtered = {
+                "pixel_summary": {
+                    "less_pixel_percentage": pixel.get("less_pixel_percentage"),
+                    "adequate_pixel_percentage": pixel.get("adequate_pixel_percentage"),
+                    "excellent_pixel_percentage": pixel.get("excellent_pixel_percentage"),
+                    "excess_pixel_percentage": pixel.get("excess_pixel_percentage"),
+                    "shallow_water_pixel_percentage": pixel.get("shallow_water_pixel_percentage"),
+                },
+                "features": [
+                    {
+                        "properties": {
+                            "tile_url": properties.get("tile_url")
+                        }
+                    }
+                ]
+            }
+            return filtered
         except httpx.HTTPError as e:
             return {"error": f"Failed to fetch soil moisture map: {str(e)}"}
 
@@ -358,9 +374,6 @@ class APIService:
         end_date = end_date or datetime.now().strftime("%Y-%m-%d")
         cache_key = f"water_uptake_map_{plot_id}_{end_date}"
 
-        cached = redis_manager.get(cache_key)
-        if cached:
-            return cached
         try:
             response = await self.client.post(
                 f"{PLOT_API_URL}/wateruptake",
@@ -369,12 +382,32 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-            redis_manager.set(cache_key, data, ttl=43200)
-            return data
+        
+            pixel = data.get("pixel_summary", {})
+            feature = data.get("features", [{}])[0]
+            properties = feature.get("properties", {})
 
+            filtered = {
+                "pixel_summary": {
+                    "deficient_pixel_percentage": pixel.get("deficient_pixel_percentage"),
+                    "less_pixel_percentage": pixel.get("less_pixel_percentage"),
+                    "adequat_pixel_percentage": pixel.get("adequat_pixel_percentage"),  # Note: API uses "adequat" not "adequate"
+                    "excellent_pixel_percentage": pixel.get("excellent_pixel_percentage"),
+                    "excess_pixel_percentage": pixel.get("excess_pixel_percentage"),
+                },
+                "features": [
+                    {
+                        "properties": {
+                            "tile_url": properties.get("tile_url")
+                        }
+                    }
+                ]
+            }
+            return filtered
         except httpx.HTTPError as e:
             return {"error": f"Water uptake map fetch failed: {str(e)}"}
    
+
     # ----------------------------------------------------------------
     
     async def get_pest_map(self, plot_id: str, end_date: Optional[str] = None) -> dict:
@@ -385,9 +418,6 @@ class APIService:
         end_date = end_date or datetime.now().strftime("%Y-%m-%d")
         cache_key = f"pest_map_{plot_id}_{end_date}"
 
-        cached = redis_manager.get(cache_key)
-        if cached:
-            return cached
         try:
             response = await self.client.post(
                 f"{PLOT_API_URL}/pest-detection",
@@ -396,8 +426,26 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-            redis_manager.set(cache_key, data, ttl=43200)
-            return data
+            pixel = data.get("pixel_summary", {})
+            feature = data.get("features", [{}])[0]
+            properties = feature.get("properties", {})
+
+            filtered = {
+                "pixel_summary": {
+                    "chewing_affected_pixel_percentage": pixel.get("chewing_affected_pixel_percentage"),
+                    "sucking_affected_pixel_percentage": pixel.get("sucking_affected_pixel_percentage"),
+                    "fungi_affected_pixel_percentage": pixel.get("fungi_affected_pixel_percentage"),
+                    "SoilBorn_affected_pixel_percentage": pixel.get("SoilBorn_affected_pixel_percentage"),
+                },
+                "features": [
+                    {
+                        "properties": {
+                            "tile_url": properties.get("tile_url")
+                        }
+                    }
+                ]
+            }
+            return filtered
 
         except httpx.HTTPError as e:
             return {"error": f"Pest map fetch failed: {str(e)}"}
@@ -412,9 +460,6 @@ class APIService:
         end_date = end_date or datetime.now().strftime("%Y-%m-%d")
         cache_key = f"growth_map_{plot_id}_{end_date}"
 
-        cached = redis_manager.get(cache_key)
-        if cached:
-            return cached
         try:
             response = await self.client.post(
                 f"{PLOT_API_URL}/analyze_Growth",
@@ -426,8 +471,28 @@ class APIService:
             )
             response.raise_for_status()            
             data = response.json()
-            redis_manager.set(cache_key, data, ttl=43200)
-            return data
+
+            pixel = data.get("pixel_summary", {})
+            feature = data.get("features", [{}])[0]
+            properties = feature.get("properties", {})
+
+            filtered = {
+                "pixel_summary": {
+                    "weak_pixel_percentage": pixel.get("weak_pixel_percentage"),
+                    "stress_pixel_percentage": pixel.get("stress_pixel_percentage"),
+                    "moderate_pixel_percentage": pixel.get("moderate_pixel_percentage"),
+                    "healthy_pixel_percentage": pixel.get("healthy_pixel_percentage"),
+                },
+                "features": [
+                    {
+                        "properties": {
+                            "tile_url": properties.get("tile_url")
+                        }
+                    }
+                ]
+            }
+            # redis_manager.set(cache_key, filtered, ttl=43200)
+            return filtered
 
         except httpx.HTTPError as e:
             return {"error": f"Growth map fetch failed: {str(e)}"}
@@ -607,8 +672,6 @@ class APIService:
             return cached
 
         try:
-            # Try FIELD_API_URL first (field analysis service), fallback to PLOT_API_URL
-            # Can be overridden via FIELD_ANALYSIS_URL environment variable
             base_url = os.getenv("FIELD_ANALYSIS_URL") or FIELD_API_URL or PLOT_API_URL
             url = f"{base_url}/analyze"
 
@@ -619,8 +682,7 @@ class APIService:
             }
 
             response = await self.client.get(url, params=params, headers=self._get_headers())
-            
-            # Handle HTTP errors gracefully
+       
             if response.status_code == 404:
                 return {"error": f"Field analysis endpoint not found at {url}. Please check if the endpoint exists or if FIELD_ANALYSIS_URL environment variable needs to be set."}
             

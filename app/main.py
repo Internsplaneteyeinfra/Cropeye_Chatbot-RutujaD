@@ -1,7 +1,7 @@
 
 # app/main.py
 from langchain_core.messages import HumanMessage
-import base64
+# import base64
 from fastapi import FastAPI, Header, Depends
 from pydantic import BaseModel
 from typing import Optional
@@ -13,19 +13,19 @@ from app.services.api_service import get_api_service
 import time
 from app.memory.redis_manager import redis_manager
 from app.utils.timer import Timer
-from app.services.voice_service import (
-    transcribe_audio_base64,
-    text_to_speech,
-    get_tts_lang,
-)
+# from app.services.voice_service import (
+#     transcribe_audio_base64,
+#     text_to_speech,
+#     get_tts_lang,
+# )
 from app.services.report_service import get_report_data
 from app.prompts.response_prompt import YIELD_IMPROVEMENT_PROMPT
 from app.config import llm
-from app.utils.lang_detect import detect_lang
+# from app.utils.lang_detect import detect_lang
 from datetime import datetime
 import asyncio
 import json
-from app.services.farm_context_service import get_farm_context
+# from app.services.farm_context_service import get_farm_context
 
 # ---------------- LOGGING CONFIG ----------------
 logging.basicConfig(
@@ -57,14 +57,14 @@ class InitializePlotRequest(BaseModel):
     plot_id: str  
 
 
-class VoiceChatRequest(BaseModel):
-    """Voice input: send either typed message or voice audio. Response includes text + optional TTS audio."""
-    message: Optional[str] = None
-    audio_base64: Optional[str] = None
-    content_type: Optional[str] = None  # e.g. "audio/wav", "audio/mpeg"
-    user_id: Optional[int] = None
-    plot_id: Optional[str] = None
-    include_audio: Optional[bool] = True  # if True, return TTS as base64
+# class VoiceChatRequest(BaseModel):
+#     """Voice input: send either typed message or voice audio. Response includes text + optional TTS audio."""
+#     message: Optional[str] = None
+#     audio_base64: Optional[str] = None
+#     content_type: Optional[str] = None  # e.g. "audio/wav", "audio/mpeg"
+#     user_id: Optional[int] = None
+#     plot_id: Optional[str] = None
+#     include_audio: Optional[bool] = True  # if True, return TTS as base64
 
 
 class GenerateReportRequest(BaseModel):
@@ -381,261 +381,140 @@ async def chat(request: ChatRequest):
     }
 
 
-# # ---------- CropEye VoiceBot: same chatbot via voice (STT -> chat -> TTS) ----------
-VOICE_ERROR_COULDNT_HEAR = "Sorry, I couldn't hear that. Please try again."
-VOICE_ERROR_CHATBOT = "I'm having trouble right now. Please try again shortly."
+# # # ---------- CropEye VoiceBot: same chatbot via voice (STT -> chat -> TTS) ----------
+# VOICE_ERROR_COULDNT_HEAR = "Sorry, I couldn't hear that. Please try again."
+# VOICE_ERROR_CHATBOT = "I'm having trouble right now. Please try again shortly."
 
 
-@app.post("/voice/chat")
-async def voice_chat(request: VoiceChatRequest):
-    auth_token = None
-    """
-    CropEye VoiceBot: accept voice (audio) or text; pass to existing chatbot unchanged;
-    return text response and optional TTS audio in the user's language.
-    """
-    user_id = request.user_id 
-    plot_id = request.plot_id 
-    plot_id = str(plot_id)
-    include_audio = request.include_audio is not False
+# @app.post("/voice/chat")
+# async def voice_chat(request: VoiceChatRequest):
+#     auth_token = None
+#     """
+#     CropEye VoiceBot: accept voice (audio) or text; pass to existing chatbot unchanged;
+#     return text response and optional TTS audio in the user's language.
+#     """
+#     user_id = request.user_id 
+#     plot_id = request.plot_id 
+#     plot_id = str(plot_id)
+#     include_audio = request.include_audio is not False
 
-    user_message = (request.message or "").strip()
-    if not user_message and request.audio_base64:
-        transcribed, _detected_lang = transcribe_audio_base64(
-            request.audio_base64, request.content_type
-        )
+#     user_message = (request.message or "").strip()
+#     if not user_message and request.audio_base64:
+#         transcribed, _detected_lang = transcribe_audio_base64(
+#             request.audio_base64, request.content_type
+#         )
  
-        user_message = (transcribed or "").strip()
+#         user_message = (transcribed or "").strip()
 
-    if not user_message:
-        tts_lang = "en"
-        speak_text = VOICE_ERROR_COULDNT_HEAR
-        audio_base64_out = None
-        if include_audio:
-            audio_bytes = text_to_speech(speak_text, tts_lang)
-            audio_base64_out = base64.b64encode(audio_bytes).decode("utf-8") if audio_bytes else None
-        return {
-            "language": tts_lang,
-            "response": speak_text,
-            "speak_text": speak_text,
-            "audio_base64": audio_base64_out,
-            "transcribed": None,
-            "error": "voice_input_failed",
-        }
+#     if not user_message:
+#         tts_lang = "en"
+#         speak_text = VOICE_ERROR_COULDNT_HEAR
+#         audio_base64_out = None
+#         if include_audio:
+#             audio_bytes = text_to_speech(speak_text, tts_lang)
+#             audio_base64_out = base64.b64encode(audio_bytes).decode("utf-8") if audio_bytes else None
+#         return {
+#             "language": tts_lang,
+#             "response": speak_text,
+#             "speak_text": speak_text,
+#             "audio_base64": audio_base64_out,
+#             "transcribed": None,
+#             "error": "voice_input_failed",
+#         }
 
-    # Load previous state from LangGraph memory for voice chat
-    thread_id = f"{user_id}_{plot_id}"
-    config = {
-        "configurable": {
-            "thread_id": thread_id
-        }
-    }
-    snapshot = graph.get_state(config)
-    previous_values = snapshot.values if snapshot else {}
+#     # Load previous state from LangGraph memory for voice chat
+#     thread_id = f"{user_id}_{plot_id}"
+#     config = {
+#         "configurable": {
+#             "thread_id": thread_id
+#         }
+#     }
+#     snapshot = graph.get_state(config)
+#     previous_values = snapshot.values if snapshot else {}
     
-    # Restore messages from previous state
-    if previous_values.get("messages"):
-        messages = previous_values["messages"]
-    else:
-        messages = []
+#     # Restore messages from previous state
+#     if previous_values.get("messages"):
+#         messages = previous_values["messages"]
+#     else:
+#         messages = []
 
-    messages.append(HumanMessage(content=user_message))
+#     messages.append(HumanMessage(content=user_message))
 
-    # Restore previous conversation state for context continuity
-    previous_intent = previous_values.get("intent")
-    previous_entities = previous_values.get("entities", {})
-    previous_conversation_state = previous_values.get("conversation_state")
-    previous_language = previous_values.get("user_language")
+#     # Restore previous conversation state for context continuity
+#     previous_intent = previous_values.get("intent")
+#     previous_entities = previous_values.get("entities", {})
+#     previous_conversation_state = previous_values.get("conversation_state")
+#     previous_language = previous_values.get("user_language")
 
-    state = {
-        "messages": messages,
-        "user_language": previous_language,  # Restore previous language
-        "intent": None,  # Will be detected fresh, but previous intent available in conversation_state
-        "entities": {},
-        "conversation_state": previous_conversation_state,  # Restore previous conversation state
-        "context": {
-            "plot_id": request.plot_id,
-            "user_id": request.user_id,
-            "auth_token": auth_token,
-        },
-        "analysis": None,
-        "final_response": None,
-    }
+#     state = {
+#         "messages": messages,
+#         "user_language": previous_language,  # Restore previous language
+#         "intent": None,  # Will be detected fresh, but previous intent available in conversation_state
+#         "entities": {},
+#         "conversation_state": previous_conversation_state,  # Restore previous conversation state
+#         "context": {
+#             "plot_id": request.plot_id,
+#             "user_id": request.user_id,
+#             "auth_token": auth_token,
+#         },
+#         "analysis": None,
+#         "final_response": None,
+#     }
 
-    status = redis_manager.get_plot_status(plot_id)
-    if status != "ready":
-        return {
-            "error": "Plot data still loading. Please wait..."
-        }
+#     status = redis_manager.get_plot_status(plot_id)
+#     if status != "ready":
+#         return {
+#             "error": "Plot data still loading. Please wait..."
+#         }
 
-    try:
-        result = await graph.ainvoke(state, config)
+#     try:
+#         result = await graph.ainvoke(state, config)
         
-    except Exception:
-        speak_text = VOICE_ERROR_CHATBOT
-        tts_lang = "en"
-        audio_base64_out = None
-        if include_audio:
-            audio_bytes = text_to_speech(speak_text, tts_lang)
-            audio_base64_out = base64.b64encode(audio_bytes).decode("utf-8") if audio_bytes else None
-        return {
-            "language": tts_lang,
-            "response": speak_text,
-            "speak_text": speak_text,
-            "audio_base64": audio_base64_out,
-            "transcribed": user_message,
-            "error": "chatbot_error",
-        }
+#     except Exception:
+#         speak_text = VOICE_ERROR_CHATBOT
+#         tts_lang = "en"
+#         audio_base64_out = None
+#         if include_audio:
+#             audio_bytes = text_to_speech(speak_text, tts_lang)
+#             audio_base64_out = base64.b64encode(audio_bytes).decode("utf-8") if audio_bytes else None
+#         return {
+#             "language": tts_lang,
+#             "response": speak_text,
+#             "speak_text": speak_text,
+#             "audio_base64": audio_base64_out,
+#             "transcribed": user_message,
+#             "error": "chatbot_error",
+#         }
 
-    redis_manager.save_message(user_id, plot_id, "user", user_message, result.get("intent"))
-    if result.get("final_response"):
-        redis_manager.save_message(user_id, plot_id, "bot", result["final_response"])
+#     redis_manager.save_message(user_id, plot_id, "user", user_message, result.get("intent"))
+#     if result.get("final_response"):
+#         redis_manager.save_message(user_id, plot_id, "bot", result["final_response"])
 
-    final_response = result.get("final_response") or ""
-    user_language = result.get("user_language")
-    tts_lang = get_tts_lang(user_language)
-    speak_text = final_response
-    audio_base64_out = None
-    if include_audio and speak_text:
-        audio_bytes = text_to_speech(speak_text, tts_lang)
-        audio_base64_out = base64.b64encode(audio_bytes).decode("utf-8") if audio_bytes else None
+#     final_response = result.get("final_response") or ""
+#     user_language = result.get("user_language")
+#     tts_lang = get_tts_lang(user_language)
+#     speak_text = final_response
+#     audio_base64_out = None
+#     if include_audio and speak_text:
+#         audio_bytes = text_to_speech(speak_text, tts_lang)
+#         audio_base64_out = base64.b64encode(audio_bytes).decode("utf-8") if audio_bytes else None
 
-    return {
-        "language": result.get("user_language"),
-        "intent": result.get("intent"),
-        "entities": result.get("entities"),
-        "context": result.get("context"),
-        "analysis": result.get("analysis"),
-        "response": final_response,
-        "speak_text": speak_text,
-        "audio_base64": audio_base64_out,
-        "transcribed": user_message if request.audio_base64 else None,
-        "error": None,
-    }
+#     return {
+#         "language": result.get("user_language"),
+#         "intent": result.get("intent"),
+#         "entities": result.get("entities"),
+#         "context": result.get("context"),
+#         "analysis": result.get("analysis"),
+#         "response": final_response,
+#         "speak_text": speak_text,
+#         "audio_base64": audio_base64_out,
+#         "transcribed": user_message if request.audio_base64 else None,
+#         "error": None,
+#     }
 
 @app.post("/refresh-plot")
 async def refresh_plot(request: InitializePlotRequest):
     return await initialize_plot(request)
-
-# @app.post("/generate-report")
-# async def generate_report(request: GenerateReportRequest):
-#     """
-#     Generate a comprehensive yield improvement report for a plot.
-#     Uses cached farm data and domain logic to provide actionable recommendations.
-#     """
-#     plot_id = str(request.plot_id)
-#     user_id = request.user_id
-#     language = request.language
-    
-#     start_time = time.perf_counter()
-    
-#     # Step 1: Check if plot is initialized
-#     try:
-#         status = redis_manager.get_plot_status(plot_id)
-#         if status != "ready":
-#             return {
-#                 "error": "Plot not ready",
-#                 "status": status,
-#                 "message": "Plot data still loading. Please wait..."
-#             }
-#     except Exception as e:
-#         logger.error(f"Error checking plot status: {e}")
-#         return {"error": "Failed to check plot status"}
-    
-#     # Step 2: Fetch cached farm data and process through domain logic
-#     try:
-#         report_data = await get_report_data(
-#             plot_id=plot_id,
-#             user_id=user_id,
-#             auth_token=None
-#         )
-        
-#         if report_data.get("error"):
-#             return {"error": report_data.get("error")}
-            
-#     except Exception as e:
-#         logger.exception("Error fetching report data")
-#         return {"error": f"Failed to fetch report data: {str(e)}"}
- 
-#     if not language:
-#         language = "en"  
- 
-#     summary = {
-#         "farm_context": {
-#             "crop_stage": report_data.get("farm_context", {}).get("crop_stage"),
-#             "days_since_plantation": report_data.get("farm_context", {}).get("days_since_plantation"),
-#             "kc": report_data.get("farm_context", {}).get("kc"),
-#             "plantation_date": report_data.get("farm_context", {}).get("plantation_date"),
-#         },
-#         "yield": report_data.get("yield", {}),
-#         "biomass": report_data.get("biomass", {}),
-#         "crop_status": report_data.get("crop_status", {}),
-#         "soil": report_data.get("soil", {}),
-#         "npk_requirements": report_data.get("npk_requirements", {}),
-#         "irrigation": report_data.get("irrigation", {}),
-#         "pest_risk": report_data.get("pest_risk", {}),
-#         "weather": {
-#             "current": {
-#                 "temperature_c": report_data.get("weather", {}).get("current", {}).get("temperature_c"),
-#                 "humidity": report_data.get("weather", {}).get("current", {}).get("humidity"),
-#                 "precip_mm": report_data.get("weather", {}).get("current", {}).get("precip_mm"),
-#             }
-#         },
-#         "indices": {
-#             "latest": report_data.get("indices", {}).get("series", [])[-1] if report_data.get("indices", {}).get("series") else {},
-#             "critical_events": report_data.get("indices", {}).get("critical_events", []),
-#         },
-#         "stress": report_data.get("stress", {}),
-#         "sugar_content": report_data.get("sugar_content", {}),
-#         "evapotranspiration": {
-#             "ET_mean_mm_per_day": report_data.get("evapotranspiration", {}).get("ET_mean_mm_per_day"),
-#         },
-#     }
-    
-#     # Step 5: Generate report using LLM
-#     try:
-#         prompt = YIELD_IMPROVEMENT_PROMPT.format(
-#             language=language,
-#             context=json.dumps(report_data.get("farm_context", {}), indent=2),
-#             analysis=json.dumps(summary, indent=2),
-#             user_message="Generate a comprehensive yield improvement report to help reach 100T yield target."
-#         )
-        
-#         logger.info(f"Generating yield improvement report for plot {plot_id}")
-#         llm_start = time.perf_counter()
-#         response = llm.invoke(prompt)
-#         logger.info(f"⏱ LLM call took {time.perf_counter() - llm_start:.3f}s")
-        
-#         # Extract content from response
-#         if hasattr(response, 'content'):
-#             report_text = response.content
-#         elif hasattr(response, 'text'):
-#             report_text = response.text
-#         elif isinstance(response, str):
-#             report_text = response
-#         else:
-#             report_text = str(response)
-        
-#         # Clean up the response
-#         report_text = report_text.strip()
-#         if report_text.startswith("```"):
-#             # Remove markdown code blocks if present
-#             lines = report_text.split("\n")
-#             report_text = "\n".join([l for l in lines if not l.strip().startswith("```")])
-        
-#     except Exception as e:
-#         logger.exception("Error generating report with LLM")
-#         return {"error": f"Failed to generate report: {str(e)}"}
-    
-#     total_time = time.perf_counter() - start_time
-#     logger.info(f"⏱ Total report generation time: {total_time:.3f}s")
-    
-#     return {
-#         "plot_id": plot_id,
-#         "language": language,
-#         "report": report_text,
-#         "timestamp": datetime.now().isoformat(),
-#         "processing_time_seconds": round(total_time, 3)
-#     }
 
 
 @app.get("/health")

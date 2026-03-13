@@ -15,6 +15,7 @@ IRRIGATION_INTENTS = {
     "irrigation_schedule",
 }
 MAP_INTENTS = {
+     "map_view",  # Main intent for all map types
      "growth_map",
      "soil_moisture_map",
      "water_uptake_map",
