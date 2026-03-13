@@ -204,7 +204,8 @@ async def initialize_plot(request: InitializePlotRequest):
     plot_id = request.plot_id
     redis_manager.set_plot_status(plot_id, "processing")
 
-    asyncio.create_task(run_initialization(plot_id, None))
+    # asyncio.create_task(run_initialization(plot_id, None))
+    await run_initialization(plot_id, None)
 
     return {
         "status": "initializing",

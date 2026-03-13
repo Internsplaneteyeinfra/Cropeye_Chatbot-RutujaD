@@ -23,6 +23,10 @@ MAP_INTENTS = {
 PEST_INTENTS = {
     "pest_risk",
 }
+FIELD_HEALTH_INTENTS = {
+    "field_score",
+    "crop_health_analysis",
+}
 FERTILIZER_INTENTS = {
     "fertilizer_schedule",
     "fertilizer_advice",
@@ -64,6 +68,9 @@ def router(state: dict) -> str:
 
     if intent in PEST_INTENTS:
         return "pest_agent"
+
+    if intent in FIELD_HEALTH_INTENTS:
+        return "field_health_agent"
 
     if intent in FERTILIZER_INTENTS:
         return "fertilizer_agent"

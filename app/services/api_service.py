@@ -591,6 +591,81 @@ class APIService:
             return {"error": f"Failed to fetch weather forecast: {str(e)}"}
 
     # ----------------------------------------------------------------
+    async def get_field_analysis(self, plot_name: str, end_date: str=None, days_back: int=7) -> Dict[str, Any]:
+        """
+        Get field score/health analysis for a plot
+        API: GET /analyze?plot_name={plot_name}&end_date={end_date}&days_back={days_back}
+        Returns: overall_health, health_status, statistics.mean, plot_name
+        """
+        if end_date is None:
+            end_date = datetime.now().strftime("%Y-%m-%d")
+
+        cache_key = f"field_analysis_{plot_name}_{end_date}_{days_back}"
+
+        cached = redis_manager.get(cache_key)
+        if cached:
+            return cached
+
+        try:
+            # Try FIELD_API_URL first (field analysis service), fallback to PLOT_API_URL
+            # Can be overridden via FIELD_ANALYSIS_URL environment variable
+            base_url = os.getenv("FIELD_ANALYSIS_URL") or FIELD_API_URL or PLOT_API_URL
+            url = f"{base_url}/analyze"
+
+            params = {
+                "plot_name": plot_name,
+                "end_date": end_date,
+                "days_back": days_back
+            }
+
+            response = await self.client.get(url, params=params, headers=self._get_headers())
+            
+            # Handle HTTP errors gracefully
+            if response.status_code == 404:
+                return {"error": f"Field analysis endpoint not found at {url}. Please check if the endpoint exists or if FIELD_ANALYSIS_URL environment variable needs to be set."}
+            
+            response.raise_for_status()
+
+            data = response.json()
+
+            field_data = None
+
+            if isinstance(data, list):
+                plot_data = [
+                    item for item in data
+                    if str(item.get("plot_name") or item.get("plot") or item.get("name")) == str(plot_name)
+                ]
+
+                if plot_data:
+                    plot_data.sort(key=lambda x: x.get("date") or "", reverse=True)
+                    field_data = plot_data[0]
+            elif isinstance(data, dict):
+                field_data = data
+
+            if not field_data:
+                return {"error": "No field analysis data found for this plot"}
+
+            result = {
+                "plot_name": plot_name,
+                "overall_health": field_data.get("overall_health", 0),
+                "health_status": field_data.get("health_status", "Unknown"),
+                "statistics": {
+                    "mean": field_data.get("statistics", {}).get("mean", 0)
+                }
+            }
+
+            redis_manager.set(cache_key, result, ttl=43200)
+
+            return result
+
+        except httpx.HTTPStatusError as e:
+            return {"error": f"HTTP {e.response.status_code}: Failed to fetch field analysis - {str(e)}"}
+        except httpx.RequestError as e:
+            return {"error": f"Request failed: {str(e)}"}
+        except Exception as e:
+            return {"error": f"Unexpected error: {str(e)}"}
+
+    # ----------------------------------------------------------------
     async def close(self):
         """Close the HTTP client"""
         await self.client.aclose()

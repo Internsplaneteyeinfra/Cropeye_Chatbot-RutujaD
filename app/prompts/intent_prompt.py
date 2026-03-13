@@ -345,6 +345,8 @@ INTENT MAPPING:
 - weather_forecast: rain, temperature, humidity, wind, weather forecast
 - fertilizer_advice: fertilizer needed, NPK requirements, fertilizer videos
 - pest_risk: pests, diseases, weeds, infestation
+- field_score: field score, field health score, show my field score, what is the field score, field score for my plot
+- crop_health_analysis: crop health, crop health analysis, how is my crop health, is my crop healthy, crop health report
 - general_explanation: greetings, help, off-topic (ONLY if not farming-related)
 
 KEY CONCEPTS:
@@ -352,6 +354,8 @@ KEY CONCEPTS:
 - Brix / sugar content → dashboard_summary (query_type: sugar_content_check)
 - Soil moisture → soil_moisture (NOT irrigation_advice)
 - Maps/visual field data → map_view
+- Field score / field health score → field_score (overall field health percentage/score)
+- Crop health / crop health analysis → crop_health_analysis (pest/disease/weed risk assessment)
 
 CONTEXT RULES:
 - Short/ambiguous messages (pronouns, "it", "this", "that") → usually same intent

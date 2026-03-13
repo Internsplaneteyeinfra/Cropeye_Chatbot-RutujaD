@@ -14,6 +14,7 @@ from app.agents.pest_agent import pest_agent
 from app.agents.irrigation_agent import irrigation_agent
 from app.agents.fertilizer_agent import fertilizer_agent
 from app.agents.dashboard_agent import dashboard_agent
+from app.agents.field_health_agent import field_health_agent
 
 def build_graph():
     graph = StateGraph(GraphState)
@@ -28,6 +29,7 @@ def build_graph():
     graph.add_node("irrigation_agent", irrigation_agent)
     graph.add_node("fertilizer_agent", fertilizer_agent)
     graph.add_node("dashboard_agent", dashboard_agent)
+    graph.add_node("field_health_agent", field_health_agent)
 
     graph.set_entry_point("unified_agent")
     
@@ -48,6 +50,7 @@ def build_graph():
             "irrigation_agent": "irrigation_agent",
             "fertilizer_agent": "fertilizer_agent",
             "dashboard_agent": "dashboard_agent",
+            "field_health_agent": "field_health_agent",
             "unified_agent": "unified_agent",  
             END: END
         }
@@ -61,6 +64,7 @@ def build_graph():
     graph.add_edge("irrigation_agent", "unified_agent")
     graph.add_edge("fertilizer_agent", "unified_agent")
     graph.add_edge("dashboard_agent", "unified_agent")
+    graph.add_edge("field_health_agent", "unified_agent")
     
     graph.add_edge("unified_agent", END)
 
