@@ -1,5 +1,4 @@
 # unified_agent.py
-# from app.prompts.unified_prompt import UNIFIED_SYSTEM_PROMPT
 from app.utils.json_utils import safe_json
 from app.config import llm
 from app.utils.lang_detect import detect_lang
@@ -7,8 +6,9 @@ import json
 from app.prompts.intent_prompt import INTENT_SYSTEM_PROMPT
 from app.prompts.response_prompt import RESPONSE_PROMPT
 from app.utils.cache_filter import filter_cache_by_intent
-from app.utils.analysis_compressor import compress_analysis
 import time
+
+from langchain_core.messages import AIMessage
 
 def unified_agent(state: dict) -> dict:
     """
@@ -16,30 +16,22 @@ def unified_agent(state: dict) -> dict:
     - If intent is not set: performs intent detection and entity extraction
     - If intent is already set: generates final response
     """
-    
-    user_message = state.get("user_message", "")
+    messages = state["messages"]
+    history_text = ""
+    for m in messages[:-1]: 
+        role = "Farmer" if m.__class__.__name__ == "HumanMessage" else "Assistant"
+        history_text += f"{role}: {m.content}\n"
+
+    user_message = messages[-1].content
+
     existing_intent = state.get("intent")
     language = state.get("user_language")
     analysis = state.get("analysis", {})
-    print("\n===== ANALYSIS DATA =====")
-    print(json.dumps(analysis, indent=2, ensure_ascii=False))
-    print("=========================\n")
     context = state.get("context", {})
-    
-    history = state.get("short_memory", []) or []
-    
-    # Detect language if not set
+
     if not language:
         language = detect_lang(user_message)
         state["user_language"] = language
-    
-    # Build conversation history
-    history_text = ""
-    last_intent = None
-    for h in history:
-        history_text += f"{h.get('role', '')}: {h.get('message', '')}\n"
-        if h.get("intent"):
-            last_intent = h["intent"]
     
     # ---------- FAST GREETING SHORT-CIRCUIT (before any LLM calls) ----------
     if not existing_intent:
@@ -61,15 +53,13 @@ def unified_agent(state: dict) -> dict:
             "help": "I can help you with soil analysis, weather forecasts, irrigation advice, fertilizer recommendations, pest detection, and crop monitoring. What do you need?",
             "who are you": "I'm CropEye, your agriculture intelligence assistant. I help farmers with crop management, soil analysis, weather forecasts, and farming advice."
         }
-        
-        # Direct match
+ 
         if message_lower in greeting_responses:
             state["intent"] = "general_explanation"
             state["final_response"] = greeting_responses[message_lower]
             state["user_language"] = language or "en"
             return state
-        
-        # Partial match for multi-word greetings
+      
         for key, response in greeting_responses.items():
             if key in message_lower and len(message_lower.split()) <= 3:
                 state["intent"] = "general_explanation"
@@ -77,19 +67,32 @@ def unified_agent(state: dict) -> dict:
                 state["user_language"] = language or "en"
                 return state
 
-    # MODE 1: Intent Detection (when intent is not set)
     if not existing_intent:
-        # Build intent detection prompt
-        intent_prompt = f"""{INTENT_SYSTEM_PROMPT}
-            Farmer message: "{user_message}"
-            """
+        conv_state = state.get("conversation_state") or {}
+        previous_intent = conv_state.get("intent")
+        previous_entities = conv_state.get("entities", {})
         
+
+        context_info = ""
+        if previous_intent:
+            context_info = f"""
+                PREVIOUS: intent={previous_intent}, entities={json.dumps(previous_entities, ensure_ascii=False)}
+                - Short/ambiguous messages → likely same intent
+                - New concept mentioned → choose matching intent
+                """
+
+        intent_prompt = f"""{INTENT_SYSTEM_PROMPT}
+            {context_info}
+            HISTORY:
+            {history_text}
+
+            MESSAGE: "{user_message}"
+            """
         try:
             start = time.perf_counter()
             response = llm.invoke(intent_prompt)
             print(f"⏱ Intent LLM time: {time.perf_counter() - start:.3f}s")
-            
-            # Handle different response formats
+   
             content = ""
             if hasattr(response, 'content'):
                 content = response.content
@@ -99,33 +102,43 @@ def unified_agent(state: dict) -> dict:
                 content = response
             else:
                 content = str(response)
-                
-            # ---------- DISABLE VERBOSE LOGGING FOR PERFORMANCE ----------
-            # print("RAW LLM RESPONSE (INTENT):", content)
             
             result = safe_json(content)
+            
             intent = result.get("intent")
             entities = result.get("entities")
             
             if not intent:
-                intent = last_intent if last_intent else "general_explanation"
+                intent = intent or "general_explanation"
             
             state["intent"] = intent
-            state["entities"] = entities if isinstance(entities, dict) else {}
+
+            new_entities = entities if isinstance(entities, dict) else {}
+
+            conv_state = state.get("conversation_state") or {}
+
+            prev_entities = conv_state.get("entities", {})
+
+            for k, v in prev_entities.items():
+                if not new_entities.get(k):
+                    new_entities[k] = v
+
+            state["entities"] = new_entities
+            conv_state["intent"] = state["intent"]
+            conv_state["entities"] = state["entities"]
+
+            state["conversation_state"] = conv_state
             
-            # If intent is general_explanation, generate response immediately
             if intent == "general_explanation":
-                # Continue to response generation below
                 existing_intent = intent
             else:
                 return state
             
         except Exception as e:
             print(f"UNIFIED_AGENT_ERROR (INTENT): {str(e)}")
-            state["intent"] = last_intent if last_intent else "general_explanation"
+            state["intent"] = "general_explanation"
             state["entities"] = {}
-            
-            # If it's general_explanation, generate response immediately
+      
             if state["intent"] == "general_explanation":
                 existing_intent = state["intent"]
             else:
@@ -133,13 +146,11 @@ def unified_agent(state: dict) -> dict:
     
     response_intent = existing_intent or state.get("intent", "general_explanation")
 
-    # -------- FILTER CACHE BASED ON INTENT --------
     cached_data = context.get("cached_data")
 
     if cached_data:
         filtered_cache = filter_cache_by_intent(response_intent, cached_data)
 
-        # remove None values
         filtered_cache = {k: v for k, v in filtered_cache.items() if v is not None}
 
         if filtered_cache:
@@ -158,11 +169,9 @@ def unified_agent(state: dict) -> dict:
         except Exception:
             analysis_str = str(analysis)
     
-    # ---------- REMOVE cached_data FOR general_explanation TO REDUCE PROMPT SIZE ----------
     context_str = "No context available"
     if context:
         try:
-            # For general_explanation, only keep minimal context (no cached_data)
             if response_intent == "general_explanation":
                 minimal_context = {
                     "plot_id": context.get("plot_id"),
@@ -172,7 +181,6 @@ def unified_agent(state: dict) -> dict:
                 print(f"CONTEXT SENT TO LLM: {context_str}")
 
             else:
-                # context_str = json.dumps(context, indent=2, ensure_ascii=False)
                 minimal_context = {
                     "plot_id": context.get("plot_id"),
                     "crop_stage": context.get("crop_stage"),
@@ -180,7 +188,6 @@ def unified_agent(state: dict) -> dict:
                 }
                 context.pop("cached_data", None)
               
-                pass
                 context_str = json.dumps(minimal_context, indent=2, ensure_ascii=False)
                 print(f"FARM CONTEXT SENT TO LLM: {context_str}")
 
@@ -198,7 +205,6 @@ def unified_agent(state: dict) -> dict:
         start = time.perf_counter()
         response = llm.invoke(response_prompt)
         print(f"⏱ LLM call took {time.perf_counter()-start:.3f}s")
-        # Handle different response formats
         content = ""
         if hasattr(response, 'content'):
             content = response.content
@@ -209,14 +215,15 @@ def unified_agent(state: dict) -> dict:
         else:
             content = str(response)
         
-        # Clean up the response (remove any JSON markers if present)
         content = content.strip()
         if content.startswith("```"):
-            # Remove markdown code blocks
             lines = content.split("\n")
             content = "\n".join([l for l in lines if not l.strip().startswith("```")])
         
         state["final_response"] = content.strip()
+        state["messages"].append(
+            AIMessage(content=content.strip())
+        )
         
     except Exception as e:
         print(f"UNIFIED_AGENT_ERROR (RESPONSE): {str(e)}")

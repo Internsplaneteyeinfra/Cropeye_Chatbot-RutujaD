@@ -66,10 +66,8 @@ class FieldIndices:
         if not raw:
             return {}
 
-        # Step 1 — aggregate like frontend
         aggregated = self._aggregate(raw, period)
 
-        # Step 2 — apply threshold logic
         analysis = []
 
         for row in aggregated:
@@ -87,7 +85,6 @@ class FieldIndices:
 
             analysis.append(entry)
 
-        # Step 3 — detect critical periods
         critical_events = []
 
         for row in analysis:

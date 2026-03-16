@@ -1,7 +1,5 @@
 from typing import Dict
 
-# from app.services.api_service import get_api_service
-# from app.services.farm_context_service import get_farm_context
 from app.domain.fertilizer.video_resource import get_fertilizer_videos
 
 from app.domain.fertilizer.schedule import (
@@ -34,13 +32,6 @@ async def fertilizer_agent(state: dict) -> dict:
         state["analysis"] = {"fertilizer": {"error": "plot_id missing"}}
         return state
 
-    # =====================================================
-    # FARM CONTEXT (single source of truth)
-    # =====================================================
-    # farm = await get_farm_context(
-    #     plot_name=plot_id,
-    #     auth_token=auth_token
-    # )
     farm = state.get("context", {})
 
     if farm.get("error"):
@@ -51,7 +42,6 @@ async def fertilizer_agent(state: dict) -> dict:
     plantation_type = farm.get("plantation_type")
     planting_method = farm.get("planting_method")
 
-    # ❗ STRICT VALIDATION (NO DEFAULTS)
     if not plantation_date:
         state["analysis"] = {"fertilizer": {"error": "plantation_date missing"}}
         return state
@@ -64,9 +54,6 @@ async def fertilizer_agent(state: dict) -> dict:
         state["analysis"] = {"fertilizer": {"error": "planting_method missing"}}
         return state
 
-    # =====================================================
-    # CHECK IF FERTILIZER STILL REQUIRED
-    # =====================================================
     months_completed = calculate_months_since_plantation(plantation_date)
 
     normalized_type = plantation_type.lower().replace("-", "").replace(" ", "")
@@ -94,9 +81,6 @@ async def fertilizer_agent(state: dict) -> dict:
         }
         return state
 
-    # =====================================================
-    # GENERATE SCHEDULE
-    # =====================================================
     try:
         schedule = generate_7_day_schedule(
             plantation_date=plantation_date,
@@ -121,9 +105,6 @@ async def fertilizer_agent(state: dict) -> dict:
         else {"error": npk["error"]}
     )
 
-    # =====================================================
-    # FINAL OUTPUT
-    # =====================================================
     state["analysis"] = {
         "fertilizer": {
             "no_fertilizer_required": False,

@@ -1,10 +1,6 @@
 # app/domain/weather/current.py
 
-from app.services.api_service import get_api_service
-
 class CurrentWeather:
-    def __init__(self, auth_token=None):
-        self.api = get_api_service(auth_token)
 
     @staticmethod
     def _comfort_level(temp_c: float) -> str:
@@ -16,11 +12,11 @@ class CurrentWeather:
             return "Warm"
         return "Hot"
 
-    async def fetch(self, plot_id: str, lat: float, lon: float) -> dict:
+    async def fetch(self, plot_id: str, lat: float, lon: float, cached: dict) -> dict:
         """
         Fetch current weather for marquee & irrigation cards
         """
-        data = await self.api.get_current_weather(plot_id, lat, lon)
+        data = cached.get("current_weather", {})
 
         if "error" in data:
             return data

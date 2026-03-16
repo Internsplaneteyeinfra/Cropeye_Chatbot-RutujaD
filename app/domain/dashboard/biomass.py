@@ -1,5 +1,4 @@
 # app/domain/dashboard/biomass.py
-from app.services.api_service import get_api_service
 
 class Biomass:
 

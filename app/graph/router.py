@@ -4,23 +4,36 @@ SOIL_ANALYSIS_INTENTS = {
     "soil_analysis"
 }
 SOIL_MOISTURE_INTENTS = {
-     "soil_moisture", 
+    "soil_moisture", 
 }
 WEATHER_INTENTS = {
+    "current_weather",
     "weather_forecast",
 }
 IRRIGATION_INTENTS = {
-    "irrigation_advice",
-    "irrigation_schedule",
+    "irrigation_status",
+    "irrigate_today",
 }
 MAP_INTENTS = {
-     "map_view",
+     "map_view",  
+     "growth_map",
+     "soil_moisture_map",
+     "water_uptake_map",
+     "pest_map",
 }
 PEST_INTENTS = {
     "pest_risk",
 }
+FIELD_HEALTH_INTENTS = {
+    "field_score",
+    "crop_health_analysis",
+}
 FERTILIZER_INTENTS = {
+    "fertilizer_schedule",
     "fertilizer_advice",
+}
+CONTACT_USER_INTENTS = {
+    "contact_user",
 }
 DASHBOARD_INTENTS = {
     "dashboard_summary",
@@ -29,7 +42,8 @@ DASHBOARD_INTENTS = {
     "sugar_content_check",
     "stress_check",
     "biomass_check",
-    "indices_check" 
+    "indices_check" ,
+    "recovery_rate_check"
 }
 
 def router(state: dict) -> str:
@@ -56,8 +70,14 @@ def router(state: dict) -> str:
     if intent in IRRIGATION_INTENTS:
         return "irrigation_agent"
 
+    if intent in CONTACT_USER_INTENTS:
+        return "contact_user_agent"
+
     if intent in PEST_INTENTS:
         return "pest_agent"
+
+    if intent in FIELD_HEALTH_INTENTS:
+        return "field_health_agent"
 
     if intent in FERTILIZER_INTENTS:
         return "fertilizer_agent"

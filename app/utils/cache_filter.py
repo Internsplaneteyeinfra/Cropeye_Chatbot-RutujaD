@@ -8,7 +8,8 @@ from app.graph.router import (
     MAP_INTENTS,
     PEST_INTENTS,
     FERTILIZER_INTENTS,
-    DASHBOARD_INTENTS
+    DASHBOARD_INTENTS,
+    FIELD_HEALTH_INTENTS
 )
 
 
@@ -72,6 +73,18 @@ def filter_cache_by_intent(intent: str, cached_data: dict) -> dict:
         return {
             "map": cached_data.get("map")
         }
+
+    # Field Health (Field Score & Crop Health Analysis)
+    if intent in FIELD_HEALTH_INTENTS:
+        if intent == "field_score":
+            return {
+                "field_analysis": cached_data.get("field_analysis")
+            }
+        elif intent == "crop_health_analysis":
+            return {
+                "pest_detection": cached_data.get("pest_detection"),
+                "current_weather": cached_data.get("current_weather")
+            }
 
     # fallback
     return {}

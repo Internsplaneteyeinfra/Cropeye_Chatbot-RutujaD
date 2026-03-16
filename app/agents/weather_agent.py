@@ -25,10 +25,5 @@ async def weather_agent(state: dict) -> dict:
     elif intent == "current_weather":
         analysis["weather"]["current_weather"] = get_cached("current_weather")
 
-    
-    # analysis["weather"]["current_weather"] = get_cached("current_weather")
-    # analysis["weather"]["weather_forecast"] = get_cached("weather_forecast")
-
     state["analysis"] = analysis
-
     return state

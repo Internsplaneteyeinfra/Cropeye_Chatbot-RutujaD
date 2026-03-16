@@ -8,6 +8,7 @@ async def map_agent(state: dict) -> dict:
     cached = context.get("cached_data", {})
     entities = state.get("entities", {})
     map_type = entities.get("query_type")
+    
     analysis = {"map": {}}
 
     if map_type == "soil_moisture_map":

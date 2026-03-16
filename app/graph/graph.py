@@ -2,9 +2,8 @@
 from langgraph.graph import StateGraph, END
 from app.graph.state import GraphState
 from app.graph.router import router
-
+from langgraph.checkpoint.memory import MemorySaver
 from app.agents.unified_agent import unified_agent
-
 from app.agents.soil_analysis_agent import soil_analysis_agent
 from app.agents.soil_moisture_agent import soil_moisture_agent
 from app.agents.weather_agent import weather_agent
@@ -13,11 +12,12 @@ from app.agents.pest_agent import pest_agent
 from app.agents.irrigation_agent import irrigation_agent
 from app.agents.fertilizer_agent import fertilizer_agent
 from app.agents.dashboard_agent import dashboard_agent
+from app.agents.field_health_agent import field_health_agent
+from app.agents.contact_user_agent import contact_user_agent
 
 def build_graph():
     graph = StateGraph(GraphState)
 
-    # Unified agent handles both intent detection and response generation
     graph.add_node("unified_agent", unified_agent)
 
     graph.add_node("soil_analysis_agent", soil_analysis_agent)
@@ -28,13 +28,11 @@ def build_graph():
     graph.add_node("irrigation_agent", irrigation_agent)
     graph.add_node("fertilizer_agent", fertilizer_agent)
     graph.add_node("dashboard_agent", dashboard_agent)
+    graph.add_node("field_health_agent", field_health_agent)
+    graph.add_node("contact_user_agent", contact_user_agent)
 
-    # Set entry point to unified agent (intent detection mode)
     graph.set_entry_point("unified_agent")
     
-    # Route based on detected intent
-    # If final_response is already set (general_explanation case handled in unified_agent), go to END
-    # Otherwise, route to domain agents
     def route_after_intent(state: dict) -> str:
         if state.get("final_response"):
             return END
@@ -52,12 +50,13 @@ def build_graph():
             "irrigation_agent": "irrigation_agent",
             "fertilizer_agent": "fertilizer_agent",
             "dashboard_agent": "dashboard_agent",
-            "unified_agent": "unified_agent",  # For general_explanation (shouldn't happen, but safe fallback)
+            "field_health_agent": "field_health_agent",
+            "contact_user_agent": "contact_user_agent",
+            "unified_agent": "unified_agent",  
             END: END
         }
     )
-    
-    # All domain agents route back to unified agent (response generation mode)
+
     graph.add_edge("soil_analysis_agent", "unified_agent")
     graph.add_edge("soil_moisture_agent", "unified_agent")
     graph.add_edge("weather_agent", "unified_agent")
@@ -66,8 +65,11 @@ def build_graph():
     graph.add_edge("irrigation_agent", "unified_agent")
     graph.add_edge("fertilizer_agent", "unified_agent")
     graph.add_edge("dashboard_agent", "unified_agent")
+    graph.add_edge("field_health_agent", "unified_agent")
+    graph.add_edge("contact_user_agent", "unified_agent")
     
-    # Unified agent (response generation mode) always ends the graph
     graph.add_edge("unified_agent", END)
 
-    return graph.compile()
+    memory = MemorySaver()
+
+    return graph.compile(checkpointer=memory)

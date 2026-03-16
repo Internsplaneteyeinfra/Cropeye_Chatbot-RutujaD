@@ -1,7 +1,5 @@
 #app domain/dashboard/crop_status.py
 
-from app.services.api_service import get_api_service
-
 class CropStatus:
 
     async def fetch(self, cached):
