@@ -3,9 +3,7 @@ from langgraph.graph import StateGraph, END
 from app.graph.state import GraphState
 from app.graph.router import router
 from langgraph.checkpoint.memory import MemorySaver
-
 from app.agents.unified_agent import unified_agent
-
 from app.agents.soil_analysis_agent import soil_analysis_agent
 from app.agents.soil_moisture_agent import soil_moisture_agent
 from app.agents.weather_agent import weather_agent
@@ -15,6 +13,7 @@ from app.agents.irrigation_agent import irrigation_agent
 from app.agents.fertilizer_agent import fertilizer_agent
 from app.agents.dashboard_agent import dashboard_agent
 from app.agents.field_health_agent import field_health_agent
+from app.agents.contact_user_agent import contact_user_agent
 
 def build_graph():
     graph = StateGraph(GraphState)
@@ -30,6 +29,7 @@ def build_graph():
     graph.add_node("fertilizer_agent", fertilizer_agent)
     graph.add_node("dashboard_agent", dashboard_agent)
     graph.add_node("field_health_agent", field_health_agent)
+    graph.add_node("contact_user_agent", contact_user_agent)
 
     graph.set_entry_point("unified_agent")
     
@@ -51,6 +51,7 @@ def build_graph():
             "fertilizer_agent": "fertilizer_agent",
             "dashboard_agent": "dashboard_agent",
             "field_health_agent": "field_health_agent",
+            "contact_user_agent": "contact_user_agent",
             "unified_agent": "unified_agent",  
             END: END
         }
@@ -65,10 +66,10 @@ def build_graph():
     graph.add_edge("fertilizer_agent", "unified_agent")
     graph.add_edge("dashboard_agent", "unified_agent")
     graph.add_edge("field_health_agent", "unified_agent")
+    graph.add_edge("contact_user_agent", "unified_agent")
     
     graph.add_edge("unified_agent", END)
 
-    # return graph.compile()
     memory = MemorySaver()
 
     return graph.compile(checkpointer=memory)

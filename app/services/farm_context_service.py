@@ -151,7 +151,6 @@ async def get_farm_context(
         "error": None
     }
     
-    # ---------- CACHE FARM CONTEXT FOR 24 HOURS ----------
     redis_manager.set(cache_key, farm_context, ttl=86400)
     
     return farm_context

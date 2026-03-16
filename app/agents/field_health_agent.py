@@ -72,16 +72,9 @@ async def field_health_agent(state: dict) -> dict:
             }
         }
 
-    # -------------------------------
-    # FIELD SCORE
-    # -------------------------------
-
     if intent == "field_score":
-        # Use cached field_analysis data (same as frontend)
-        # Frontend fetches from API and uses overall_health, health_status, statistics.mean
         field_analysis = cached.get("field_analysis")
         
-        # If not in cache, fetch from API (will be cached by api_service)
         if not field_analysis:
             api_service = get_api_service()
             current_date = datetime.now().strftime("%Y-%m-%d")
@@ -90,8 +83,7 @@ async def field_health_agent(state: dict) -> dict:
                 end_date=current_date,
                 days_back=7
             )
-        
-        # Check for errors
+ 
         if "error" in field_analysis or not field_analysis:
             return {
                 "analysis": {
@@ -101,8 +93,7 @@ async def field_health_agent(state: dict) -> dict:
                     "error": field_analysis.get("error", "Field analysis data not available")
                 }
             }
-        
-        # Return same structure as frontend expects (Map.tsx line 728-739)
+ 
         state["analysis"] = {
             "agent": "field_health",
             "intent": "field_score",
@@ -118,10 +109,6 @@ async def field_health_agent(state: dict) -> dict:
         }
 
         return state
-
-    # -------------------------------
-    # CROP HEALTH
-    # -------------------------------
 
     if intent == "crop_health_analysis":
 

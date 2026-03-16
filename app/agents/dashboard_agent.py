@@ -12,7 +12,6 @@ from app.memory.redis_manager import redis_manager
 
 async def dashboard_agent(state: dict):
 
-    # plot_id = context.get("plot_id")
     context = state.get("context", {})
     cached_data = context.get("cached_data", {})
 

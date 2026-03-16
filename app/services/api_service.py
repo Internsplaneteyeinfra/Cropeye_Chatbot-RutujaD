@@ -8,13 +8,11 @@ import httpx
 import os
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
-from cachetools import TTLCache
 from dotenv import load_dotenv
 from app.memory.redis_manager import redis_manager
 
 load_dotenv()
 
-# Base URLs
 BASE_URL = os.getenv("BASE_URL", "https://cropeye-backend.up.railway.app/api")
 SOIL_API_URL = os.getenv("SOIL_API_URL", "https://main-cropeye.up.railway.app")
 PLOT_API_URL = os.getenv("PLOT_API_URL", "https://admin-cropeye.up.railway.app")
@@ -77,7 +75,6 @@ class APIService:
             )
             response.raise_for_status()
             data = response.json()
-            # # # data["_source"] = "api"
             redis_manager.set(cache_key, data, ttl=3600)
             return data
 
@@ -360,6 +357,7 @@ class APIService:
                     }
                 ]
             }
+            redis_manager.set(cache_key, filtered, ttl=43200)
             return filtered
         except httpx.HTTPError as e:
             return {"error": f"Failed to fetch soil moisture map: {str(e)}"}
@@ -403,6 +401,7 @@ class APIService:
                     }
                 ]
             }
+            redis_manager.set(cache_key, filtered, ttl=43200)
             return filtered
         except httpx.HTTPError as e:
             return {"error": f"Water uptake map fetch failed: {str(e)}"}
@@ -445,6 +444,7 @@ class APIService:
                     }
                 ]
             }
+            redis_manager.set(cache_key, filtered, ttl=43200)
             return filtered
 
         except httpx.HTTPError as e:
@@ -491,7 +491,7 @@ class APIService:
                     }
                 ]
             }
-            # redis_manager.set(cache_key, filtered, ttl=43200)
+            redis_manager.set(cache_key, filtered, ttl=43200)
             return filtered
 
         except httpx.HTTPError as e:
@@ -732,7 +732,7 @@ class APIService:
         """Close the HTTP client"""
         await self.client.aclose()
 
-# Global API service instance (will be initialized with auth token when available)
+
 api_service: Optional[APIService] = None
 
 def get_api_service(auth_token: Optional[str] = None) -> APIService:

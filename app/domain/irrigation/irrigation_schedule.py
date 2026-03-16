@@ -6,9 +6,6 @@ from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List, Optional, Literal, Tuple
 
-# =====================================================
-# HELPERS
-# =====================================================
 
 def _parse_rainfall_value(value: Any) -> float:
     if value is None:
@@ -22,18 +19,10 @@ def _parse_rainfall_value(value: Any) -> float:
         return 0.0
 
 
-# =====================================================
-# MAIN CLASS
-# =====================================================
-
 class IrrigationSchedule:
 
     EFFICIENCY = 0.94
-    # ACRE_TO_SQM = 4046.86
-
-    # -----------------------------
-    # ET range
-    # -----------------------------
+   
     @staticmethod
     def get_et_range(et: float) -> Literal["Low", "Medium", "High"]:
         if et <= 3.0:
@@ -42,29 +31,17 @@ class IrrigationSchedule:
             return "Medium"
         return "High"
 
-    # -----------------------------
-    # Net ET
-    # -----------------------------
     def calculate_net_et(self, et, rainfall):
         return max(0, et - rainfall)
 
-
-    # -----------------------------
-    # Water calculation (plot area based)
-    # -----------------------------
     def calculate_water_required(self, net_et, kc):
         if net_et <= 0 or kc <= 0:
             return 0
 
-        # area_sqm = area_hectares * 10000
-        # liters = net_et * kc * self.EFFICIENCY
         liters = net_et * kc * 0.94 * 4046.86
 
         return round(liters)
 
-    # -----------------------------
-    # Deterministic ET prediction
-    # -----------------------------
     @staticmethod
     def generate_adjusted_et(base_et, plot_id):
 
@@ -104,9 +81,6 @@ class IrrigationSchedule:
 
         return predictions
 
-    # -----------------------------
-    # Flood time
-    # -----------------------------
     @staticmethod
     def format_time(hours):
         if not hours or hours <= 0:
@@ -133,42 +107,14 @@ class IrrigationSchedule:
         return self.format_time(water/flow_lph)
 
 
-    # =====================================================
-    # BUILD SCHEDULE
-    # =====================================================
-
     async def build(self, plot_id: str, lat, lon, cached, context):
-
-        # farm_context = await get_farm_context(
-        #     plot_name=plot_id,
-        #     auth_token=self.auth_token
-        # )
-
-        # if kc is missing, raise error
-        # if farm_context.get("error"):
-        #     print("[FARM CONTEXT ERROR] =", farm_context["error"])
-
-        # kc = farm_context.get("kc")
 
         kc = context.get("kc")
         crop_stage = context.get("crop_stage")
         plantation_date = context.get("plantation_date")
-
-        # if kc is None:
-        #     print("[FARM CONTEXT ERROR] KC value missing from farm context")
-
-        # print("\n[FARM CONTEXT]")
-        print("KC =", kc)
-        print("Crop stage =", crop_stage)
-        print("Plantation date =", plantation_date)
-        # print("Stage =", farm_context.get("crop_stage"))
-        # print("Plantation =", farm_context.get("plantation_date"))
-
         weather_today = cached.get("current_weather", {})
         forecast = cached.get("weather_forecast", {})
         et_data = cached.get("et", {})
-
-        print("\n[IRRIGATION DEBUG]")
 
         base_et = (
             et_data.get("et_24hr")
@@ -177,7 +123,6 @@ class IrrigationSchedule:
         )        
         if not base_et or base_et <= 0:
             print("Evapotranspiration data not available")
-
 
         print("Base ET =", base_et)
 

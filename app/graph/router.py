@@ -4,18 +4,18 @@ SOIL_ANALYSIS_INTENTS = {
     "soil_analysis"
 }
 SOIL_MOISTURE_INTENTS = {
-     "soil_moisture", 
+    "soil_moisture", 
 }
 WEATHER_INTENTS = {
     "current_weather",
     "weather_forecast",
 }
 IRRIGATION_INTENTS = {
-    "irrigation_advice",
-    "irrigation_schedule",
+    "irrigation_status",
+    "irrigate_today",
 }
 MAP_INTENTS = {
-     "map_view",  # Main intent for all map types
+     "map_view",  
      "growth_map",
      "soil_moisture_map",
      "water_uptake_map",
@@ -31,6 +31,9 @@ FIELD_HEALTH_INTENTS = {
 FERTILIZER_INTENTS = {
     "fertilizer_schedule",
     "fertilizer_advice",
+}
+CONTACT_USER_INTENTS = {
+    "contact_user",
 }
 DASHBOARD_INTENTS = {
     "dashboard_summary",
@@ -66,6 +69,9 @@ def router(state: dict) -> str:
 
     if intent in IRRIGATION_INTENTS:
         return "irrigation_agent"
+
+    if intent in CONTACT_USER_INTENTS:
+        return "contact_user_agent"
 
     if intent in PEST_INTENTS:
         return "pest_agent"

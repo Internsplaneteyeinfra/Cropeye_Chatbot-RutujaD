@@ -1,9 +1,7 @@
 # app/domain/pest_risk/risk_calculator.py
-# Replicates frontend pestt logic exactly. No external API. No formula changes.
 
 from typing import Any, Dict, List, Optional
 
-# --- Data: same as frontend pestsData (fields used for risk only) ---
 PESTS_DATA: List[Dict[str, Any]] = [
     {"name": "Early shoot borer", "months": ["April", "May", "June", "July"], "stage": {"minDays": 0, "maxDays": 120}, "category": "chewing"},
     {"name": "Top shoot borer", "months": ["January", "February", "March", "April"], "stage": {"minDays": 46, "maxDays": 210}, "category": "chewing"},
@@ -18,7 +16,6 @@ PESTS_DATA: List[Dict[str, Any]] = [
     {"name": "Sugarcane scale insect", "months": ["March", "April", "May", "June", "July", "August", "September", "October"], "stage": {"minDays": 46, "maxDays": 365}, "category": "sucking"},
 ]
 
-# --- Data: same as frontend diseasesData (only Red Rot and Rust use fungi %) ---
 DISEASES_DATA: List[Dict[str, Any]] = [
     {"name": "Red Rot", "months": ["July", "August", "September", "October", "November"], "stage": {"minDays": 121, "maxDays": 365}},
     {"name": "Rust", "months": ["August", "September", "October", "November", "December"], "stage": {"minDays": 46, "maxDays": 365}},
@@ -30,7 +27,6 @@ DISEASES_DATA: List[Dict[str, Any]] = [
     {"name": "Downy Mildew", "months": ["June", "July", "August"], "stage": {"minDays": 121, "maxDays": 210}},
 ]
 
-# --- Data: same as frontend Weeds.ts (full records for high-risk weeds display) ---
 WEEDS_DATA: List[Dict[str, Any]] = [
     {"name": "Hariali (Cynodon dactylon)", "months": ["February", "March", "April", "May"], "when": "Perennial, flushes in warm months", "where": "Irrigated fields, bunds, canals", "why": "Aggressive competitor, spreads via stolons & rhizomes, hard to control", "image": "/Image/hariyali.jpg", "chemical": ["Fenoxaprop-p-ethyl 9.3% EC - 400 ml/acre in 150–200 l water"]},
     {"name": "Congress Grass (Parthenium hysterophorus)", "months": ["February", "March", "April", "May"], "when": "Germinates with first rains", "where": "Roadsides, waste lands, also in cane fields", "why": "Allelopathic, fast spreading, causes worker allergies", "image": "/Image/congress grass.jpg", "chemical": ["2,4-D Sodium Salt 80% WP - 500–750 gm/acre in 150–200 l water"]},
@@ -38,7 +34,6 @@ WEEDS_DATA: List[Dict[str, Any]] = [
     {"name": "Bathua (Chenopodium album)", "months": ["October", "November", "December", "January"], "when": "Germinates in winter (low temp)", "where": "Northern India, fertile irrigated lands", "why": "Competes during early cane growth, reduces tillering", "image": "/Image/bathua.jpg", "chemical": ["2,4-D Sodium Salt 80% WP - 600–700 gm/acre in 150–200 l water"]},
 ]
 
-# --- Sugarcane stages: same as frontend riskAssessmentService SUGARCANE_STAGES ---
 SUGARCANE_STAGES = [
     {"name": "Germination & Early Growth", "minDays": 0, "maxDays": 45},
     {"name": "Tillering & Early Stem Elongation", "minDays": 46, "maxDays": 120},
@@ -106,7 +101,6 @@ def _assess_pest_risk(
     stage_match = True
     if pest.get("stage"):
         s = pest["stage"]
-        # Special handling: if days > 365 and pest maxDays is 365, still match for maturity stage
         if days_since_plantation > 365 and s["maxDays"] == 365:
             stage_match = days_since_plantation >= s["minDays"]
         else:
@@ -140,7 +134,6 @@ def _assess_disease_risk(
     stage_match = True
     if disease.get("stage"):
         s = disease["stage"]
-        # Special handling: if days > 365 and disease maxDays is 365, still match for maturity stage
         if days_since_plantation > 365 and s["maxDays"] == 365:
             stage_match = days_since_plantation >= s["minDays"]
         else:
@@ -174,7 +167,6 @@ def categorize_weeds_by_season(
     from datetime import datetime
     weeds = weeds if weeds is not None else WEEDS_DATA
     if current_month_lower is None:
-        # Same as frontend: toLocaleString('en-US', { month: 'long' }).toLowerCase()
         current_month_lower = datetime.utcnow().strftime("%B").lower()
 
     seasonal = [w for w in weeds if _matches_current_month_weed(w, current_month_lower)]
@@ -232,7 +224,6 @@ def generate_risk_assessment(
     if (pest_detection_data.get("SoilBorn_affected_pixel_percentage") or 0) > 0:
         active_categories.append("soil_borne")
 
-    # Process pests for High risk (API percentage > 0 AND stage matches AND month matches)
     for pest in PESTS_DATA:
         if not pest.get("category") or pest["category"] not in active_categories:
             continue
@@ -240,13 +231,10 @@ def generate_risk_assessment(
         if level == "High":
             result["pests"]["High"].append(pest["name"])
 
-    # Process pests for Low risk (stage matches AND month matches BUT API percentage = 0)
-    # This matches frontend behavior where Low risk pests are shown based on month/stage matching
     for pest in PESTS_DATA:
         if not pest.get("category"):
             continue
         
-        # Get API percentage for this pest category
         api_percentage = 0.0
         if pest["category"] == "chewing":
             api_percentage = pest_detection_data.get("chewing_affected_pixel_percentage") or 0
@@ -255,27 +243,18 @@ def generate_risk_assessment(
         elif pest["category"] == "soil_borne":
             api_percentage = pest_detection_data.get("SoilBorn_affected_pixel_percentage") or 0
         
-        # Only consider for Low risk if API percentage is 0
         if api_percentage > 0:
-            continue  # Already processed for High risk above
+            continue  
         
-        # Check if stage matches
-        # For Low risk, be more lenient: if month matches and days >= minDays, show it
-        # (even if days > maxDays, as Low risk indicates potential seasonal risk)
         stage_match = True
         if pest.get("stage"):
             s = pest["stage"]
-            # For Low risk: match if days >= minDays (ignore maxDays check for Low risk)
-            # This matches frontend behavior where Low risk pests are shown based on month matching
             stage_match = days_since_plantation >= s["minDays"]
-        
-        # Check if month matches
+     
         current_month_norm = _normalize_month(month)
         pest_months_norm = [_normalize_month(m) for m in pest.get("months") or []]
         month_match = current_month_norm in pest_months_norm
         
-        # Add to Low risk if stage and month match (but API percentage is 0)
-        # Also check it's not already in High risk
         if stage_match and month_match and pest["name"] not in result["pests"]["High"]:
             result["pests"]["Low"].append(pest["name"])
 
@@ -286,37 +265,24 @@ def generate_risk_assessment(
             if level == "High":
                 result["diseases"]["High"].append(disease["name"])
 
-    # Process diseases for Low risk (stage matches AND month matches)
-    # For fungal diseases (Red Rot, Rust): only show if fungi percentage = 0 but stage/month match
-    # For non-fungal diseases: show if stage and month match
     for disease in DISEASES_DATA:
-        # Skip if already in High risk
         if disease["name"] in result["diseases"]["High"]:
             continue
         
-        # Check if stage matches
-        # For Low risk, be more lenient: if month matches and days >= minDays, show it
-        # (even if days > maxDays, as Low risk indicates potential seasonal risk)
         stage_match = True
         if disease.get("stage"):
             s = disease["stage"]
-            # For Low risk: match if days >= minDays (ignore maxDays check for Low risk)
-            # This matches frontend behavior where Low risk diseases are shown based on month matching
             stage_match = days_since_plantation >= s["minDays"]
         
-        # Check if month matches
         current_month_norm = _normalize_month(month)
         disease_months_norm = [_normalize_month(m) for m in disease.get("months") or []]
         month_match = current_month_norm in disease_months_norm
         
-        # For fungal diseases (Red Rot, Rust), only show if fungi percentage = 0 and stage/month match
         is_fungal = disease.get("name") in ("Red Rot", "Rust")
         if is_fungal:
-            # Only add to Low if fungi percentage is 0 and stage/month match
             if not has_fungi and stage_match and month_match:
                 result["diseases"]["Low"].append(disease["name"])
         else:
-            # For non-fungal diseases, show as Low risk if stage and month match
             if stage_match and month_match:
                 result["diseases"]["Low"].append(disease["name"])
 

@@ -692,6 +692,7 @@
         let isInitialized = false;
         let isLoading = false;
         let testPlotId = null; // Global variable to store test plot_id (simulates login result)
+        let hasGreeted = false; // Track if greeting has been played
 
         // ==================== DOM ELEMENTS ====================
         const testPlotIdInput = document.getElementById('testPlotIdInput');
@@ -1296,6 +1297,34 @@
         // ==================== INITIALIZATION ====================
 
         /**
+         * Play automatic greeting when chatbot loads
+         */
+        function playGreeting() {
+            // Only play greeting once per session
+            if (hasGreeted) {
+                return;
+            }
+
+            const greetingText = "Hello! Welcome to cropeye. How can I assist you today?";
+            
+            // Wait for voices to be loaded before speaking
+            const waitForVoices = () => {
+                const voices = speechSynthesis.getVoices();
+                if (voices.length > 0) {
+                    console.log('[Greeting] Playing automatic greeting');
+                    speak(greetingText);
+                    hasGreeted = true;
+                } else {
+                    // If voices aren't loaded yet, wait a bit and try again
+                    setTimeout(waitForVoices, 100);
+                }
+            };
+
+            // Start waiting for voices (with a small initial delay)
+            setTimeout(waitForVoices, 300);
+        }
+
+        /**
          * Initialize page on load
          */
         async function init() {
@@ -1314,6 +1343,9 @@
 
             // Enable report button only if plot is initialized
             generateReportButton.disabled = !plotId;
+
+            // Play automatic greeting when chatbot loads
+            playGreeting();
 
             console.log('[Init] Initialization complete');
         }

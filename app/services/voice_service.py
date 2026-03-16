@@ -55,7 +55,6 @@ def convert_to_wav(input_path: str, output_path: str):
     )
 
 
-# Speech → Text (Whisper)
 def transcribe_audio(audio_bytes: bytes, content_type: Optional[str] = None) -> Tuple[str, Optional[str]]:
     """
     Transcribe audio to text using faster-whisper.
@@ -68,13 +67,6 @@ def transcribe_audio(audio_bytes: bytes, content_type: Optional[str] = None) -> 
     if not audio_bytes or len(audio_bytes) < 500:
         debug("❌ STT failed: audio too small")
         return "", None
-
-    # try:
-    #     from faster_whisper import WhisperModel
-    # except ImportError:
-    #     print("❌ faster-whisper not installed")
-    #     return "", None
-
 
     suffix = ".bin"
     if content_type:
